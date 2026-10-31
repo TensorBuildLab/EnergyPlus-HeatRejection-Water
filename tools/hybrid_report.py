@@ -88,7 +88,6 @@ def fig_wue_by_site(h, out):
     ax.set_ylabel("WUE [L/kWh IT]")
     ax.set_ylim(0, 3.2)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.32), ncol=3, fontsize=7.5)
-    ax.set_title("Site water use: hybrid dry cooler vs evaporative tower (sites by mean wet-bulb)", loc="left")
     fs.save(fig, out / "fig_hybrid_wue")
 
 

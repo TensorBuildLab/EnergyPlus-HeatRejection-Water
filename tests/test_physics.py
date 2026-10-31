@@ -79,6 +79,19 @@ class Poppe(unittest.TestCase):
         self.assertEqual(r.status, ev.OK)
         self.assertTrue(r.supersaturated)
 
+    def test_supersaturated_branch_conserves_energy_and_mass(self):
+        # cold, humid air fogs; check energy with the supersaturated (vapour + mist) enthalpy (review M8)
+        t_db, rh, tw_in, tw_out, mw, ma = 2.0, 0.9, 30.0, 22.0, 1.0, 0.7
+        w, r = self.run_case(t_db=t_db, rh=rh, tw_in=tw_in, tw_out=tw_out, mw=mw, ma=ma, n=40)
+        self.assertTrue(r.supersaturated)
+        wsa = ps.w_sat(r.t_air_out, P)
+        i_out = (ps.CP_AIR * r.t_air_out + wsa * (ps.H_FG0 + ps.CP_VAPOR * r.t_air_out)
+                 + (r.w_air_out - wsa) * ps.CP_WATER * r.t_air_out)
+        air_gain = ma * (i_out - ps.h_air(t_db, w))
+        water_loss = mw * ps.CP_WATER * tw_in - (mw - r.evap_kg_s) * ps.CP_WATER * tw_out
+        self.assertAlmostEqual(air_gain / water_loss, 1.0, delta=1e-3)
+        self.assertAlmostEqual(r.evap_kg_s, ma * (r.w_air_out - w), places=12)
+
     def test_idle_and_no_airflow(self):
         w = ps.w_from_rh(25, 0.5, P)
         self.assertEqual(ev.poppe(30, 30, 1.0, 1.0, 25, w, P).status, ev.IDLE)

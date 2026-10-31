@@ -1,6 +1,7 @@
-% Draft manuscript. Target: Energy and Buildings / Applied Energy (Elsevier, elsarticle).
-% Compile: pdflatex manuscript && bibtex manuscript && pdflatex manuscript && pdflatex manuscript
-% (or upload the paper/ folder to Overleaf). Numbers marked \tbd{} are filled from results/ by the scripts.
+% Manuscript v2 (after review round 1; see paper/REVIEW_round1.md and paper/RESPONSE_round1.md).
+% Target: Energy and Buildings (Elsevier, elsarticle). Earlier versions: manuscript_v1_before_review.tex (as reviewed),
+% manuscript_v1_after_hybrid.tex (identical content). The hybrid dry cooler study moved to paper/hybrid/manuscript_hybrid.tex (review M1).
+% Compile: pdflatex manuscript && bibtex manuscript && pdflatex manuscript && pdflatex manuscript (or Overleaf).
 \documentclass[preprint,12pt,authoryear]{elsarticle}
 \usepackage{amsmath,amssymb,graphicx,booktabs,siunitx,hyperref,xcolor}
 \newcommand{\tbd}[1]{\textcolor{red}{[#1]}}
@@ -9,109 +10,134 @@
 
 \begin{document}
 \begin{frontmatter}
-\title{How much water does a data center cooling tower really use?\\
-A multi-method, physics-based evaporation and blowdown framework for EnergyPlus}
+\title{Cooling tower evaporation models in building energy simulation: a verified multi-method EnergyPlus framework
+and its implications for data center water use}
 
 \author{Liang Zhang}
 \address{Department of Civil and Architectural Engineering and Mechanics, University of Arizona, Tucson, AZ, USA \tbd{confirm affiliation}}
 
 \begin{abstract}
-Water use is becoming a siting and permitting constraint for data centers, yet building energy simulation
-estimates cooling tower water with simplified relations: a fixed loss per kelvin of range, or Merkel's
-assumption that exit air is saturated, combined with a fixed number of cycles of concentration.
-We present an open framework, implemented as an EnergyPlus Python plugin, that evaluates eight
-evaporation methods---from bounding and empirical relations to the effectiveness model of Braun et al.\ and the full
-Poppe heat and mass transfer model with supersaturated air---at the same simulated operating point every
-timestep, together with a blowdown model driven by makeup-water chemistry (constituent limits, Langelier
-saturation index, silica solubility). The Poppe implementation is verified against an independent
-boundary-value solution of the conservation equations to $<10^{-4}$\,\%.
-For a fixed counterflow tower at full load, empirical methods deviate from Poppe by $-$39 to +117\,\% across
-ambient conditions, and saturated-exit methods, including the EnergyPlus default, by $-$18 to +11\,\%:
-they overpredict in hot--dry air and underpredict in cold--humid air, where Poppe predicts fogging exit air.
-Applied to a 1\,MW water-cooled data center in 14 climates (ASHRAE zones 0A--6A), the EnergyPlus default
-underestimates annual evaporation by 3.7--9.3\,\%, most in cold climates; the EnergyPlus loss-factor method,
-used as documented, overestimates it by 4--64\,\%. Evaporation per unit heat rejected ranges from 1.05 to
-1.65\,L/kWh$_{th}$ across climates, and makeup-water chemistry changes total makeup by $-$13 to +22\,\%, as much as
-the choice of evaporation physics. The framework also models hybrid adiabatic dry coolers by imposing pad-cooled air on EnergyPlus fluid coolers
-through EMS actuators. With wetting above 28\,\textdegree C, the hybrid plant keeps its chillers within their rated
-range at every site and uses 14--100\,\% less water than the evaporative tower, but always-wet operation in the
-hottest, driest climate uses more water than the tower; water spent per kWh of electricity saved is 100--240\,L/kWh.
-We also document five defects in EnergyPlus heat-rejection models, one of which inflates loss-factor evaporation
-100-fold and another fluid-cooler air flow about 1000-fold.
+Building energy simulation is increasingly used to estimate the water use of data centers, but it computes cooling
+tower evaporation with simplified relations. We present an open EnergyPlus Python-plugin framework that evaluates eight
+evaporation models, from rules of thumb to the Poppe heat and mass transfer model with supersaturated air, at the same
+simulated operating point every timestep, with blowdown from makeup-water chemistry. The Poppe implementation agrees with
+an independent solution of the conservation equations within 0.01\,\% in seven cases, including supersaturated
+near-pinch conditions. For a fixed counterflow tower at full load, saturated-exit methods differ from Poppe by $-$18 to
++11\,\% across ambient conditions and empirical methods by $-$39 to +117\,\%. For a 1\,MW water-cooled data center in
+14 climates, the EnergyPlus default (saturated exit) gives 3.7--9.3\,\% less annual evaporation than Poppe, or 3.5--7.6\,\%
+when liquid mist in supersaturated exhaust is excluded; the result changes by at most 1.2 percentage points across tower
+sizing and condenser-control variants, and by at most 0.15\,\% when Poppe is solved for a fixed physical fill.
+Loss-factor estimates over their documented range (0.15--0.27\,\%/K) deviate by $-$22 to +122\,\%. We also show that
+the EnergyPlus \texttt{LossFactor} input is applied as a fraction rather than a percentage, inflating that method's
+evaporation 100-fold.
 \end{abstract}
 
+\begin{highlights}
+\item Eight tower evaporation models evaluated on the same EnergyPlus operating point
+\item Poppe implementation verified against an independent solver within 0.01\,\%
+\item EnergyPlus default gives 3.5--9.3\,\% less evaporation than Poppe in 14 climates
+\item Documented loss-factor range spans $-$22 to +122\,\% of Poppe evaporation
+\item EnergyPlus applies the \texttt{LossFactor} input 100 times too high
+\end{highlights}
+
 \begin{keyword}
-Data center \sep Hybrid dry cooler \sep Cooling tower \sep Water consumption \sep Poppe method \sep Merkel method \sep EnergyPlus \sep Blowdown \sep Water usage effectiveness
+Cooling tower \sep Evaporation \sep Poppe method \sep EnergyPlus \sep Data center \sep Water usage effectiveness
 \end{keyword}
 \end{frontmatter}
+
+\section*{Nomenclature}
+\begin{tabular}{ll}
+$c_{pa}, c_{pv}, c_{pw}$ & specific heat of dry air, vapour, liquid water [J/(kg\,K)] \\
+$E$ & evaporation rate [kg/s] (annual totals in m$^3$) \\
+$i_{ma}$, $i_{masw}$ & enthalpy of moist air; of saturated air at $T_w$ [J/kg dry air] \\
+$i_{fg0}$, $i_v$ & latent heat at 0\,\textdegree C; vapour enthalpy at $T_w$ [J/kg] \\
+$Le_f$ & Lewis factor [--] \\
+$Me_P$ & Poppe Merkel number, defined on the local water flow [--] \\
+$\dot m_a$, $\dot m_w$ & dry-air and water mass flow [kg/s] \\
+$N_c$ & cycles of concentration [--] \\
+$NTU$ & air-side number of transfer units (Braun model) [--] \\
+$\dot Q$ & heat rejected, $\dot m_{w,i}c_{pw}(T_{w,i}-T_{w,o})$ [W] \\
+$T_{db}$, $T_{wb}$, $T_w$ & dry-bulb, wet-bulb, water temperature [\textdegree C] \\
+$\omega$, $\omega_{sw}$, $\omega_{sa}$ & humidity ratio; saturated at $T_w$; saturated at $T_a$ [kg/kg dry air] \\
+L/kWh$_{th}$ & litres of evaporation per kWh of heat rejected \\
+WUE & water usage effectiveness: site makeup water per IT energy [L/kWh$_{IT}$] \\
+\end{tabular}
 
 %======================================================================
 \section{Introduction}
 %======================================================================
 Data centers convert almost all of their electricity into heat, and most large facilities reject it through
-evaporative cooling towers. Their direct water use is therefore a function of heat load, climate, makeup-water
-quality and plant control \citep{mytton2021data,shehabi2016united}. As new campuses concentrate in water-stressed
-regions, operators, utilities and permitting agencies increasingly need credible hourly and annual water estimates at
-the design stage, and metrics such as water usage effectiveness (WUE) \citep{greengrid2011wue} are reported publicly.
+evaporative cooling towers, so their direct water use depends on heat load, climate, makeup-water quality and plant
+control \citep{mytton2021data,shehabi2016united}. National assessments estimate data-center water use and its growth
+\citep{shehabi2024united}, map it onto water-stressed basins \citep{siddik2021environmental}, and show that WUE varies
+widely with climate and cooling technology \citep{lei2022climate}; water footprints of computing, including AI workloads,
+have become a public concern \citep{ristic2015water,li2025making}. Operators report water usage effectiveness (WUE)
+\citep{greengrid2011wue}, and design-stage studies in hot--arid climates show trade-offs between energy and water
+among cooling options \citep{karimi2022water,karimi2025energy}. Such studies need hourly evaporation estimates that are
+consistent with the simulated plant.
 
-Building energy simulation is the natural tool for such estimates, because it already resolves the hourly heat
-rejected by the plant. EnergyPlus, the most widely used open engine, computes tower evaporation either with a constant
-loss factor or by assuming saturated exit air (Merkel's assumption), and blowdown with a fixed concentration ratio
-\citep{doe2022engref}. These simplifications are well known in the cooling tower literature: Merkel's method
-neglects the Lewis factor, the water lost by evaporation and the real exit-air state \citep{merkel1925verdunstungskuhlung,kloppers2005critical}.
-\citet{kloppers2005critical,kloppers2005cooling} showed that Merkel and e-NTU methods predict heat rejection
-close to the Poppe method \citep{poppe1991berechnung} but differ from it in predicted water evaporation, with the difference
-depending on ambient conditions \tbd{check exact claim and magnitude in K\&K 2005 before submission}. These findings have not been carried into building energy simulation, where water estimates feed design
-decisions, nor have they been combined with water chemistry, which sets blowdown---often a quarter or more of makeup.
+Building energy simulation resolves the hourly heat rejected by the plant and is therefore a natural tool for such
+estimates. EnergyPlus, a widely used open engine, computes tower evaporation either with a constant loss factor or by
+assuming saturated exit air, i.e.\ Merkel's assumption, and blowdown with a fixed concentration ratio
+\citep{doe2022engref}. \citet{powers2016new} noted that evaporation models in whole-building simulation are either too
+simple or too slow for water estimates and proposed a polynomial evaporation model. In the cooling-tower literature the
+limits of the simplifications are well understood: Merkel's method \citep{merkel1925verdunstungskuhlung} sets the Lewis
+factor to one, neglects the water lost by evaporation in the energy balance and assumes saturated exit air, while the
+Poppe method \citep{poppe1991berechnung} retains all three and can represent supersaturated (fogging) exhaust
+\citep{klimanek2009solution}. \citet{kloppers2005critical,kloppers2005cooling} compared the Merkel, e-NTU and Poppe
+methods and found close agreement in heat rejection but differences in predicted water evaporation that depend on
+ambient conditions; \citet{kloppers2005lewis} and \citet{khan2001improved} examined the influence of the Lewis factor,
+\citet{navarro2022critical} recommended Poppe for a new tower prototype, and \citet{qureshi2006prediction} studied
+evaporation-loss prediction. How large these model differences are for annual, building-scale water estimates, across
+climates and under real plant control, has not been quantified inside building energy simulation.
 
-This paper makes four contributions:
+This paper asks: how much do cooling tower evaporation estimates depend on the evaporation model used inside a building
+energy simulation, and where do simplified models depart most from a full heat and mass transfer model? Because no
+measured data are used, the comparisons are model-to-model; Poppe serves as the most complete model, not as ground
+truth. The contributions are:
 \begin{enumerate}
-\item An open, multi-method framework that evaluates eight evaporation models on the same EnergyPlus operating point
-every timestep, so differences isolate evaporation physics (Section~\ref{sec:methods}).
-\item A blowdown model driven by makeup-water chemistry, including constituent limits, the Langelier saturation index
-and temperature-dependent silica solubility (Section~\ref{sec:chem}).
-\item Verification of every model, including an independent boundary-value solution of the Poppe equations
-(Section~\ref{sec:verification}), and a climate-general map of where each simplification fails
-(Section~\ref{sec:map}).
-\item A multi-climate case study of a representative water-cooled data center and an analysis of
-water-accounting defects in EnergyPlus heat-rejection models (Sections~\ref{sec:case}--\ref{sec:results}).
-\item A hybrid adiabatic dry cooler model coupled to EnergyPlus, and the water--energy trade-off of its
-wet/dry control across climates (Section~\ref{sec:hybrid}).
+\item an open framework that evaluates eight evaporation models on the same EnergyPlus operating point every timestep,
+with chemistry-driven blowdown (Section~\ref{sec:methods});
+\item verification of every model, including an independent boundary-value solution of the Poppe equations for
+unsaturated and supersaturated air (Section~\ref{sec:verification});
+\item a climate-general map of where simplified models depart from Poppe for a fixed tower (Section~\ref{sec:map});
+\item a 14-climate data-center case study with consistency and sensitivity checks, and the identification of a units
+error in the EnergyPlus loss-factor input (Sections~\ref{sec:case}--\ref{sec:lossfactor}).
 \end{enumerate}
+A companion paper applies the framework to hybrid adiabatic dry coolers.
 
 %======================================================================
 \section{Methods}\label{sec:methods}
 %======================================================================
-\subsection{Accounting mode: one operating point, many evaporation models}
-At the end of each system timestep, the plugin reads, for every tower, the water inlet and outlet temperatures,
-water mass flow, heat rejected, air-flow ratio, operating cells and fan part-load ratio, plus the outdoor dry-bulb,
-wet-bulb, humidity ratio and pressure. The air mass flow is reconstructed from the design air flow and the fan regime
-(Section~\ref{sec:airflow}). Every evaporation method is then evaluated at this operating point. EnergyPlus' thermal
-solution is not changed. A rating mode, available in the standalone library, instead predicts the cold-water
-temperature from a fill Merkel number for each method; it is used for the climate map and for future validation
-against manufacturer data.
+\subsection{Accounting mode}
+At the end of each system timestep the plugin reads, for every tower, the water inlet and outlet temperatures, water
+mass flow, heat rejected, fan-speed (air-flow) ratio and operating cells, and the outdoor dry-bulb, wet-bulb, humidity
+ratio and pressure. Every evaporation model is evaluated at this operating point and reported as an output variable;
+the EnergyPlus thermal solution is not changed. Differences between models therefore isolate evaporation physics.
+Whether the conclusions depend on EnergyPlus' thermal operating point is tested in Section~\ref{sec:consistency}.
+Full equations, assumptions and code locations are given in the supplementary technical reference (docs/METHODS.md).
 
 \subsection{Evaporation models}
-Table~\ref{tab:methods} lists the eight methods; full equations are given in the supplementary technical reference
-(docs/METHODS.md).
+Table~\ref{tab:methods} lists the models. Properties follow the ASHRAE Handbook \citep{ashrae2021fundamentals} with the
+Hyland--Wexler saturation pressure \citep{hyland1983formulations}, the latent heat of \citet{hendersonsellers1984new}
+and the water density of \citet{kell1975density}.
 
 \begin{table}[t]\centering\small
-\caption{Evaporation methods evaluated at each timestep.}\label{tab:methods}
+\caption{Evaporation models evaluated at each timestep.}\label{tab:methods}
 \begin{tabular}{lll}\toprule
 ID & Model & Key assumption \\\midrule
 LAT & $E=\dot Q/i_{fg}$ & all heat rejected as latent heat \\
-ROT & $E = 0.00153\,\dot m_w\,\Delta T$ & rule of thumb, 1\,\% per 10\,\textdegree F range \\
-LF & $E = k\,\dot m_w\,\Delta T$, $k=0.2$\,\%/K & EnergyPlus LossFactor \\
+ROT & $E = 0.00085\times1.8\,\dot m_w\Delta T$ & rule of thumb, 0.153\,\%/K (0.85\,\% per 10\,\textdegree F) \citep{green2008perrys} \\
+LF & $E = k\,\dot m_w\Delta T$, $k=0.2$\,\%/K & EnergyPlus LossFactor \emph{as documented} \\
 EPSAT & EnergyPlus SaturatedExit (replica) & saturated exit air, moist-air basis \\
 MSAT & Merkel energy balance & saturated exit air, dry-air basis \\
 BRAUN & \citet{braun1989effectiveness} & e-NTU, $Le_f=1$, unsaturated exit humidity \\
-POPPE & \citet{poppe1991berechnung}, \citet{kloppers2005critical} & full model, Bo\v{s}njakovi\'c $Le_f$, supersaturation \\
+POPPE & \citet{poppe1991berechnung,kloppers2005critical} & full model, Bo\v{s}njakovi\'c $Le_f$, supersaturation \\
 POPPE1 & Poppe with $Le_f=1$ & isolates the Lewis-factor effect \\\bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Poppe model} With water temperature as the independent variable, the humidity ratio, air enthalpy and
-Merkel number obey \citep{kloppers2005critical}
+\paragraph{Poppe model} With water temperature as the independent variable \citep{kloppers2005critical},
 \begin{equation}
 \frac{d\omega}{dT_w} = \frac{c_{pw}\,(\dot m_w/\dot m_a)(\omega_{sw}-\omega)}{D},\quad
 \frac{di_{ma}}{dT_w} = \frac{\dot m_w c_{pw}}{\dot m_a}\left[1+\frac{c_{pw}T_w(\omega_{sw}-\omega)}{D}\right],\quad
@@ -120,114 +146,116 @@ Merkel number obey \citep{kloppers2005critical}
 \begin{equation}
 D = (i_{masw}-i_{ma}) + (Le_f-1)\left[i_{masw}-i_{ma}-(\omega_{sw}-\omega)i_v\right] - (\omega_{sw}-\omega)c_{pw}T_w,
 \end{equation}
-with a corresponding form for supersaturated air, and the Lewis factor of \citet{bosnjakovic1965technical}. Because both water
-temperatures are known in accounting mode, the equations are integrated from the bottom to the top of the fill (RK4,
-ten steps) and the Merkel number is an output; no fill correlation is required. The unknown exit humidity enters the
-local water flow and is found by fixed-point iteration.
+with the corresponding supersaturated form and the Lewis factor of \citet{bosnjakovic1965technical}, as used by
+\citet{kloppers2005lewis}. Both water temperatures are known, so the equations are integrated from the bottom to the
+top of the fill (RK4, ten steps) and $Me_P$ is an output; no fill correlation is needed. The unknown exit humidity enters
+the local water flow and is found by fixed-point iteration. In supersaturated air the humidity ratio $\omega$ includes
+liquid mist; Section~\ref{sec:mist} reports vapour and mist separately.
 
-\paragraph{Braun e-NTU model} The air-side effectiveness of the operating point gives the number of transfer units in
-closed form, and the exit humidity follows the effective-saturation relation of \citet{braun1989effectiveness}. This
-model is thermodynamically consistent with the EnergyPlus \texttt{CoolingTower:VariableSpeed:Merkel} object.
+\paragraph{Braun model} The air-side effectiveness of the operating point gives the number of transfer units in
+closed form, and the exit humidity follows the effective-saturation relation of \citet{braun1989effectiveness}. Where the
+predicted exit state is supersaturated, which this model cannot represent, the result is limited to saturated exit air;
+this occurs at 25\,\% of the points of the climate map (Section~\ref{sec:map}).
 
-\subsection{Air flow reconstruction}\label{sec:airflow}
-Physical evaporation models need the actual air mass flow. For \texttt{CoolingTower:VariableSpeed:Merkel} it is
-the reported fan-speed ratio times the design air flow and the fraction of cells operating; in free convection, where
-EnergyPlus reports zero air flow while rejecting heat, the sized free-convection air flow is used. For the regression-based
-\texttt{CoolingTower:VariableSpeed} models, EnergyPlus reports the free-convection \emph{capacity} fraction as an
-air-flow ratio when the fan is off or cycling; the plugin replaces it with the time average of the minimum-speed and
-free-convection air flows weighted by the fan part-load ratio. Because the Merkel model ties air flow to a $UA$
-relation, it is used in the case study.
+\subsection{Air flow and operating points at the thermodynamic limit}\label{sec:airflow}
+For \texttt{CoolingTower:VariableSpeed:Merkel} the air flow is the fan-speed ratio times the design air flow and the
+fraction of cells operating; in free convection, where EnergyPlus reports zero air flow while rejecting heat, the sized
+free-convection air flow is used. The EnergyPlus Merkel tower linearises the saturation enthalpy and runs at the lowest
+fan speed meeting the condenser setpoint. For an oversized tower at part load this puts the exit air within a fraction
+of a percent of the saturated enthalpy at the hot-water temperature, i.e.\ at the pinch. Poppe, which keeps $Le_f<1$ and
+the enthalpy of the evaporated water, may then find no positive driving force near the top of the fill. In that case
+the plugin re-solves the point with the smallest air-flow increase (1--50\,\%) that is feasible, and evaluates MSAT,
+BRAUN and POPPE1 at the same adjusted air flow so that all physical models see one operating point; EPSAT keeps EnergyPlus'
+air flow because it must reproduce EnergyPlus. How often this happens, and whether it matters, is reported in
+Section~\ref{sec:consistency}.
 
-\paragraph{Operating points beyond the thermodynamic limit}
-EnergyPlus' Merkel tower linearises the saturation enthalpy (Braun's $c_s$) and selects the lowest fan speed that meets
-the condenser setpoint. With an oversized tower at part load this places the exit air within a fraction of a percent of
-the saturated enthalpy at the hot-water temperature. Poppe, which accounts for $Le_f<1$ and the enthalpy of the evaporated
-water, can then find no positive driving force near the top of the fill. In that case the plugin re-solves the point with
-the smallest air-flow increase (from 1\,\% to 50\,\%) that makes it feasible and records the factor. Near the pinch,
-evaporation is insensitive to air flow: for a representative point, +2\,\% air changes Poppe evaporation by $<0.1$\,\% and
-+20\,\% by 1.4\,\%.
-
-\subsection{Blowdown from makeup-water chemistry}\label{sec:chem}
-Blowdown follows from the dissolved-solids balance, $B = E/(N-1) - D$, where $N$ is the cycles of concentration.
-Instead of a fixed $N$, the plugin sets $N$ to the most restrictive of: constituent limits (silica, calcium hardness,
-chloride, TDS), product limits, a calcium carbonate limit $LSI\le LSI_{\max}$ evaluated at the hot-water temperature
-\citep{langelier1936analytical}, for which $N_{LSI} = 10^{(LSI_{\max}-pH+pH_s(1))/1.9}$ in closed form, and amorphous-silica
-solubility at the cold-water temperature \citep{fournier1977chemical}. Three modes are available: fixed (EnergyPlus),
-constituent (constant), and dynamic (re-evaluated every timestep).
+\subsection{Water balance, chemistry and metrics}\label{sec:chem}
+Blowdown follows from the dissolved-solids balance, $B = E/(N_c-1) - D_r$, with drift $D_r$ (0.001\,\% of circulating
+flow, an assumption for modern eliminators). To keep the comparison of evaporation models free of other effects, all
+headline results use EnergyPlus' fixed four cycles. The plugin can instead set $N_c$ from makeup chemistry, as in
+practice cycles are limited by scaling, corrosion and treatment \citep{li2011control,altman2012membrane,pan2018cooling,soliman2022treatment}:
+constituent limits; a calcium carbonate limit $LSI\le LSI_{\max}$ at the hot-water temperature
+\citep{langelier1936analytical}, with the closed form $N_{LSI}=10^{(LSI_{\max}-pH+pH_s(1))/1.9}$, which assumes a
+controlled pH and no alkalinity reduction by acid feed and is therefore conservative; and amorphous-silica solubility
+at the cold-water temperature \citep{fournier1977chemical}. Because the makeup qualities and treatment limits available
+here are illustrative, chemistry results are shown only as a demonstration (Section~\ref{sec:wue}). Units: L/kWh$_{th}$ is
+evaporation per heat rejected; WUE is site makeup per IT energy (L/kWh$_{IT}$).
 
 %======================================================================
 \section{Verification}\label{sec:verification}
 %======================================================================
-Table~\ref{tab:verification} summarizes the code verification. Psychrometric functions agree with PsychroLib
-\citep{meyer2019psychrolib} within 0.2\,\%. The Poppe implementation was compared with an independent formulation:
-the height-wise conservation equations with a prescribed transfer coefficient, solved as a boundary-value problem by
-shooting with an adaptive stiff integrator (relative tolerance $10^{-10}$). Over five cases from hot--dry to
-hot--humid air, evaporation and Merkel number agree within $10^{-4}$\,\%. The EnergyPlus SaturatedExit replica reproduces
-EnergyPlus' reported evaporation within 0.4\,\% at every loaded timestep, confirming that the plugin reads the same
-operating point.
+Table~\ref{tab:verification} summarises the code verification. The Poppe implementation was compared with an independent
+formulation: the height-wise conservation equations with a prescribed transfer coefficient $K$, including the
+supersaturated (vapour at saturation plus mist) state, solved as a boundary-value problem by shooting with an adaptive
+stiff integrator (relative tolerance $10^{-10}$). Seven cases cover temperate, hot--dry, hot--humid, high and low $L/G$,
+and two near-pinch cases with $Me_P\approx4$ whose exit air is supersaturated. Evaporation agrees within 0.008\,\% with
+the plugin's ten RK4 steps; $Me_P$ agrees within 0.003\,\% with 40 steps (near the pinch, ten steps give 0.5\,\% error in
+$Me_P$ but only 0.003\,\% in evaporation). Both formulations share the property functions, so this check verifies the
+transport equations and their numerical solution, not the property data, which are verified separately against
+PsychroLib \citep{meyer2019psychrolib} and IAPWS-95 \citep{wagner2002iapws}. Reproducing a published worked example
+\tbd{Kröger (2004) / Kloppers \& Kröger (2005) example to be added} remains to be done.
 
 \begin{table}[t]\centering\small
 \caption{Code verification.}\label{tab:verification}
 \begin{tabular}{lr}\toprule
 Check & Max.\ deviation \\\midrule
 Psychrometrics vs PsychroLib ($p_{ws}$, $\omega_s$, $i$, $T_{wb}$) & 0.2\,\% / 0.02\,K \\
-Latent heat vs IAPWS-95 \citep{wagner2002iapws} & 0.3\,\% \\
-Poppe energy balance closure & $<0.1$\,\% \\
-Poppe vs independent BVP (5 cases) & $<10^{-4}$\,\% \\
-Poppe RK4, 10 vs 80 steps & $<0.01$\,\% \\
-Rating mode, same fill: Merkel / Poppe / e-NTU $T_{w,o}$ & $<0.5$\,K \\
-EPSAT replica vs EnergyPlus output & 0.4\,\% \\\bottomrule
+Latent heat vs IAPWS-95 & 0.3\,\% \\
+Poppe vs independent BVP, 7 cases incl.\ supersaturated near-pinch: evaporation & 0.008\,\% \\
+\hspace{1em} $Me_P$ (40 steps) & 0.003\,\% \\
+Poppe energy closure, unsaturated and supersaturated & $<0.1$\,\% \\
+Rating mode, same fill: Merkel / Poppe / e-NTU outlet temperature & $<0.5$\,K \\
+EPSAT replica vs EnergyPlus output, annual, all 14 sites & 0.2\,\% \\\bottomrule
 \end{tabular}
 \end{table}
 
 %======================================================================
-\section{Where do simplified methods fail? A climate-general map}\label{sec:map}
+\section{Where do simplified models depart from Poppe? A climate-general map}\label{sec:map}
 %======================================================================
 A counterflow tower was sized with the Poppe model for a \SI{3.9}{K} approach and \SI{5.6}{K} range at
 \SI{35}{\celsius}/\SI{25.6}{\celsius} design conditions and $L/G=1.2$ ($Me_P = 1.27$). With fill, $L/G$ and range fixed,
-the cold-water temperature was solved with Poppe over a grid of dry-bulb ($-5$ to \SI{46}{\celsius}) and relative humidity
-(5--100\,\%), and all methods were evaluated at each point (Fig.~\ref{fig:map}).
+the cold-water temperature was solved with Poppe over a grid of dry-bulb ($-5$ to \SI{46}{\celsius}) and relative
+humidity (5--100\,\%, wet-bulb below \SI{32}{\celsius}), and all models were evaluated at each point (Fig.~\ref{fig:map}).
 
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{fig_method_map_physical}
 \includegraphics[width=0.8\linewidth]{fig_method_map_empirical}
-\caption{Evaporation of each method relative to Poppe for a fixed tower at full load. Top: physics-based methods
-($\pm$20\,\% scale). Bottom: empirical methods ($\pm$120\,\% scale). Lines: outdoor wet-bulb.}\label{fig:map}
+\caption{Evaporation of each model relative to Poppe for a fixed tower at full load (top: $\pm$20\,\% scale; bottom:
+$\pm$120\,\%). Lines: outdoor wet-bulb. Blank: wet-bulb above 32\,\textdegree C (not simulated). The step in the EnergyPlus
+panel follows the 0\,\textdegree C wet-bulb line, where EnergyPlus switches its saturation-pressure formula from ice to water.}\label{fig:map}
 \end{figure}
 
-Three patterns emerge. (i) Saturated-exit methods, including the EnergyPlus default, overpredict by up to
-11\,\% in hot--dry air, where real exit air is unsaturated, and underpredict by up to 18\,\% in cold--humid
-air, where Poppe predicts supersaturated exit air carrying liquid mist. (ii) The Braun e-NTU model underpredicts
-everywhere by 3--18\,\%. (iii) The Lewis factor alone changes evaporation by only $-$4.2 to +1.8\,\%. Empirical methods
-are unusable outside the conditions they implicitly assume: the EnergyPlus loss factor of 0.2\,\%/K overpredicts by up to
-117\,\% in cold weather, and the latent-only bound underpredicts by up to 32\,\% in hot--dry weather, where
-sensible heat flows from the air into the water.
+Saturated-exit models differ from Poppe by $-$18 to +11\,\%: they give more evaporation in hot--dry air, where the
+Poppe exit air is unsaturated, and less in cold--humid air, where Poppe predicts supersaturated exhaust. The Braun model
+gives 2.8--6.2\,\% less than Poppe where it can represent the exit state, and down to $-$18\,\% where it is limited to
+saturated exit. The Lewis factor alone changes evaporation by $-$4.2 to +1.8\,\%. Empirical models range from $-$39 to
++117\,\%: the documented loss factor overpredicts most in cold weather, and the latent-only estimate ranges from $-$32\,\%
+in hot--dry air, where sensible heat flows from the air into the water, to +84\,\% in cold air.
 
 %======================================================================
 \section{Case study: a water-cooled data center}\label{sec:case}
 %======================================================================
-The host model (Table~\ref{tab:dcmodel}) is a single-storey facility with two 500\,m$^2$ data halls and
-1.0\,MW of air-cooled IT equipment (\texttt{ElectricEquipment:ITE:AirCooled}) operating at 70--90\,\% CPU
-utilisation (mean IT power 861\,kW, 7,540\,MWh/yr). Each hall is served by a recirculating CRAH-type air
-handler with a chilled-water coil and variable-speed fan, supplying 20\,\textdegree C air (ASHRAE class A1).
-Three water-cooled variable-speed centrifugal chillers (Carrier 19XR curve set from the EnergyPlus dataset), each
-sized at 50\,\% of the design load (N+1), supply 10\,\textdegree C chilled water. Heat is rejected by a three-cell
-\texttt{CoolingTower:VariableSpeed:Merkel} sized for a 3.9\,K approach and 5.6\,K range at the site's 0.4\,\%
-evaporation design wet-bulb; condenser water follows outdoor wet-bulb plus 3.9\,K between 18 and 29.4\,\textdegree C.
-For every site, design days, site data, tower design air state and condenser design temperature are replaced with that
-site's ASHRAE values, so the plant is sized for its climate. Weather is TMYx 2011--2025 for 14 sites spanning ASHRAE
-climate zones 0A to 6A. Drift is 0.001\,\% of circulating flow. Annual PUE is 1.24--1.28 across sites, with zero unmet
-zone hours. Parameter sources and assumptions are listed in the supplementary model documentation.
+The host model (Table~\ref{tab:dcmodel}) is a single-storey facility with two 500\,m$^2$ data halls and 1.0\,MW of
+air-cooled IT equipment at 70--90\,\% CPU utilisation (mean 861\,kW, 7,540\,MWh/yr), recirculating CRAH-type air
+handlers supplying 20\,\textdegree C air, three 50\,\% water-cooled variable-speed centrifugal chillers (N+1, 10\,\textdegree C
+chilled water) and a three-cell \texttt{CoolingTower:VariableSpeed:Merkel} sized for a 3.9\,K approach and 5.6\,K range at
+the site's 0.4\,\% evaporation design wet-bulb. Condenser water follows outdoor wet-bulb plus 3.9\,K between 18 and
+29.4\,\textdegree C; the 18\,\textdegree C floor protects the chillers' minimum condenser temperature. Because the condenser loop
+is sized for all three chillers, the tower is 1.5 times the duty flow, and it rejects heat in every hour (it never idles
+or enters free convection). A water-side economizer, common in such plants \citep{li2020model}, was not included. Design
+days, site data and tower design conditions are replaced with each site's ASHRAE values. Weather is TMYx 2011--2025 for
+14 sites in ASHRAE climate zones 0A to 6A (zones from the weather files' design conditions, ASHRAE 169-2021). Annual PUE
+is 1.24--1.28 and there are no unmet zone hours. EnergyPlus 22.2.0 (build c249759bad) was used.
 
 \begin{table}[t]\centering\small
-\caption{Data center model (key parameters).}\label{tab:dcmodel}
+\caption{Data center model (key parameters; sources and assumptions in the supplementary model documentation).}\label{tab:dcmodel}
 \begin{tabular}{ll}\toprule
 IT load & 1.0\,MW design, 0.70--0.90 utilisation, UPS 95\,\% \\
 Air side & 2 CRAH loops, chilled-water coils, VAV fans, 20\,\textdegree C supply, no economizer \\
 Chillers & 3 $\times$ 50\,\% water-cooled VSD centrifugal, 10\,\textdegree C CHW, 6\,K design $\Delta T$ \\
 Tower & Merkel VS, 3 cells (MaximalCell), approach 3.9\,K, range 5.6\,K at 0.4\,\% WB \\
 Condenser control & $T_{wb}$ + 3.9\,K, limits 18--29.4\,\textdegree C \\
-Water & drift 0.001\,\%; EnergyPlus 4 cycles; plugin chemistry (Section~\ref{sec:chem}) \\
+Water & drift 0.001\,\%; 4 cycles (headline results) \\
 Weather & TMYx 2011--2025, 14 sites, climate-specific design days \\\bottomrule
 \end{tabular}
 \end{table}
@@ -235,184 +263,167 @@ Weather & TMYx 2011--2025, 14 sites, climate-specific design days \\\bottomrule
 %======================================================================
 \section{Results}\label{sec:results}
 %======================================================================
-\subsection{Evaporation by method and climate}
-Table~\ref{tab:sites} and Fig.~\ref{fig:dcdev} summarise the annual results. The EnergyPlus SaturatedExit replica
-reproduces EnergyPlus' own evaporation within 0.2\,\% at every site. Against Poppe, the EnergyPlus default
-underestimates annual evaporation at all 14 sites, by 3.7\,\% (Phoenix) to 9.3\,\% (Montreal). The other
-saturated-exit and e-NTU formulations behave similarly ($-$2.2 to $-$7.3\,\%), and the Lewis factor alone accounts for
-0.1--2.1\,\%. The deviation is largest in cold climates and smallest in hot--dry ones; at the timestep level it
-reaches $-$29\,\% at outdoor temperatures below $-$20\,\textdegree C (Fig.~\ref{fig:dcts}), where the Poppe exit air is
-supersaturated. Exit air carrying more than 0.1\,g/kg of liquid occurs in 400\,h (Mumbai) to 7,200\,h (Dublin) per year.
-
-Unlike the full-load map of Section~\ref{sec:map}, saturated-exit methods do not overpredict in hot--dry climates here.
-The data-center tower is oversized (N+1) and runs at part load near its thermodynamic limit, so its exit air is close to
-saturation at the hot-water temperature even in dry weather. Whether a simplified method over- or underpredicts thus
-depends on how close the tower operates to the pinch, not only on climate.
-
-Empirical methods do not follow the climate signal at all (Fig.~\ref{fig:dcmonthly}). The loss factor of 0.2\,\%/K, as
-documented, is nearly constant through the year and overestimates annual evaporation by 4\,\% (Riyadh) to 64\,\%
-(Dublin); the rule of thumb ranges from $-$20 to +26\,\% and the latent-only estimate from $-$11 to +40\,\%. They are
-closest to Poppe in hot--dry climates, where sensible heat flows from the air into the water.
+\subsection{Annual evaporation by model and climate}
+Table~\ref{tab:sites} and Fig.~\ref{fig:dcdev} summarise the annual results. The EPSAT replica reproduces EnergyPlus'
+own annual evaporation within 0.2\,\% at every site. Evaporation per unit heat rejected (Poppe) ranges from
+1.05\,L/kWh$_{th}$ (Dublin, Stockholm) to 1.65\,L/kWh$_{th}$ (Riyadh), against about 1.48\,L/kWh$_{th}$ if all heat left
+as latent heat. The EnergyPlus default gives less annual evaporation than Poppe at all 14 sites, by 3.7\,\% (Phoenix) to
+9.3\,\% (Montreal, Stockholm). The other saturated-exit and e-NTU formulations behave similarly ($-$2.2 to $-$7.3\,\%), and
+the Lewis factor alone accounts for 0.1--2.1\,\%. Unlike the full-load map, saturated-exit models do not give more
+evaporation than Poppe in hot--dry climates here: the oversized tower runs at part load close to the pinch, where its
+exit air is near saturation even in dry weather.
 
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{fig_dc_method_deviation}
-\caption{Annual tower evaporation of each method relative to Poppe for the data center in 14 climates.}\label{fig:dcdev}
+\caption{Annual evaporation of each model relative to Poppe (vapour and mist) for the data center in 14 climates, sites
+sorted by mean wet-bulb. The colour scale is limited to $\pm$30\,\%; values are printed in each cell.}\label{fig:dcdev}
 \end{figure}
+
+\begin{table}[t]\centering\scriptsize
+\caption{Annual results by site (sorted by mean wet-bulb). $E_P$: Poppe evaporation including mist; mist: liquid share of
+$E_P$; EP SatExit vs Poppe for total and vapour-only Poppe evaporation; corr.: share of hours with the near-pinch air-flow
+correction; LF: documented loss factor (0.2\,\%/K) vs Poppe.}\label{tab:sites}
+\resizebox{\linewidth}{!}{\input{../results/study/dc_sites_table_v2.tex}}
+\end{table}
+
+\subsection{Vapour and liquid mist}\label{sec:mist}
+In cold and mild climates Poppe predicts supersaturated exhaust in many hours (exit air carrying more than 0.1\,g/kg of
+liquid in 400\,h/yr in Mumbai to 7,200\,h/yr in Dublin). The liquid share of Poppe evaporation is below 0.4\,\% in Phoenix, Riyadh, Las Vegas, Mumbai
+and Singapore, 1.0--2.5\,\% in Atlanta, Dallas, Houston, Madrid and Portland, and 3.1--4.9\,\% in Frankfurt, Dublin,
+Montreal and Stockholm, where it accounts for about half of the difference
+from EnergyPlus. Whether this mist is consumed depends on how much of it the drift eliminators capture and return to the
+basin; vapour-only Poppe evaporation is therefore a lower bound and total evaporation an upper bound. Against vapour-only
+Poppe the EnergyPlus default gives 3.5\,\% (Phoenix) to 7.6\,\% (Singapore) less evaporation.
+
+\subsection{Consistency with EnergyPlus' thermal operating point}\label{sec:consistency}
+The near-pinch correction (Section~\ref{sec:airflow}) was needed in 66--100\,\% of hours at Dublin, Frankfurt, Madrid,
+Portland and Stockholm, with a mean air-flow factor of 1.02--1.03 (maximum 1.05), and in fewer than 0.3\,\% of hours
+elsewhere. Near the pinch the implied $Me_P$ becomes very large (median 1.6--6.2 by site, maximum 78), which shows that
+EnergyPlus' Merkel tower at part load behaves like a much larger fill than its design point implies. To test whether
+this affects the water estimates, Poppe was solved in rating mode for a \emph{fixed} fill: $Me_P$ sized at the tower's
+design point (with the same minimal air correction where needed, 3\,\% at Stockholm) and scaled off-design as
+$Me_P\propto(L/G)^{-0.6}$ (a typical fill exponent; assumption). For every loaded hour at Phoenix, Singapore, Frankfurt and
+Stockholm, at EnergyPlus' inlet water temperature, water flow, air flow and weather, the fixed-fill cold-water
+temperature differs from EnergyPlus' by $-$0.09 to +0.11\,K (median), heat rejected by $-$2.4 to +1.8\,\%, and
+evaporation per unit heat by at most 0.15\,\% from the accounting-mode value. Close to the pinch the cold-water temperature
+is insensitive to fill size, so the model differences reported here do not depend on how EnergyPlus' tower model
+reaches its operating point.
+
+\subsection{Peak day and seasonal pattern}
+On each site's peak evaporation day the EnergyPlus default gives 1.2--7.2\,\% less evaporation than Poppe. Empirical
+models do not follow the climate signal (Fig.~\ref{fig:dcmonthly}): the documented loss factor is nearly constant through
+the year.
 
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{fig_dc_monthly}
-\caption{Monthly evaporation, Poppe vs EnergyPlus SaturatedExit and LossFactor (0.2\,\%/K as documented).}\label{fig:dcmonthly}
+\caption{Monthly mean daily evaporation: Poppe, EnergyPlus SaturatedExit and LossFactor (0.2\,\%/K as documented).}\label{fig:dcmonthly}
 \end{figure}
 
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{fig_dc_timestep_deviation}
-\caption{Timestep deviation of EnergyPlus SaturatedExit from Poppe against outdoor dry-bulb and humidity ratio, all 14 sites.}\label{fig:dcts}
+\caption{Timestep difference of EnergyPlus SaturatedExit from Poppe (vapour and mist) against outdoor dry-bulb and humidity
+ratio, all 14 sites. The largest differences ($-$15 to $-$29\,\%) occur below 0\,\textdegree C, where Poppe exhaust is
+supersaturated.}\label{fig:dcts}
 \end{figure}
 
-\begin{table}[t]\centering\scriptsize
-\caption{Annual results by site (sorted by mean wet-bulb). $Q$: heat rejected; deviations relative to Poppe;
-WUE: site makeup per IT energy, EnergyPlus default (SaturatedExit, 4 cycles) and Poppe with constituent-limited cycles
-for the hard-groundwater example source.}\label{tab:sites}
-\resizebox{\linewidth}{!}{\input{../results/study/dc_sites_table.tex}}
+\subsection{Sensitivity}\label{sec:sensitivity}
+Table~\ref{tab:sens} shows that the EnergyPlus--Poppe difference changes by at most 1.2 percentage points when the
+tower is sized for duty instead of N+1 or the condenser floor is lowered to 15\,\textdegree C. Over the documented loss-factor
+range (0.15--0.27\,\%/K) the loss-factor estimate spans $-$22 to +122\,\% of Poppe across sites. The Lewis factor changes
+evaporation by 0.1--2.1\,\% (POPPE vs POPPE1). Drift (0.001\,\%) is below 0.2\,\% of makeup in all cases. Weather-year
+variability was not studied; a single typical year per site was used.
+
+\begin{table}[t]\centering\small
+\caption{EnergyPlus SaturatedExit vs Poppe annual evaporation [\%] for plant variants.}\label{tab:sens}
+\input{../results/study/sensitivity_plant_table.tex}
 \end{table}
 
-\subsection{Blowdown, makeup and WUE}
-Evaporation per unit heat rejected ranges from 1.05\,L/kWh$_{th}$ (Dublin) to 1.65\,L/kWh$_{th}$ (Riyadh). With
-blowdown, WUE ranges from 1.66 to 2.63\,L/kWh (Fig.~\ref{fig:wue}). Replacing EnergyPlus' fixed four cycles by
-constituent-limited cycles and Poppe evaporation raises WUE by up to 6\,\%. Across the three illustrative makeup sources
-and the constituent and dynamic (LSI and silica solubility) chemistry modes, makeup at a given site varies from $-$13\,\%
-to +22\,\% around that estimate. Makeup-water quality is therefore as important as evaporation physics for annual
-water use, and needs measured utility data in any site assessment.
+\subsection{Water usage effectiveness}\label{sec:wue}
+With EnergyPlus' four cycles, replacing EnergyPlus evaporation by Poppe raises WUE by 3.9--10.3\,\%, from 1.56--2.63 to
+1.72--2.74\,L/kWh$_{IT}$ across sites (Fig.~\ref{fig:wue}). As a demonstration of the chemistry model, cycles set by
+constituent limits or by the LSI and silica limits move WUE within the bars of Fig.~\ref{fig:wue}; these ranges follow
+directly from the illustrative makeup qualities and limits (including a 10-cycle cap) and are not results about any site.
 
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{fig_dc_wue}
-\caption{WUE by climate. Bars: range over makeup sources and chemistry modes with Poppe evaporation.}\label{fig:wue}
+\caption{WUE by climate. Diamonds: EnergyPlus default (SaturatedExit, 4 cycles). Circles: Poppe evaporation with
+constituent-limited cycles for an illustrative hard-groundwater source. Bars: range over three illustrative makeup sources
+and two chemistry modes (demonstration only).}\label{fig:wue}
 \end{figure}
-
-\subsection{Water-accounting defects in EnergyPlus}
-Analysis of EnergyPlus v22.2 (unchanged on the development branch in October 2026) identified five defects, documented
-with reproductions in the supplementary material: (1) towers that are not running still book evaporation, drift and
-blowdown computed from a stale air-flow ratio (8.65\,m$^3$/yr in a stock example with zero heat rejected);
-(2) the Merkel tower books no evaporation in free convection; (3) regression-based variable-speed towers use a capacity
-fraction as an air-flow ratio in the fan-off regime; and (4) the \texttt{LossFactor} input, documented in percent per
-kelvin, is applied as a fraction, so the documented default evaporates 100 times the intended amount (20\,\%/K;
-up to 24\,\% of circulating flow in a stock example); and (5) fluid-cooler air flow is autosized as nominal capacity in
-watts divided by the design temperature difference times 4, read as m$^3$/s, about 1000 times a physical value
-(14,061\,m$^3$/s for a 58.6\,kW stock example). Defects (1)--(3) did not occur in the data-center case study,
-whose tower never idles or enters free convection; they matter for multi-tower plants and lightly loaded towers.
-
 
 %======================================================================
-\section{Hybrid adiabatic dry coolers}\label{sec:hybrid}
+\section{The EnergyPlus loss-factor input}\label{sec:lossfactor}
 %======================================================================
-\subsection{Model}
-Hybrid (adiabatic) dry coolers are the main water-saving alternative to towers in new data centers. EnergyPlus has
-dry fluid coolers but no water-side hybrid cooler, so the plugin builds one: a bank of \texttt{FluidCooler:TwoSpeed}
-objects shares one outdoor-air node, and in wet mode the plugin overrides that node's dry-bulb with the pad-leaving
-temperature, keeping the wet-bulb, through EMS actuators at the start of each timestep. EnergyPlus then simulates the
-coils with pre-cooled air, and a condenser setpoint manager that follows the node lowers the condenser water
-temperature, so the chillers see the benefit. Pad cooling follows adiabatic saturation,
-\begin{equation}
-T_{pre} = T_{db} - \varepsilon\,(T_{db}-T_{wb}),\qquad i(T_{db},\omega_i) + (\omega_{pre}-\omega_i)c_{pw}T_{wb} = i(T_{pre},\omega_{pre}),
-\end{equation}
-with pad effectiveness $\varepsilon=0.85$ (assumption, typical of rigid media). Evaporation is
-$E=\sum_k f_k\dot m_{a,k}(\omega_{pre}-\omega_i)$ over the fan states of the timestep, recovered exactly from the
-coolers' reported fan power, and bleed follows the chemistry model of Section~\ref{sec:chem}. Unlike the tower
-analysis, this plugin changes the EnergyPlus solution.
-
-\subsection{Case study and control strategies}
-The data-center model of Section~\ref{sec:case} was given a hybrid heat-rejection plant: three 50\,\% fluid coolers
-(N+1) sized for wet operation at the 0.4\,\% dry-bulb design condition (5.6\,K approach and range, 8\,K design air
-temperature rise, hard-sized air flows), a condenser setpoint of pad-leaving air plus 5.6\,K (23--40\,\textdegree C), and
-three 50\,\% inlet-vane centrifugal chillers (Trane CVHE curve set, rated COP 5.38). No chiller curve set in the
-EnergyPlus dataset is valid above 41.1\,\textdegree C leaving condenser water; hours beyond that limit, where EnergyPlus
-clamps the curves and underestimates chiller energy, are reported for every case. Seven control strategies were run
-at all 14 sites on identical hardware: dry only, always wet (above 5\,\textdegree C), and wet when the outdoor
-dry-bulb exceeds $T_{on}=$ 16, 20, 24, 28 or 32\,\textdegree C (2\,K hysteresis). Because the tower and hybrid plants use
-different chiller curve sets, energy is compared only among hybrid strategies, and the tower enters as a water
-reference.
-
-\subsection{Results}
-Table~\ref{tab:hybrid} and Figs.~\ref{fig:hybtrade}--\ref{fig:hybwue} summarise the results. Three findings stand out.
-
-\emph{Wet operation is primarily a capacity measure.} Dry-only, the chillers run beyond their rated condenser range
-for up to 3,285\,h/yr (Riyadh), 2,800\,h (Phoenix) and 1,170--1,880\,h in Dallas, Houston, Mumbai and Singapore. Wetting above
-28\,\textdegree C reduces this to at most 5\,h/yr at every site.
-
-\emph{Saving electricity with pad water is expensive.} Relative to dry operation, wetting above 28\,\textdegree C saves 0--1.7\,\%
-of facility electricity at a marginal cost of 100--122\,L of water per kWh saved, and always-wet operation 107--241\,L/kWh.
-These figures overstate the cost somewhat, because the dry baseline's chiller energy is underestimated where curves clamp.
-
-\emph{Control decides whether a hybrid saves water.} With wetting above 28\,\textdegree C, site water is 14\,\% (Riyadh),
-31\,\% (Phoenix) and 41\,\% (Las Vegas) lower than the evaporative tower, 60--85\,\% lower in hot--humid climates, and
-93--100\,\% lower in cool climates. Always-wet operation in Riyadh uses 9\,\% \emph{more} water than the tower, because the
-pads cool all the air the dry coil moves, which is more air than a wet tower needs for the same heat.
-
-\begin{figure}[t]\centering
-\includegraphics[width=\linewidth]{fig_hybrid_tradeoff}
-\caption{Water--energy trade-off of hybrid dry-cooler control (dry, wet above 32 to 16\,\textdegree C, always wet) at six
-sites; dashed: evaporative tower WUE at the same site. Open markers: chillers more than 50\,h/yr outside their rated curve range.}\label{fig:hybtrade}
-\end{figure}
-
-\begin{figure}[t]\centering
-\includegraphics[width=\linewidth]{fig_hybrid_wue}
-\caption{Site water use of the hybrid dry cooler (wet above 28\,\textdegree C and always wet) and the evaporative tower.}\label{fig:hybwue}
-\end{figure}
-
-\begin{table}[t]\centering\scriptsize
-\caption{Hybrid dry cooler results by site (sorted by mean wet-bulb). WUE in L/kWh IT; $\Delta$WUE$_{T28}$ relative to the tower;
-h$_{out}$: chiller hours outside rated curve range; $\Delta E_{T28}$: facility electricity saved vs dry; L/kWh$_{saved}$: water
-per kWh saved (T28).}\label{tab:hybrid}
-\resizebox{\linewidth}{!}{\input{../results/study/hybrid_table.tex}}
-\end{table}
+The EnergyPlus input dictionary documents the evaporation loss factor in percent per kelvin (default 0.2, typical
+0.15--0.27), but \texttt{CondenserLoopTowers.cc} (v22.2.0 and the development branch in October 2026) uses the input
+without dividing by 100, while the drift percentage read alongside it is divided by 100. A run of the stock
+\texttt{CoolingTower\_VariableSpeed.idf} with the documented default gives an implied factor of 0.2001\,K$^{-1}$, i.e.\
+20\,\%/K, with evaporation reaching 24\,\% of the circulating water. Users who adopt the documented values therefore
+overestimate evaporation by two orders of magnitude. All LF results in this paper use the documented intent (0.2\,\%/K).
+Other water-accounting issues found during this work, with their evidence status, are listed in Appendix~\ref{app:issues};
+they did not affect the case study.
 
 %======================================================================
 \section{Discussion}
 %======================================================================
-\paragraph{Which method to use} For annual totals in building simulation, saturated-exit and e-NTU methods are within
-about 10\,\% of Poppe, biased low in cold climates and at part load near the pinch. Loss-factor and rule-of-thumb
-estimates should not be used for siting or permitting: their error changes sign with climate and exceeds 60\,\% in
-cool, humid climates. Where hourly water matters (peak demand on a utility, drought curtailment, plume abatement),
-Poppe is preferable because its error relative to saturated exit is concentrated in cold, humid hours.
+\paragraph{Interpretation} The differences reported here are between models, not errors against measurements. Poppe is
+the most complete of the models considered and is verified against an independent solution, but its predictions for these
+towers have not been validated against measured makeup water. The results show how much a water estimate depends on the
+chosen model and where that dependence is largest.
 
-\paragraph{Limitations} (i) Accounting mode: the thermal solution and air flow are EnergyPlus', so any bias in its tower
-model propagates; near the pinch the plugin adjusts air flow by up to 3\,\% on average to keep the Poppe solution
-physical. (ii) Water chemistry inputs are illustrative placeholders; treatment limits and the empirical LSI form need
-site data and vendor limits. (iii) No measured validation yet: manufacturer performance tables and metered makeup and
-blowdown are needed. (iv) One plant configuration was studied, without water-side economizer, and with drift from a
-single eliminator assumption.
+\paragraph{Which model to use} For annual totals, saturated-exit and e-NTU models are within about 10\,\% of Poppe and
+consistently lower in this plant, with the largest differences in cold and mild climates and at part load near the pinch.
+At the timestep level the difference reaches $-$29\,\% in freezing weather, so hourly or peak-hour water estimates in cold
+climates should use Poppe. Loss-factor and rule-of-thumb estimates change sign with climate and depart by more than 50\,\%
+in cool, humid climates; they should not be used for siting or permitting. Because the mist share depends on drift
+eliminators, reporting vapour-only and total Poppe evaporation as a range is recommended.
 
-\paragraph{Hybrid coolers} The hybrid results argue for controls that wet only to keep chillers within their rated
-condenser range, not to save electricity: below the capacity limit, each kWh saved costs on the order of 100\,L of water.
-The hybrid analysis assumes a constant pad effectiveness, no pad pressure drop, perfect knowledge of the current
-dry-bulb, placeholder water chemistry, and uses a chiller curve set whose rated range ends at 41.1\,\textdegree C; a
-high-lift chiller characterisation and manufacturer pad data are needed before the energy side is used quantitatively.
-
-\paragraph{Outlook} The verified Poppe and e-NTU rating functions allow a full physics-based tower as an EnergyPlus
-user-defined plant component; demand-based wet/dry control (wetting only when the condenser setpoint cannot be held)
-and spray and wetted-coil hybrids are natural extensions of the hybrid model.
+\paragraph{Limitations} (i) Accounting mode uses EnergyPlus' thermal solution and air flow; the fixed-fill check bounds
+the effect on evaporation per unit heat to 0.15\,\% for the sites tested, but an EnergyPlus tower model with a Poppe thermal
+solution would remove the dependence. (ii) No measured validation: manufacturer performance tables and metered makeup and
+blowdown are needed. (iii) One plant type, one typical weather year per site; plant variants changed the main result by up
+to 1.2 percentage points. (iv) Makeup chemistry inputs are illustrative. (v) The fill exponent (0.6) in the consistency check
+is an assumption.
 
 %======================================================================
 \section{Conclusions}
 %======================================================================
 \begin{enumerate}
-\item A multi-method EnergyPlus plugin evaluates eight evaporation models on the same operating point every timestep,
-with chemistry-driven blowdown; the Poppe implementation agrees with an independent boundary-value solution to
-$<10^{-4}$\,\%.
-\item For a full-load tower, saturated-exit methods deviate from Poppe by $-$18 to +11\,\% depending on ambient
-conditions; empirical methods by $-$39 to +117\,\%.
-\item In a 1\,MW data center across 14 climates, the EnergyPlus default underestimates annual evaporation by
-3.7--9.3\,\%, most in cold climates; the documented loss-factor method overestimates it by 4--64\,\%.
-\item Makeup-water chemistry changes annual makeup by $-$13 to +22\,\%, comparable to the choice of evaporation physics.
-\item A hybrid adiabatic dry cooler with wetting above 28\,\textdegree C keeps chillers within their rated range at all
-sites and uses 14--100\,\% less water than the tower; always-wet operation can use more water than a tower, and saving
-electricity with pad water costs about 100--240\,L/kWh.
-\item Five defects were identified in EnergyPlus heat-rejection models; one inflates loss-factor evaporation
-100-fold and another autosizes fluid-cooler air flow about 1000-fold.
+\item An EnergyPlus plugin evaluates eight evaporation models on the same operating point every timestep; the Poppe
+implementation agrees with an independent solution within 0.01\,\% for unsaturated and supersaturated air.
+\item For a fixed tower at full load, saturated-exit models differ from Poppe by $-$18 to +11\,\% depending on ambient
+conditions, and empirical models by $-$39 to +117\,\%.
+\item For a 1\,MW data center in 14 climates, the EnergyPlus default gives 3.7--9.3\,\% less annual evaporation than Poppe
+(3.5--7.6\,\% excluding mist), with the largest differences in cold climates; the result is robust to plant variants
+($\le$1.2 points) and to the thermal operating point ($\le$0.15\,\%).
+\item Over the documented loss-factor range, loss-factor estimates deviate from Poppe by $-$22 to +122\,\%.
+\item The EnergyPlus \texttt{LossFactor} input is applied as a fraction instead of a percentage, inflating that method's
+evaporation 100-fold.
 \end{enumerate}
 
 \section*{Data and code availability}
-The plugin, models, weather metadata and scripts that reproduce every figure are available at \tbd{repository URL}.
+The plugin, models, weather metadata, run archive and scripts that reproduce every figure and table are available at
+\tbd{repository URL} under \tbd{licence}. \texttt{reproduce.sh} regenerates all results with EnergyPlus 22.2.0.
+
+\appendix
+\section{Other water-accounting issues in EnergyPlus heat-rejection models}\label{app:issues}
+\begin{table}[h]\centering\scriptsize
+\begin{tabular}{p{0.38\linewidth}p{0.55\linewidth}}\toprule
+Issue & Evidence \\\midrule
+Idle towers book evaporation, drift and blowdown (water use computed from a stale air-flow ratio before \texttt{report()} zeroes
+the tower outputs) & Reproduced with stock files: in \texttt{CoolingTower\_VariableSpeed.idf} (Golden, annual) the second tower
+rejects no heat but books 8.65\,m$^3$ in 2,823 timesteps. Not observed with the Merkel tower in the case study. \\
+Merkel tower books no evaporation in free convection (air-flow ratio set to 0 while heat is rejected) & Code inspection only;
+not triggered in the case study, whose tower never enters free convection. \\
+Regression-based variable-speed towers use the free-convection capacity fraction as an air-flow ratio & Code inspection;
+observed in the stock example as ratios of 0.125--0.14 in fan-off and cycling hours. \\
+Fluid-cooler air flow autosized as $\dot Q_{nom}[\mathrm W]/(T_{w,in}-T_{a,in})\times4$ read as m$^3$/s & Reproduced:
+14,061\,m$^3$/s for the 58.6\,kW stock \texttt{FluidCoolerTwoSpeed.idf}, about 2,900 times a physical value at a 10\,K air
+temperature rise; affects air-side quantities only. \\\bottomrule
+\end{tabular}
+\end{table}
+None of these issues has yet been confirmed on EnergyPlus 26.2 or reported to the developers; reproductions are provided
+in the supplementary material.
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references}

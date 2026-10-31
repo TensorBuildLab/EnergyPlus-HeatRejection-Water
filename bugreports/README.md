@@ -54,7 +54,7 @@ Users report entering 0.0015–0.0027 as a workaround (unmethours.com).
 
 **Suggested fix:** divide by 100 on input (and add a transition rule if existing files rely on the workaround).
 
-## 5. Fluid-cooler air flow autosizing is ~1000× too large
+## 5. Fluid-cooler air flow autosizing is about three orders of magnitude too large
 
 **Where:** `FluidCoolers.cc` (v22.2.0, line ~1045), `FluidCoolerspecs::size()`:
 `tmpHighSpeedAirFlowRate = FluidCoolerNominalCapacity / (DesignEnteringWaterTemp - DesignEnteringAirTemp) * 4.0;`

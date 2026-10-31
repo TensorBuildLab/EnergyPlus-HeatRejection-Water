@@ -21,11 +21,11 @@ PAPER = ROOT / "paper"
 FIGS = ROOT / "results" / "figures"
 
 
-def latex_for_pandoc(tex: str) -> str:
+def latex_for_pandoc(tex: str, base: Path = PAPER) -> str:
     tex = re.sub(r"\\resizebox\{[^}]*\}\{[^}]*\}\{(\\input\{[^}]+\})\}", r"\1", tex)
     # inline the results table (pandoc resolves \input relative to cwd; do it explicitly)
     def inc(m):
-        p = (PAPER / m.group(1)).resolve()
+        p = (base / m.group(1)).resolve()
         if p.suffix == "":
             p = p.with_suffix(".tex")
         return p.read_text() if p.exists() else m.group(0)
@@ -45,8 +45,9 @@ def latex_for_pandoc(tex: str) -> str:
     return tex
 
 
-def convert_manuscript():
-    src = latex_for_pandoc((PAPER / "manuscript.tex").read_text())
+def convert_manuscript(tex: Path = PAPER / "manuscript.tex", out: Path = PAPER / "manuscript.docx"):
+    src = latex_for_pandoc(tex.read_text(), tex.parent)
+    src = src.replace("{../references}", "{references}")
     args = ["--citeproc", "--bibliography", str(PAPER / "references.bib"), "--resource-path", str(FIGS),
             "--metadata", "link-citations=true"]
     csl = PAPER / "elsevier-harvard.csl"
@@ -59,11 +60,10 @@ def convert_manuscript():
         fh.write(src)
         tmp = Path(fh.name)
     try:
-        pypandoc.convert_file(str(tmp), "docx", format="latex", outputfile=str(PAPER / "manuscript.docx"),
-                              extra_args=args)
+        pypandoc.convert_file(str(tmp), "docx", format="latex", outputfile=str(out), extra_args=args)
     finally:
         tmp.unlink()
-    return PAPER / "manuscript.docx"
+    return out
 
 
 def convert_methods():
@@ -74,6 +74,10 @@ def convert_methods():
 
 
 if __name__ == "__main__":
-    for f in (convert_manuscript(), convert_methods()):
+    outs = [convert_manuscript(), convert_methods()]
+    hyb = PAPER / "hybrid" / "manuscript_hybrid.tex"
+    if hyb.exists():
+        outs.append(convert_manuscript(hyb, PAPER / "hybrid" / "manuscript_hybrid.docx"))
+    for f in outs:
         print("wrote", f, "%.0f kB" % (f.stat().st_size / 1e3))
     sys.exit(0)

@@ -2,7 +2,8 @@
 # Reproduce every number and figure in the paper from scratch (~15 min on a 16+ core machine).
 set -euo pipefail
 cd "$(dirname "$0")"
-PY=${PY:-/srv/data1/liangzhang/envs/towerwater/bin/python}    # needs numpy scipy pandas matplotlib psychrolib
+PY=${PY:-python3}    # Python 3.8+ with numpy scipy pandas matplotlib psychrolib pypandoc_binary (see pyproject.toml [analysis])
+EPLUS=${EPLUS:-/srv/data1/EnergyPlus-22-2-0/energyplus}   # EnergyPlus 22.2.0 (c249759bad); scripts take --eplus
 
 echo "== 1. Unit tests and code verification"
 $PY -m unittest discover -s tests

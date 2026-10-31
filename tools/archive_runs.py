@@ -80,6 +80,18 @@ def hybrid_study():
     print("hyb", len(list((ARCH / "hyb").glob("*/*/hourly.csv.gz"))), "runs")
 
 
+def light_runs():
+    """Earlier and sensitivity tower runs: summaries, scenarios, configs and logs only (no series)."""
+    for root in sorted(RUNS.glob("sens_*")) + [RUNS / "dc_v1_independent_air"]:
+        if not root.exists():
+            continue
+        for f in ("summary.csv", "scenarios.csv"):
+            copy(root / f, ARCH / root.name / f)
+        for run in sorted(p for p in root.iterdir() if (p / "out" / "eplusout.csv").exists()):
+            keep_common(run, ARCH / root.name / run.name)
+        print("light", root.name)
+
+
 def dev_runs():
     for name in ("dcdev", "hybdev"):
         root = RUNS / name
@@ -94,6 +106,7 @@ def dev_runs():
 if __name__ == "__main__":
     tower_study()
     hybrid_study()
+    light_runs()
     dev_runs()
     total = sum(f.stat().st_size for f in ARCH.rglob("*") if f.is_file())
     big = [(f, f.stat().st_size) for f in ARCH.rglob("*") if f.is_file() and f.stat().st_size > 50e6]

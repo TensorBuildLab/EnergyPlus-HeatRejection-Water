@@ -26,7 +26,7 @@ exactly from the reported fan power (two-speed cycling logic of `FluidCoolerspec
 ## Requirements on the model
 
 - One or more `FluidCooler:TwoSpeed` objects, all with the same `OutdoorAir:Node` in "Outdoor Air Inlet Node Name".
-- **Hard-sized air flows and fan powers.** EnergyPlus 22.2 autosizes fluid-cooler air flow about 1000× too large
+- **Hard-sized air flows and fan powers.** EnergyPlus 22.2 autosizes fluid-cooler air flow about three orders of magnitude too large
   (`bugreports/README.md` §5), which would make pad water meaningless.
 - Optional but recommended: a condenser setpoint manager that follows the node dry-bulb, so wet operation benefits the chillers.
 - `models/build_datacenter_idf.py --heat-rejection hybrid` builds a complete example (`models/datacenter_chiller_hybrid.idf`).

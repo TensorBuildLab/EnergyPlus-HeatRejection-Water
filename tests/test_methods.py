@@ -130,6 +130,17 @@ class NearPinch(unittest.TestCase):
         self.assertLessEqual(r["POPPE"].air_scale, 1.05)
         self.assertAlmostEqual(r["POPPE"].evap_kg_s / r["MSAT"].evap_kg_s, 1.0, delta=0.05)
 
+    def test_physical_methods_share_the_adjusted_air_flow(self):
+        p, tdb, w, tin, tout, mw, q, ma = 101621.5, 16.25, 0.006745, 22.40268, 18.0, 54.478239, 1002583.35, 31.16067
+        o = mt.OperatingPoint(tin, tout, mw, q, ma, ma * (1 + w), tdb, ps.t_wb_from_w(tdb, w, p), w, p)
+        r = mt.evaluate(o, ["POPPE", "MSAT", "EPSAT"])
+        sc = r["POPPE"].air_scale
+        self.assertGreater(sc, 1.0)
+        self.assertEqual(r["MSAT"].air_scale, sc)
+        msat_scaled = ev.merkel_saturated_exit(q, ma * sc, tdb, w, p).evap_kg_s
+        self.assertAlmostEqual(r["MSAT"].evap_kg_s, msat_scaled, places=12)
+        self.assertEqual(r["EPSAT"].air_scale, 1.0)     # EnergyPlus replica keeps EnergyPlus' air
+
 
 class Chemistry(unittest.TestCase):
     water = ch.WaterQuality("w", {"tds": 650, "calcium_hardness": 220, "m_alkalinity": 180, "silica": 30})

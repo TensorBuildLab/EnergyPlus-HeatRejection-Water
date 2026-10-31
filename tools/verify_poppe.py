@@ -11,7 +11,9 @@ problem by shooting on the bottom water temperature with SciPy's adaptive RK45/L
     dh/dz    = K [Le_f c_pma (T_w - T_a) + (w_sw - w) h_v(T_w)] / m_a
     d(m_w c_pw T_w)/dz = m_a dh/dz                        (energy)
 
-z in [0, 1] from the bottom (air inlet) to the top (water inlet). Unsaturated air only.
+z in [0, 1] from the bottom (air inlet) to the top (water inlet). In supersaturated air the vapour stays at
+saturation (w_sa at T_a), the driving force is (w_sw - w_sa), and the excess water is carried as mist with the air
+enthalpy i_ss = c_pa T_a + w_sa (i_fg0 + c_pv T_a) + (w - w_sa) c_pw T_a (ev.air_state gives T_a).
 
 The tower_water.evaporation.poppe() result at the same (T_w,in, T_w,out, m_w,in, m_a, air)
 must reproduce Me = K / m_w,in and the evaporation rate. Prints a table; exits non-zero on failure.
@@ -39,13 +41,15 @@ def height_model(K, m_a, m_w_in, t_w_in, t_db, w_in, lewis=None):
 
     def rhs(z, y):
         tw, mw, w, h = y
-        ta = ps.t_from_h_w(h, w)
+        # air state: unsaturated, or supersaturated (vapour at saturation w_sa + liquid mist w - w_sa)
+        ta, wsa, supersat = ev.air_state(h, w, P)
+        wv = wsa if supersat else w                      # vapour content that drives mass transfer
         wsw = ps.w_sat(tw, P)
-        lef = ev.lewis_bosnjakovic(wsw, w) if lewis is None else lewis
-        cpma = ps.CP_AIR + w * ps.CP_VAPOR
+        lef = ev.lewis_bosnjakovic(wsw, wv) if lewis is None else lewis
+        cpma = ps.CP_AIR + wv * ps.CP_VAPOR
         hv = ps.H_FG0 + ps.CP_VAPOR * tw
-        mdot = K * (wsw - w)
-        dh = K * (lef * cpma * (tw - ta) + (wsw - w) * hv) / m_a
+        mdot = K * (wsw - wv)
+        dh = K * (lef * cpma * (tw - ta) + (wsw - wv) * hv) / m_a
         dw = mdot / m_a
         dmw = mdot
         # d(mw cpw tw) = ma dh  ->  cpw (mw dtw + tw dmw) = ma dh
@@ -95,27 +99,29 @@ CASES = [
     ("hot-humid (Singapore-like)", 31.0, 0.75, 36.0, 10.0, 10.0, 14.0),
     ("mild, high L/G", 20.0, 0.60, 32.0, 10.0, 5.0, 8.0),
     ("cool, low L/G", 12.0, 0.55, 28.0, 10.0, 14.0, 10.0),
+    # near-pinch, very high NTU (review M8): exit air approaches saturation at the hot-water temperature
+    ("near pinch, mild (Dublin-like)", 16.0, 0.55, 23.0, 10.0, 6.0, 40.0),
+    ("near pinch, hot-dry", 38.0, 0.15, 30.0, 10.0, 6.5, 40.0),
 ]
 
 
 def main():
     print("%-28s %8s %8s %8s %10s %10s %9s %9s %9s" % ("case", "Tw,out", "K/mw_in", "Me_ref", "Me_code",
-                                                    "E_ref g/s", "E_code", "dE %", "dMe %"))
-    worst = 0.0
+                                                    "E_ref g/s", "E_code", "dE %", "dMe(40) %"))
+    worst_e = worst_me = 0.0
     for name, t_db, rh, tw_in, mw, ma, K in CASES:
         w = ps.w_from_rh(t_db, rh, P)
         tw_out, e_ref, ta_o, w_o, me_local = height_model(K, ma, mw, tw_in, t_db, w)
-        r = ev.poppe(tw_in, tw_out, mw, ma, t_db, w, P, n_steps=10)
-        if r.supersaturated:
-            print("%-28s exit air supersaturated; height model is unsaturated-only, skipped" % name)
-            continue
+        r = ev.poppe(tw_in, tw_out, mw, ma, t_db, w, P, n_steps=10)        # plugin default
+        r40 = ev.poppe(tw_in, tw_out, mw, ma, t_db, w, P, n_steps=40)      # Me converges slower near the pinch
         de = 100 * (r.evap_kg_s / e_ref - 1)
-        dme = 100 * (r.merkel / me_local - 1)
-        worst = max(worst, abs(de), abs(dme))
-        print("%-28s %8.3f %8.4f %8.4f %10.4f %10.3f %9.3f %9.5f %9.5f" % (
-            name, tw_out, K / mw, me_local, r.merkel, 1e3 * e_ref, 1e3 * r.evap_kg_s, de, dme))
-    print("max |error| (evaporation or Me): %.4f %%" % worst)
-    return 0 if worst < 0.1 else 1
+        dme = 100 * (r40.merkel / me_local - 1)
+        worst_e = max(worst_e, abs(de))
+        worst_me = max(worst_me, abs(dme))
+        print("%-28s %8.3f %8.4f %8.4f %10.4f %10.3f %9.3f %9.5f %9.5f %s" % (
+            name, tw_out, K / mw, me_local, r.merkel, 1e3 * e_ref, 1e3 * r.evap_kg_s, de, dme, "supersat" if r.supersaturated else ""))
+    print("max |error|: evaporation (10 RK4 steps) %.4f %%, Me_P (40 steps) %.4f %%" % (worst_e, worst_me))
+    return 0 if worst_e < 0.05 and worst_me < 0.2 else 1
 
 
 if __name__ == "__main__":

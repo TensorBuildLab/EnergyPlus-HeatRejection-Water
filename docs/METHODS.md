@@ -183,6 +183,14 @@ can find $D\le0$ near the top of the fill. `methods.evaluate` then re-solves wit
 {1.01, 1.02, 1.03, 1.05, 1.08, 1.12, 1.2, 1.35, 1.5} that is feasible and reports it (`AirScale`). Near the pinch evaporation is
 insensitive to air flow (Dublin test point: +2 % air → <0.1 %, +20 % → 1.4 %; `tests/test_methods.py::NearPinch`). In the
 14-climate study the mean factor was 1.01–1.03 and no timestep needed the MSAT fallback.
+**Common air flow (since review round 1):** when POPPE is adjusted, MSAT, BRAUN and POPPE1 are evaluated at the same
+adjusted air flow (`methods.COMMON_AIR`, `cfg['common_air']`, default on), so all physical models share one operating point;
+EPSAT always keeps EnergyPlus' air flow. A fixed-fill rating check (`tools/review_analyses.py`) bounds the effect of
+EnergyPlus' near-pinch operating points on evaporation per unit heat to ≤ 0.15 % (paper §6.3).
+
+**Vapour and mist:** in supersaturated exhaust Poppe's ω includes liquid mist. `tools/review_analyses.py` splits
+E into vapour, ṁ_a(ω_s(T_a,o) − ω_i), and mist, ṁ_a(ω_o − ω_s(T_a,o)); vapour-only is a lower bound of consumption
+(mist may be captured by drift eliminators), total an upper bound.
 
 **Note on $Me_P$:** this rearranged form defines $Me_P$ on the *local* water flow, $Me_P=\int h_d a_{fi}A_{fr}\,dz/\dot m_w(z)$,
 which is larger than $h_da_{fi}A_{fr}L/\dot m_{w,i}$ by about half the evaporated fraction (≈0.5–0.7 % here).
@@ -345,7 +353,7 @@ the study adds it to facility electricity in post-processing. Default $\Delta p_
 $f P_{high}+(1-f)P_{low}$. Inverting: $P\le P_{low}\Rightarrow[(P/P_{low},\dot V_{low})]$; otherwise
 $f=(P-P_{low})/(P_{high}-P_{low})$, states $[(f,\dot V_{high}),(1-f,\dot V_{low})]$.
 **Cooler air flows must be hard-sized**: EnergyPlus autosizes fluid-cooler air flow as
-$Q_{nom}/(T_{w,in}-T_{a,in})\times4$ with $Q$ in W (`FluidCoolers.cc`, v22.2), about 1000× too large (§8, issue 5).
+$Q_{nom}/(T_{w,in}-T_{a,in})\times4$ with $Q$ in W (`FluidCoolers.cc`, v22.2), about three orders of magnitude too large (§8, issue 5).
 
 ### 6.5 Wet/dry control
 
@@ -369,7 +377,8 @@ traces the water–energy trade-off.
 | Latent heat vs IAPWS-95 | `tests/test_methods.py` | < 0.3 % |
 | Poppe energy balance closure | `tests/test_physics.py` | < 0.1 % |
 | Poppe step convergence (10 vs 80 RK4 steps) | `tests/test_physics.py` | < 0.01 % |
-| Poppe vs independent height-wise BVP | `tools/verify_poppe.py` | < $10^{-4}$ % |
+| Poppe vs independent height-wise BVP, 7 cases incl. supersaturated near-pinch | `tools/verify_poppe.py` | evaporation 0.008 % (10 steps); $Me_P$ 0.003 % (40 steps) |
+| Poppe energy/mass closure in supersaturated air | `tests/test_physics.py` | < 0.1 % |
 | Braun NTU inversion round trip | `tests/test_methods.py` | < 1 % |
 | Rating mode: Merkel vs Poppe vs e-NTU outlet temperature, same fill | `tests/test_methods.py` | < 0.5 K |
 | `EPSAT` replica vs EnergyPlus output | `tools/analyze.py`, all runs | < 0.4 % |
@@ -392,7 +401,7 @@ Not yet done: validation against measured tower data and manufacturer performanc
    but `UserEvapLossFactor = NumArray(...)` is used without `/100` (drift percent, read the same way, is divided by 100).
    A run of the stock `CoolingTower_VariableSpeed.idf` with `LossFactor` 0.2 gives an implied factor of 0.2001 per K (20 %/K),
    evaporating up to 24 % of the circulating water.
-5. **Fluid-cooler air flow autosizing is ~1000× too large.** `FluidCoolerspecs::size()` sets
+5. **Fluid-cooler air flow autosizing is about three orders of magnitude too large.** `FluidCoolerspecs::size()` sets
    `HighSpeedAirFlowRate = NominalCapacity / (DesignEnteringWaterTemp - DesignEnteringAirTemp) * 4.0` with capacity in W and the
    result in m³/s (stock `FluidCoolerTwoSpeed.idf`: 58.6 kW → 14,061 m³/s). Thermal results depend on the UA sized with this flow,
    but any air-side quantity (fan power scaling, pad water in §6) is unphysical. To be checked against the I/O Reference.

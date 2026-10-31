@@ -94,37 +94,64 @@ def _with_air(op, scale):
                           op.t_db, op.t_wb, op.w, op.p)
 
 
+# Physical methods that share the reference method's air flow when that air flow had to be adjusted (review M3).
+# EPSAT is excluded on purpose: it must reproduce EnergyPlus exactly, at EnergyPlus' air flow.
+COMMON_AIR = {"MSAT", "BRAUN", "POPPE", "POPPE1"}
+
+
+def _solve(mid, op, cfg, scales):
+    """Evaluate one method; if INFEASIBLE, retry with the given air scales. Returns EvapResult with air_scale."""
+    fn = METHODS[mid][0]
+    try:
+        r = fn(op, cfg)
+        r.air_scale = 1.0
+        if r.status == ev.INFEASIBLE and mid in NEEDS_AIR and cfg.get("adjust_air", True):
+            for sc in scales:
+                r2 = fn(_with_air(op, sc), cfg)
+                if r2.status in (ev.OK, ev.CLIPPED):
+                    r2.status, r2.air_scale = ev.ADJUSTED, sc
+                    return r2
+    except (ValueError, ZeroDivisionError, OverflowError):
+        r = ev.EvapResult(0.0, status=ev.INFEASIBLE)
+        r.air_scale = float("nan")
+    return r
+
+
 def evaluate(op: OperatingPoint, methods=None, cfg=None):
     """Return OrderedDict id -> EvapResult.
 
-    If a physical method finds the operating point INFEASIBLE (driving force vanishes, i.e. the EnergyPlus
-    operating point lies beyond this model's thermodynamic limit, typically within a few percent of the pinch),
-    it is re-solved with the smallest air-flow increase in AIR_SCALES that makes it feasible; status ADJUSTED and
-    the factor (r.air_scale) are recorded. If none up to 1.5x works, or the method raises, the MSAT value is
-    used (status kept) so totals stay complete.
+    Near-pinch handling: if the reference method (POPPE) finds the EnergyPlus operating point INFEASIBLE
+    (driving force vanishes: the point lies beyond its thermodynamic limit, typically within a few percent of the
+    pinch), it is re-solved with the smallest air-flow factor in AIR_SCALES that is feasible (status ADJUSTED,
+    factor in r.air_scale). With cfg["common_air"] (default True) the other physical methods in COMMON_AIR are then
+    evaluated at the SAME adjusted air flow, so all physical methods see one operating point; EPSAT always uses
+    EnergyPlus' air flow. A method that still cannot solve (or raises) is given the MSAT value (status kept) so
+    totals stay complete.
     """
     cfg = cfg or {}
     ids = methods or list(METHODS)
+    common = cfg.get("common_air", True)
+    scale = 1.0
+    pre = {}
+    if common and REFERENCE in ids:
+        pre[REFERENCE] = _solve(REFERENCE, op, cfg, AIR_SCALES)
+        if pre[REFERENCE].status == ev.ADJUSTED:
+            scale = pre[REFERENCE].air_scale
     out = OrderedDict()
     msat = None
     for mid in ids:
-        fn = METHODS[mid][0]
-        try:
-            r = fn(op, cfg)
-            r.air_scale = 1.0
-            if r.status == ev.INFEASIBLE and mid in NEEDS_AIR and cfg.get("adjust_air", True):
-                for sc in AIR_SCALES:
-                    r2 = fn(_with_air(op, sc), cfg)
-                    if r2.status in (ev.OK, ev.CLIPPED):
-                        r2.status, r2.air_scale = ev.ADJUSTED, sc
-                        r = r2
-                        break
-        except (ValueError, ZeroDivisionError, OverflowError):
-            r = ev.EvapResult(0.0, status=ev.INFEASIBLE)
-            r.air_scale = float("nan")
+        if mid in pre:
+            r = pre[mid]
+        elif common and scale != 1.0 and mid in COMMON_AIR:
+            r = _solve(mid, _with_air(op, scale), cfg, [s for s in AIR_SCALES if s > scale])
+            if r.status == ev.OK:
+                r.status = ev.ADJUSTED
+            r.air_scale = scale * (r.air_scale if r.air_scale == r.air_scale else 1.0)
+        else:
+            r = _solve(mid, op, cfg, AIR_SCALES)
         if r.status in (ev.NO_AIRFLOW, ev.INFEASIBLE):
             if msat is None:
-                msat = _msat(op, cfg)
+                msat = _msat(_with_air(op, scale), cfg)
             r.evap_kg_s = msat.evap_kg_s if msat.status == ev.OK else ev.latent_only(op.q, op.t_w_in, op.t_w_out)
         out[mid] = r
     return out

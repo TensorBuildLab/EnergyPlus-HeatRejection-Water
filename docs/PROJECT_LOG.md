@@ -57,7 +57,7 @@ Author: Liang Zhang (University of Arizona), with Claude Code.
 2. Merkel tower books no evaporation in free convection (air-flow ratio 0 while Q > 0).
 3. VariableSpeed tower uses a capacity fraction as air-flow ratio in fan-off/cycling.
 4. `LossFactor` applied as a fraction although documented in %/K → 100× evaporation (confirmed by simulation: 20 %/K).
-5. Fluid-cooler air flow autosized ~1000× too large (Q[W]/ΔT×4 as m³/s).
+5. Fluid-cooler air flow autosized about three orders of magnitude too large (Q[W]/ΔT×4 as m³/s).
 Not yet confirmed on v26.2; not yet filed upstream.
 
 ## 7. Paper
@@ -77,3 +77,13 @@ Not yet confirmed on v26.2; not yet filed upstream.
 - High-lift chiller characterisation for the hybrid plant; same chiller for tower and hybrid comparisons.
 - Full Poppe tower as `PlantComponent:UserDefined`; demand-based hybrid control; spray-on-coil hybrids; water-side economizer.
 - Confirm and file the five EnergyPlus issues on v26.2.
+
+## 10. Review round 1 (2026-11-01)
+- Independent referee-style review: `paper/REVIEW_round1.md` (major revision; 12 major, 31 minor). The requested
+  `paper-review` skill was not available on this machine.
+- Response: `paper/RESPONSE_round1.md`. Manuscript v2: hybrid study split to `paper/hybrid/manuscript_hybrid.tex`;
+  model-to-model framing; common air flow for physical models (study re-run; v1 runs kept in `runs/dc_v1_independent_air`);
+  vapour/mist split (EnergyPlus −3.5 to −7.6 % vs vapour-only Poppe, −3.7 to −9.3 % vs total); fixed-fill rating check
+  (≤ 0.15 % on evaporation per heat); plant sensitivity (duty-sized tower, 15 °C floor; ≤ 1.2 points; `models/sensitivity/`);
+  peak day; loss-factor range; supersaturated near-pinch verification; 20 verified references added
+  (`paper/LITERATURE_ADDITIONS.md`).

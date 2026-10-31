@@ -12,7 +12,9 @@ makeup-water chemistry**. Research context: `CONCEPT_NOTE.md` (Study 2 for the N
 | `docs/HYBRID_DRY_COOLER.md` | User guide for the hybrid adiabatic dry cooler model |
 | `docs/PROJECT_LOG.md` | Record of decisions, findings and open items |
 | `results/archive/` | Compact archive of every simulation run (models, configs, logs, timestep/hourly series); `tools/archive_runs.py` |
-| `paper/manuscript.tex`, `paper/references.bib` | Journal manuscript draft (Elsevier `elsarticle`) |
+| `paper/manuscript.tex`, `paper/references.bib` | Journal manuscript v2 (Elsevier `elsarticle`), revised after review round 1 |
+| `paper/REVIEW_round1.md`, `paper/RESPONSE_round1.md` | Referee-style review and point-by-point response |
+| `paper/hybrid/manuscript_hybrid.tex` | Companion draft: hybrid dry cooler study (split off in review round 1) |
 | `paper/manuscript.docx`, `docs/METHODS.docx` | Word versions (native editable equations; regenerate with `tools/make_docx.py`) |
 | `results/figures/`, `results/study/` | Paper figures (PNG + PDF) and tables |
 | `models/` | Representative 1 MW water-cooled data center (`DATACENTER_MODEL.md`) and stock examples |
@@ -75,7 +77,8 @@ reference method `Drift`, `Blowdown`, `Makeup`, `MakeupVol`, `Cycles`, `CycLimit
 
 ## Main results (1 MW data center, 14 climates, TMYx 2011–2025)
 
-- EnergyPlus default (SaturatedExit) **underestimates annual evaporation by 3.7–9.3 %** vs Poppe; most in cold climates.
+- EnergyPlus default (SaturatedExit) gives **3.7–9.3 % less annual evaporation than Poppe** (3.5–7.6 % excluding liquid mist);
+  robust to plant variants (≤ 1.2 points) and to EnergyPlus' thermal operating point (≤ 0.15 %, fixed-fill check). Model-to-model, not measured.
 - EnergyPlus LossFactor (as documented, 0.2 %/K) overestimates by 4–64 %; rule of thumb −20 to +26 %; latent-only −11 to +40 %.
 - Evaporation 1.05–1.65 L/kWh of heat rejected; WUE 1.66–2.63 L/kWh IT.
 - Makeup-water chemistry changes makeup by −13 to +22 %, as much as the choice of evaporation physics.
@@ -83,7 +86,7 @@ reference method `Drift`, `Blowdown`, `Makeup`, `MakeupVol`, `Cycles`, `CycLimit
 - **Hybrid dry cooler** (3 × 50 % fluid coolers, 7 control strategies): wetting above 28 °C keeps chillers within their rated
   range at all sites (dry-only: up to 3,285 h/yr outside) and uses 14–100 % less water than the tower; always-wet in Riyadh uses
   9 % *more* than the tower; electricity saved by wetting costs 100–240 L of water per kWh.
-- **EnergyPlus defects:** fluid-cooler air flow autosized ~1000× too large; idle towers book water; Merkel free convection books none; capacity fraction used as air-flow
+- **EnergyPlus defects:** fluid-cooler air flow autosized about three orders of magnitude too large; idle towers book water; Merkel free convection books none; capacity fraction used as air-flow
   ratio; **LossFactor applied 100× too high** (percent input used as a fraction).
 
 ## Before publishing

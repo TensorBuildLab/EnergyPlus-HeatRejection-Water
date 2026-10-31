@@ -96,7 +96,6 @@ def fig_deviation_heatmap(t, out):
     ax.grid(False)
     cb = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.02, extend="both")
     cb.set_label("Annual evaporation vs Poppe [%]")
-    ax.set_title("Annual tower evaporation of each method relative to Poppe (sites by mean wet-bulb)", loc="left")
     fs.save(fig, out / "fig_dc_method_deviation")
 
 
@@ -114,7 +113,6 @@ def fig_wue(t, out):
     ax.set_ylabel("WUE, site makeup / IT energy [L/kWh]")
     ax.set_ylim(0, 3.5)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.32), ncol=2, fontsize=7.5)
-    ax.set_title("Water usage effectiveness by climate (sites by mean wet-bulb)", loc="left")
     fs.save(fig, out / "fig_dc_wue")
 
 
@@ -125,14 +123,15 @@ def fig_monthly(run_root, sites, out):
         d = next(iter(frames.values())).copy()
         d["month"] = d.time.str.strip().str.slice(0, 2).astype(int)
         sec = dt_h * 3600
-        g = d.groupby("month")[["pl_e_poppe", "pl_e_epsat", "pl_e_lf"]].sum() * sec / 1e3
+        days = d.assign(day=d.time.str.strip().str.slice(0, 5)).groupby("month")["day"].nunique()
+        g = (d.groupby("month")[["pl_e_poppe", "pl_e_epsat", "pl_e_lf"]].sum() * sec).div(days, axis=0)   # m3/day
         ax.plot(g.index, g.pl_e_poppe, color=fs.METHOD_COLOR["POPPE"], label="Poppe")
         ax.plot(g.index, g.pl_e_epsat, color=fs.METHOD_COLOR["EPSAT"], label="EnergyPlus SaturatedExit")
         ax.plot(g.index, g.pl_e_lf, color=fs.METHOD_COLOR["LF"], linestyle="--", label="LossFactor 0.2 %/K")
         ax.set_title(nice(site))
         ax.set_xticks([1, 4, 7, 10])
         ax.set_xticklabels(["Jan", "Apr", "Jul", "Oct"])
-    axes[0].set_ylabel("Evaporation [1000 m³/month]")
+    axes[0].set_ylabel("Evaporation, monthly mean [m³/day]")
     h, l = axes[0].get_legend_handles_labels()
     fig.legend(h, l, loc="lower center", ncol=3, fontsize=7.5, bbox_to_anchor=(0.5, -0.12))
     fs.save(fig, out / "fig_dc_monthly")
