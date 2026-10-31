@@ -287,8 +287,27 @@ multiple of solubility under the treatment program.
 `fixed` ($N$ given, EnergyPlus `ConcentrationRatio`), `constituent` (5.2 only, constant), `dynamic` (5.2–5.4 each
 timestep: an idealised conductivity controller always running at the allowable $N$).
 
-**Data status:** the water sources and treatment limits in `data/water_sources.json` are placeholders.
-Replace them with utility water-quality reports and treatment-vendor limits before publishing results.
+### 5.6 Water-quality data
+
+- `data/water_sources_sourced.json` holds **sourced makeup water for all 14 study sites** (utility reports, or USGS
+  source-water records where reports give no mineral data). It also holds **five sourced treatment limit sets**:
+  - EVAPCO galvanized inhibitor;
+  - EVAPCO 316 stainless;
+  - BAC galvanized;
+  - an ICC GEW174-14 modern-stabiliser program;
+  - an acid-fed program at pH 7.5.
+
+  Every value has its URL, year, conversion and confidence rating in `docs/WATER_QUALITY_SOURCES.md`. A JSON `null` means
+  the value was not reported, and that constraint is skipped.
+- `tools/water_quality_study.py` pairs each site with its own water and evaluates every limit set, writing
+  `results/study/water_quality_*` and `fig_dc_water_quality`.
+- `data/water_sources.json` keeps the original illustrative sources (soft surface, hard groundwater, reclaimed) for
+  generic scenarios. Those values are **not** from any utility.
+- Assumptions and limits:
+  - recirculating pH 8.5 for programs without acid (assumption);
+  - the LSI limit scales alkalinity with $N$ even under acid feed (conservative);
+  - corrosion limits for soft, aggressive waters are not modelled;
+  - the cycle cap is 10.
 
 ---
 
@@ -384,7 +403,12 @@ traces the water–energy trade-off.
 | `EPSAT` replica vs EnergyPlus output | `tools/analyze.py`, all runs | < 0.4 % |
 | Limit behaviour (saturated exit at high NTU, fog in cold humid air, hot-dry $E>\dot Q/i_{fg}$) | tests | pass |
 
-Not yet done: validation against measured tower data and manufacturer performance tables (see CONCEPT_NOTE §6).
+| Poppe vs 126 measured counterflow fill tests (Kloppers 2003, App. R–T: trickle, splash, film) | `tools/validate_kloppers.py` | $Me_P$ vs Kloppers' own Poppe analysis +1.0 % mean (95th pct 2.0 %); outlet-air T vs measured: bias −0.20 K, rms 0.84 K (Kloppers 0.85 K) |
+| Fill law $Me\propto(L/G)^{-n}$, single-point $n=0.6$, rating mode on the same tests | `tools/validate_kloppers.py` | $T_{w,o}$ rms 0.17–0.83 K; evaporation mean error ±4.4 %, max 11.5 % (film) |
+
+The fill tests measure outlet-air temperature but not evaporation. They validate the air-side balance, not water use
+directly. Not yet done: metered makeup and blowdown of an operating tower. Data: `data/equipment/kloppers2003_fill_tests.csv`;
+extraction: `data/equipment/extraction/`.
 
 ---
 

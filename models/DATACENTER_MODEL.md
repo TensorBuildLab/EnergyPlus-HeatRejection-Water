@@ -77,7 +77,7 @@ The new objects go between marker comments, so the script can be re-applied to i
 | Tower design point | Design approach **3.9 K (7 °F)**, range **5.6 K (10 °F)**, at the site **0.4 % WB=>MDB** condition: PHX 24.1 °C WB / 33.9 °C DB; CHI 25.5 / 31.2. Condenser design exit = WB + 3.9 = 28.0 [29.4] °C | Phoenix DDY: 2025 ASHRAE Handbook—Fundamentals ch. 14; Chicago DDY (EnergyPlus 22.2 WeatherData): 2009 ASHRAE Handbook |
 | Tower capacity rationale | The condenser-loop design flow is the sum of the 3 chiller condenser flows. That gives 1.5 × duty flow, i.e. **one cell per chiller (N+1 cells)**. With MaximalCell all 3 cells share the duty flow (per-cell water ≈ 0.67 of cell design, above the 0.33 minimum), which lowers fan speed | Spec (N+1); E+ cell logic |
 | Tower curves | Fan power 0.02 + 0.98·AFR³; UA(AFR) = 1.3·AFR − 0.3·AFR²; UA(ΔWB) = 1 + 0.0081·ΔWB; UA(WFR) = 0.1082 + 1.667·WFR − 0.7713·WFR² | `ExampleFiles/CoolingTower_MerkelVariableSpeed.idf` |
-| Tower fan sizing | 0.0105 W fan per W nominal capacity (E+ default). That is ≈ 60 gpm/hp at the CTI point, better than the ASHRAE 90.1 minimum for axial-fan open towers (≈ 38–40 gpm/hp) | E+ IDD default; the gpm/hp equivalent is our own calculation |
+| Tower fan sizing | 0.0105 W fan per W nominal capacity (E+ default). That is ≈ 60 gpm/hp on the catalog basis (78 °F WB) and ≈ 75–85 gpm/hp on the ASHRAE 90.1 rating basis (95/85/75 °F). This is an efficient selection: the 90.1 minimum is 40.2 gpm/hp (≈ 0.02 W/W) and Title 24 requires 60 | E+ IDD default; conversion in `docs/EQUIPMENT_SPECS.md` (corrected 2026-10-31; earlier text compared bases inconsistently) |
 | Minimum air flow ratio | 0.2 | E+ default (VFD turndown) |
 | Evaporation | SaturatedExit | Spec (EnergyPlus default) |
 | **Drift** | 0.001 % of circulating flow | Assumption, typical of modern high-efficiency drift-eliminator specifications (≈ 0.0005–0.005 %); E+ default is 0.008 % |
@@ -195,6 +195,24 @@ We ran this test with `build_datacenter_idf.py --idle-tower-test`, Phoenix, time
    - **We found no stale-air-flow-ratio evaporation leak for the Merkel tower in these configurations.**
 3. **One stale output does exist:** `Cooling Tower Operating Cells Count` reports **1** in timesteps when the tower has zero water flow.
 4. **Not exercised:** a tower with water flow but its fan off because the setpoint is satisfied, i.e. a free-convection/off state on a running loop. This model never reaches that state, because the chiller condenser always loads the tower. The reported 22.2 issue (`calculateWaterUsage` using a stale `AirFlowRateRatio`) may be specific to `CoolingTower:VariableSpeed`, or to that flow-on/fan-off state; this test cannot rule it out.
+
+## 4b. Equipment-informed variant (`--plant modern`)
+
+`python3 models/build_datacenter_idf.py --plant modern --out models/sensitivity/modern_plant.idf` builds a plant that
+follows current data-center equipment and practice. Sources and confidence ratings are in `docs/EQUIPMENT_SPECS.md`.
+
+| Item | Base | Modern | Source |
+|---|---|---|---|
+| CHW supply | 10 °C | 15.5 °C | FEMP data-center guide (≥ 55 °F); modern colocation 15–18 °C |
+| Chiller curves | Carrier 19XR VSD (DataSets) | ASHRAE 90.1-2019 Add. bd App. J **Set S** (centrifugal 150–300 t, Path B, 0.635/0.400 kW/ton; ref. COP 5.54 at 7/30 °C; min PLR 0.25) | 90.1 Addendum bd Table J-5 |
+| CW reset floor | 18 °C | 15.5 °C (60 °F) | Trane CenTraVac, Daikin Magnitude, York YZ minimum entering condenser water |
+| Merkel UA(AFR) | 1.3x − 0.3x² (E+ example) | 0.1174 + 1.1082x − 0.2292x² (= AFR^0.7) | Kloppers (2003) film-fill data |
+| Merkel UA(WFR) | 0.1082 + 1.667x − 0.7713x² | 0.2473 + 0.9169x − 0.1617x² (= WFR^0.58) | same |
+| Tower min air flow ratio | 0.2 | 0.25 | BAC gear-drive minimum motor speed |
+| Cell water flow fraction min/max | 0.33 / 2.5 | 0.5 / 1.2 | BAC weir dams, Title 24 / 90.1 50 % turndown; max is an assumption |
+
+All other inputs are unchanged: drift 0.001 %, approach 3.9 K, range 5.6 K, fan 0.0105 W/W and 4 cycles. These were
+reviewed and kept. Results are in `runs/sens_modern_plant` and the paper's plant-sensitivity table.
 
 ## 5. Known limitations and modelling notes
 

@@ -1,0 +1,28 @@
+source,location,fill_or_tower,height_or_spacing_m,form,a,exp_LG_or_Gw,exp_Ga,exp_Lfi,r_or_r2,basis,note
+Kloppers 2003 PhD (Stellenbosch),Table R.13,trickle,1.08,Me/Lfi=a(Gw/Ga)^b,1.021224,-0.551502,,,r2=0.977,Merkel,
+Kloppers 2003 PhD,Table R.13,trickle,1.53,Me/Lfi=a(Gw/Ga)^b,0.910464,-0.624555,,,r2=0.990,Merkel,
+Kloppers 2003 PhD,Table R.13,trickle,1.98,Me/Lfi=a(Gw/Ga)^b,0.846533,-0.658826,,,r2=0.998,Merkel,
+Kloppers 2003 PhD,Table R.3,trickle,1.08,Me/Lfi=a(Gw/Ga)^b,1.104216,-0.522373,,,r2=0.976,Poppe,
+Kloppers 2003 PhD,Table R.7,trickle,1.53,Me/Lfi=a(Gw/Ga)^b,0.987536,-0.582992,,,r2=0.990,Poppe,
+Kloppers 2003 PhD,Table S.17,splash,0.1,Me/Lfi=a(Gw/Ga)^b,0.444827,-0.505736,,,r2=0.974,Merkel,spacing 0.1 m
+Kloppers 2003 PhD,Table S.17,splash,0.4,Me/Lfi=a(Gw/Ga)^b,0.280500,-0.571781,,,r2=0.925,Merkel,spacing 0.4 m
+Kloppers 2003 PhD,Table T.13,film,0.6,Me/Lfi=a(Gw/Ga)^b,1.796447,-0.588290,,,r2=0.903,Merkel,cross-corrugated PVC
+Kloppers 2003 PhD,Table T.13,film,0.9,Me/Lfi=a(Gw/Ga)^b,1.625041,-0.607805,,,r2=0.932,Merkel,
+Kloppers 2003 PhD,Table T.13,film,1.2,Me/Lfi=a(Gw/Ga)^b,1.471826,-0.645730,,,r2=0.945,Merkel,
+Kloppers 2003 PhD,Table T.13,film,0.6,Me/Lfi=a Gw^b Ga^c,1.131871,-0.403632,0.782625,,,Merkel,
+Kloppers 2003 PhD,Table T.13,film,0.9,Me/Lfi=a Gw^b Ga^c,1.092357,-0.443876,0.774531,,,Merkel,
+Kloppers 2003 PhD,Table T.13,film,1.2,Me/Lfi=a Gw^b Ga^c,0.996604,-0.469512,0.790386,,,Merkel,
+Kloppers 2003 PhD,Table R.13,trickle,1.08,Me/Lfi=a Gw^b Ga^c,0.857501,-0.480158,0.624824,,,Merkel,
+Kloppers 2003 PhD,Table R.13,trickle,1.53,Me/Lfi=a Gw^b Ga^c,0.817071,-0.581055,0.670746,,,Merkel,
+Kloppers 2003 PhD,Table R.13,trickle,1.98,Me/Lfi=a Gw^b Ga^c,0.817647,-0.644301,0.672908,,,Merkel,
+Kloppers 2003 PhD,Table S.17,splash,0.1,Me/Lfi=a Gw^b Ga^c,0.374457,-0.435520,0.577461,,,Merkel,
+Kloppers 2003 PhD,Table S.17,splash,0.4,Me/Lfi=a Gw^b Ga^c,0.195062,-0.418215,0.707961,,,Merkel,
+Kloppers 2003 PhD; Kloppers & Kroger IJHMT 48 (2005) 765-777,eq. T.1,film,all,Me/Lfi=a Gw^b Ga^c Lfi^d,1.019766,-0.432896,0.782744,-0.292870,r=0.988,Merkel,combined fit over heights
+Kloppers 2003 PhD,eq. S.1,splash,all,Me/Lfi=a Gw^b Ga^c spacing^d,0.164488,-0.419312,0.614346,-0.347798,,Merkel,
+Braun 1988 PhD (UW-Madison) Table 3.1,Simpson & Sherwood tower R-1,tower,,KaV/L=c(L/G)^-n,1.684,-0.391,,,,Merkel/e-NTU,lab counterflow tower
+Braun 1988 Table 3.1,Simpson & Sherwood R-2,tower,,KaV/L=c(L/G)^-n,1.405,-0.727,,,,Merkel/e-NTU,
+Braun 1988 Table 3.1,Simpson & Sherwood M-1,tower,,KaV/L=c(L/G)^-n,0.984,-0.852,,,,Merkel/e-NTU,
+Braun 1988 Table 3.1,Simpson & Sherwood M-2,tower,,KaV/L=c(L/G)^-n,1.130,-0.617,,,,Merkel/e-NTU,
+Braun 1988 Sec. 3.1.6,D/FW airport field tower (4 cells),tower,,KaV/L=c(L/G)^-n,3.76,-0.63,,,,e-NTU,field data 3 days Oct; RMS 1.4 F
+Pirunkaset (Kasetsart Univ. Eng. J.),ATC-105 worked example,film,,KaV/L=c(L/G)^-n,1.8218,-0.6135,,,,Merkel,calculated design curve
+This work (refit of Kloppers 2003 data with src/tower_water Poppe),kloppers2003_poppe_check_summary.csv,film 0.6/0.9/1.2; trickle 1.08/1.53/1.98; splash 0.1,,Me_P=c(L/G)^-n,see summary,-0.506 to -0.598,,,,Poppe (Bosnjakovic Lewis),whole-fill Me

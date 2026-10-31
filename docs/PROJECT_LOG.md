@@ -64,7 +64,7 @@ Not yet confirmed on v26.2; not yet filed upstream.
 - `paper/manuscript.tex` (Elsevier elsarticle) + `paper/references.bib` + `paper/elsevier-harvard.csl`;
   Word version `paper/manuscript.docx` via `tools/make_docx.py` (native editable equations; references are static text).
 - Review round 1: `paper/REVIEW_round1.md` and responses in `paper/RESPONSE_round1.md`.
-- Open `[TBD]`: affiliation, Kloppers & Kröger claim, repository URL. No LaTeX on the server; compile on Overleaf.
+- Open `[TBD]`: affiliation only. No LaTeX on the server; compile on Overleaf.
 
 ## 8. Data handling
 - Raw simulation output (28 GB in `runs/`) is not versioned. `tools/archive_runs.py` keeps per-run models, configs,
@@ -72,8 +72,8 @@ Not yet confirmed on v26.2; not yet filed upstream.
   runs in `results/archive/` (~175 MB). `reproduce.sh` regenerates everything.
 
 ## 9. Open items / next steps
-- Replace placeholder water chemistry with utility reports and vendor limits.
-- Validate against manufacturer performance data and metered makeup/blowdown.
+- Improve low-confidence water data (Atlanta, Dallas, Madrid, Mumbai).
+- Validate evaporation against metered makeup/blowdown (fill tests cover outlet air only).
 - High-lift chiller characterisation for the hybrid plant; same chiller for tower and hybrid comparisons.
 - Full Poppe tower as `PlantComponent:UserDefined`; demand-based hybrid control; spray-on-coil hybrids; water-side economizer.
 - Confirm and file the five EnergyPlus issues on v26.2.
@@ -87,3 +87,25 @@ Not yet confirmed on v26.2; not yet filed upstream.
   (≤ 0.15 % on evaporation per heat); plant sensitivity (duty-sized tower, 15 °C floor; ≤ 1.2 points; `models/sensitivity/`);
   peak day; loss-factor range; supersaturated near-pinch verification; 20 verified references added
   (`paper/LITERATURE_ADDITIONS.md`).
+
+## 11. Round 2: repository, water quality, equipment, measured fill tests (2026-10-31)
+- Pushed to private GitHub `TensorBuildLab/EnergyPlus-HeatRejection-Water`; URL in both papers; MIT licence (`LICENSE`;
+  chosen by Claude on the author's instruction to decide; change if the university prefers another).
+- **Water quality**: `data/water_sources_sourced.json` + `docs/WATER_QUALITY_SOURCES.md` (14 sites, utility/USGS data, five
+  sourced limit sets: EVAPCO galvanized and 316 SS, BAC galvanized, ICC GEW174-14, acid feed pH 7.5).
+  `tools/water_quality_study.py` → Table `water_quality_table.tex`, `fig_dc_water_quality` (replaces the illustrative
+  chemistry figure). Cycles 1.5–10; makeup −17 to +125 % vs 4 cycles; Colorado River sulfate (210–240 mg/L) limits
+  Phoenix/Las Vegas; Riyadh chloride; Frankfurt alkalinity; soft sites hit the 10-cycle cap (corrosion not modelled).
+  Low-confidence data: Atlanta, Dallas, Madrid, Mumbai.
+- **Equipment**: `docs/EQUIPMENT_SPECS.md`, `data/equipment/`. Base model kept (reviewed results unchanged); new
+  `--plant modern` variant (15.5 °C CHW and CW floor, 90.1 Set S chiller curves, fill-data UA curves, min air 0.25, cell water
+  0.5–1.2) run at 14 sites (`runs/sens_modern_plant`): EnergyPlus vs Poppe −2.5 to −8.4 % (0.4–1.2 points smaller than base);
+  PUE 1.24–1.28; more CW unmet hours at Phoenix (tower at full fan, mostly < 0.5 K). Fan-power gpm/hp statement corrected in
+  `models/DATACENTER_MODEL.md`.
+- **Measured fill tests**: 126 counterflow tests from Kloppers (2003) PhD thesis (open access). `tools/validate_kloppers.py`:
+  Me_P +1.0 % vs Kloppers' Poppe; outlet air 0.84 K rms vs measured. Replaces the missing worked example (review M8).
+  Our Merkel numbers are 2.5–4.3 % above Kloppers' tabulated Merkel values (cause not resolved).
+- **Fill exponent sweep** 0.5/0.6/0.78 in the fixed-fill check: ≤ 0.17 % on evaporation per heat.
+- Manuscript v3 (v2 kept as `paper/manuscript_v2_before_round2.tex`): new verification paragraph, Table/Fig. Kloppers,
+  sourced water-quality section, equipment-informed plant in sensitivity, abstract/highlights/conclusions updated.
+- To verify before citing: ASHRAE 90.1 Addendum bd year (bib says 2021); 90.1-2022 tower table text; BAC drift guarantee.

@@ -28,6 +28,11 @@ chiller characterisation (manufacturer data or a physics-based compressor model)
 \item The tower and hybrid plants use different chillers; for energy comparisons both plants need the same chiller model.
 \item Pad pressure drop is zero in the reported runs; pad effectiveness (0.85) and the design air rise (8\,K) are untested
 assumptions. Add a sensitivity analysis and manufacturer pad data.
+\item Equipment data now in hand (\texttt{docs/EQUIPMENT\_SPECS.md}, \texttt{data/equipment/evap\_pad\_performance.csv}) suggest:
+pad effectiveness 0.75--0.80 for the base case (EVAPCO pad tests reach at most 78\,\% at 2\,m/s; a 150\,mm Munters pad is about
+83\,\%); wet-pad pressure drop 20--85\,Pa; pad bleed of about 25\,\% of evaporation; manufacturer default switch-over to wet
+only when fans are at 100\,\% and the setpoint is unmet, with a 21--26\,\textdegree C threshold, a lockout below
+4\,\textdegree C and at most one wet start per day. The 0.02\,W/W fan power is reasonable (about Eurovent class C).
 \item ``L/kWh saved'' ratios are unreliable where savings are small (0.03--0.08\,\%); report them only where savings exceed
 a threshold, and express uncertainty.
 \item Literature (verified, in references.bib): hybrid cooling towers \citep{asvapoositkul2014comparative}, pad
@@ -102,6 +107,10 @@ per kWh saved (T28).}\label{tab:hybrid}
 \resizebox{\linewidth}{!}{\input{../../results/study/hybrid_table.tex}}
 \end{table}
 
+
+\section*{Data and code availability}
+The hybrid-cooler plugin, models and scripts are available at
+\url{https://github.com/TensorBuildLab/EnergyPlus-HeatRejection-Water} under the MIT licence.
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{../references}

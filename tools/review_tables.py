@@ -25,22 +25,28 @@ def sites():
 
 
 def sensitivity():
+    """EnergyPlus vs Poppe for plant variants: 4 sites, plus the range over all sites run for that variant."""
     rows = []
     base = pd.read_csv(ROOT / "runs" / "dc" / "summary.csv").set_index("site")
     sites = ["phoenix_tmyx", "singapore", "frankfurt", "stockholm"]
     variants = [("Base (N+1 tower, 18\\,\\textdegree C floor)", base)]
     for v, lab in (("duty_sized", "Tower sized for duty (2 chillers)"), ("cw_floor_15", "Condenser floor 15\\,\\textdegree C"),
-                   ("duty_sized_cw_floor_15", "Both")):
+                   ("duty_sized_cw_floor_15", "Both"),
+                   ("modern_plant", "Equipment-informed plant$^a$")):
         f = ROOT / "runs" / ("sens_" + v) / "summary.csv"
         if f.exists():
             variants.append((lab, pd.read_csv(f).set_index("site")))
     for lab, d in variants:
-        rows.append([lab] + ["%+.1f" % d.loc[s, "EP_vs_POPPE_%"] for s in sites])
-    lines = [r"\begin{tabular}{lrrrr}", r"\toprule", r"Plant variant & Phoenix & Singapore & Frankfurt & Stockholm \\",
+        allv = d["EP_vs_POPPE_%"]
+        rng = "%+.1f to %+.1f (%d)" % (allv.min(), allv.max(), len(allv)) if len(allv) > len(sites) else "--"
+        rows.append([lab] + ["%+.1f" % d.loc[s, "EP_vs_POPPE_%"] for s in sites] + [rng])
+    cols = ["variant"] + sites + ["all sites (n)"]
+    lines = [r"\begin{tabular}{lrrrrr}", r"\toprule",
+             r"Plant variant & Phoenix & Singapore & Frankfurt & Stockholm & All sites ($n$) \\",
              r"\midrule"] + [" & ".join(r) + r" \\" for r in rows] + [r"\bottomrule", r"\end{tabular}"]
     (S / "sensitivity_plant_table.tex").write_text("\n".join(lines) + "\n")
-    pd.DataFrame(rows, columns=["variant"] + sites).to_csv(S / "sensitivity_plant.csv", index=False)
-    print(pd.DataFrame(rows, columns=["variant"] + sites).to_string(index=False))
+    pd.DataFrame(rows, columns=cols).to_csv(S / "sensitivity_plant.csv", index=False)
+    print(pd.DataFrame(rows, columns=cols).to_string(index=False))
 
 
 if __name__ == "__main__":

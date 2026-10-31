@@ -1,0 +1,302 @@
+{
+  "_note": "Sourced makeup-water quality for the 14 study sites and citable treatment limit sets. See docs/WATER_QUALITY_SOURCES.md for conversions, confidence and gaps. Units mg/L; hardness and alkalinity as CaCO3; silica as SiO2. null = not reported/not found. Keys listed in a site's 'estimated' are estimates, not measured values.",
+  "sources": {
+    "atlanta": {
+      "description": "Atlanta DWM (Chattahoochee R.). Utility CCR 2025 has no mineral data; values are USGS NWIS raw-river medians at 02336000 Chattahoochee R. at Atlanta (Ca, alk, SiO2, Cl, SO4: 1995-2009, n=2); TDS = median specific conductance 2010-2024 (76 uS/cm, n=306) x 0.65. Treated water is likely somewhat higher in Ca/alkalinity (lime/caustic) and sulfate (coagulant).",
+      "silica": 6.0,
+      "calcium_hardness": 8.1,
+      "m_alkalinity": 11.5,
+      "chloride": 3.3,
+      "sulfate": 3.9,
+      "tds": 49.4,
+      "ph": null,
+      "source_url": "https://www.waterqualitydata.us/data/Result/search?siteid=USGS-02336000",
+      "year": "1995-2024",
+      "confidence": "low (raw river, sparse major-ion samples)",
+      "estimated": []
+    },
+    "dallas": {
+      "description": "Dallas Water Utilities (Elm Fork Trinity / Lewisville, Ray Roberts, Grapevine, Ray Hubbard, Tawakoni). DWU 2025 CCR has no mineral data; values are USGS NWIS raw-water medians at 08053000 Elm Fork Trinity R. nr Lewisville, 1985-1997 (n~70). Alternative East Fork (Ray Hubbard, 08061750): Ca 51.5, alk 115, SiO2 7.9, Cl 45, SO4 51, TDS 302.",
+      "silica": 3.9,
+      "calcium_hardness": 104.9,
+      "m_alkalinity": 110.0,
+      "chloride": 20.0,
+      "sulfate": 33.0,
+      "tds": 198.0,
+      "ph": null,
+      "source_url": "https://www.waterqualitydata.us/data/Result/search?siteid=USGS-08053000",
+      "year": "1985-1997",
+      "confidence": "low-medium (raw source water, dated)",
+      "estimated": []
+    },
+    "houston": {
+      "description": "City of Houston Main System (~90% surface water, Lake Houston/Trinity). Cl, SO4, TDS, pH = 2025 CCR averages (total hardness avg 135.5, range 43.5-229). Ca hardness, alkalinity, SiO2 not in CCR -> USGS NWIS medians at 08066500 Trinity R. at Romayor 1985-1995 (Ca 39 mg/L x 2.497).",
+      "silica": 6.6,
+      "calcium_hardness": 97.4,
+      "m_alkalinity": 95.0,
+      "chloride": 38.4,
+      "sulfate": 20.8,
+      "tds": 260.0,
+      "ph": 7.8,
+      "source_url": "https://www.houstonpublicworks.org/sites/g/files/nwywnm456/files/doc/003_2025_houston_water_quality_report.pdf ; https://www.waterqualitydata.us/data/Result/search?siteid=USGS-08066500",
+      "year": "2025 (Ca/alk/SiO2: USGS 1985-1995)",
+      "confidence": "medium",
+      "estimated": []
+    },
+    "las_vegas": {
+      "description": "LVVWD (Lake Mead / Colorado R.) 2026 Water Quality Summary annual averages. Ca 75 mg/L x 2.497; alkalinity 137 mg/L as HCO3 x 0.82. 2024 summary: Ca 79, Cl 104, SiO2 7.6, SO4 235, TDS 642.",
+      "silica": 8.3,
+      "calcium_hardness": 187.3,
+      "m_alkalinity": 112.3,
+      "chloride": 98.6,
+      "sulfate": 209.0,
+      "tds": 591.0,
+      "ph": 7.8,
+      "source_url": "https://www.lvvwd.com/assets/pdf/water-quality-summary-las-vegas-valley.pdf",
+      "year": "2026 summary",
+      "confidence": "high",
+      "estimated": []
+    },
+    "phoenix_tmyx": {
+      "description": "Phoenix, CAP (Colorado R.) supply assumed for a data center (west/north Phoenix plants). USGS NWIS medians at 09427520 Colorado R. below Parker Dam (CAP intake reach), 2005-2023 (n~50; SiO2 n=4). Consistent with City of Phoenix 2025 CCR distribution ranges: total hardness 172-302, alkalinity 121-167, TDS 464-716, pH 6.6-8.8. Alternative SRP Salt/Verde water: higher Na/Cl and TDS (up to ~700), not quantified.",
+      "silica": 8.0,
+      "calcium_hardness": 188.5,
+      "m_alkalinity": 132.0,
+      "chloride": 89.8,
+      "sulfate": 239.0,
+      "tds": 623.0,
+      "ph": 8.2,
+      "source_url": "https://www.waterqualitydata.us/data/Result/search?siteid=USGS-09427520 ; https://www.phoenix.gov/waterqualityreport",
+      "year": "2005-2023 (USGS); 2025 (city CCR ranges)",
+      "confidence": "medium-high",
+      "estimated": []
+    },
+    "portland_or": {
+      "description": "Portland Water Bureau, 100% Bull Run (test-results page, updated Jul 2026). Total hardness 7; Ca ~1.9 mg/L x 2.497 (unconfirmed secondary table); silica 3.8 mg/L as Si x 2.139. Cl and SO4 not reported. Alternative Columbia South Shore groundwater: hardness 68, alk 91, SiO2 40.6 (19 as Si), TDS 125, pH 8.2.",
+      "silica": 8.1,
+      "calcium_hardness": 4.7,
+      "m_alkalinity": 29.0,
+      "chloride": null,
+      "sulfate": null,
+      "tds": 60.0,
+      "ph": 8.8,
+      "source_url": "https://www.portland.gov/water/drinking-water-quality/about-drinking-water-quality/test-results",
+      "year": "2025-2026",
+      "confidence": "high (Ca medium)",
+      "estimated": []
+    },
+    "montreal": {
+      "description": "Ville de Montreal (Atwater + Charles-J.-Des Baillets, St. Lawrence), distributed water 2022 annual mean (min-max): Ca 30.9 (28-33) mg/L x 2.497; alkalinity 93 (87-96); SiO2 1.07; Cl 25.8; SO4 21.5; conductivity 306 uS/cm; LSI -0.46. TDS = conductivity x 0.65 (report 'solides totaux' 146, 'solides fixes' 180 are inconsistent).",
+      "silica": 1.07,
+      "calcium_hardness": 77.2,
+      "m_alkalinity": 93.0,
+      "chloride": 25.8,
+      "sulfate": 21.5,
+      "tds": 198.9,
+      "ph": 7.78,
+      "source_url": "https://portail-m4s.s3.montreal.ca/pdf/2022_rapport_annuel_montreal_montreal_ouest_et_mont-royal.pdf",
+      "year": "2022",
+      "confidence": "high",
+      "estimated": []
+    },
+    "dublin": {
+      "description": "Uisce Eireann Ballymore Eustace (Liffey) supply, largest Dublin source; parameter guide values (dlrcoco 2013): Ca 18-20 mg/L (x 2.497 -> 45-50), total hardness 55, alkalinity 28, Cl <25, SO4 <35 (upper bounds used), TDS 95, pH 7.5-8.5. Silica not reported. Alternative Leixlip (harder; Ca hardness 100-250, alk 70-200; low-confidence council replies).",
+      "silica": null,
+      "calcium_hardness": 47.4,
+      "m_alkalinity": 28.0,
+      "chloride": 25.0,
+      "sulfate": 35.0,
+      "tds": 95.0,
+      "ph": 8.0,
+      "source_url": "https://dlrcoco.ie/sites/default/files/atoms/files/parameter_guide_values_vartry_2013.pdf",
+      "year": "2013",
+      "confidence": "medium (guide values; Cl/SO4 are upper bounds)",
+      "estimated": []
+    },
+    "frankfurt": {
+      "description": "Mainova/Hessenwasser Frankfurt: blend of soft (Vogelsberg/Spessart) and hard (Hessisches Ried) waters. Ca 68.0 and SO4 44.8 = 2019 city-wide annual means (Ca x 2.497). Alkalinity, Cl, TDS, pH = linear mix of 2018 Innenstadt soft/hard analyses with hard fraction 0.56 implied by the Ca mean (soft: Ks4.3 1.0-1.6 mmol/L, Cl 8, cond 194; hard: Ks4.3 5.1 mmol/L, Cl 32, cond 703 uS/cm); alkalinity = Ks4.3 x 50; TDS = cond x 0.65. SiO2 ~18 in both waters (reported as SiO2).",
+      "silica": 18.2,
+      "calcium_hardness": 169.8,
+      "m_alkalinity": 171.0,
+      "chloride": 21.5,
+      "sulfate": 44.8,
+      "tds": 310.8,
+      "ph": 7.7,
+      "source_url": "https://www.mainova.de/resource/blob/65874/f0e73743b4d24d00b065dc6042901655/jahresmittelwerte-trinkwasseranalysen-mainova-2019-data.pdf ; https://www.mainova.de/resource/blob/35310/d00ef76d46d72327dae8e121a5496e4d/inn-analysenbericht-trinkwasser-innenstadt-stand-2018-data.pdf",
+      "year": "2018-2019",
+      "confidence": "medium (zone-dependent; alk/Cl/TDS by mixing inference)",
+      "estimated": [
+        "m_alkalinity",
+        "chloride",
+        "tds"
+      ]
+    },
+    "madrid": {
+      "description": "Canal de Isabel II (Sierra granite reservoirs; very soft, low conductivity per Ayuntamiento de Madrid). No utility table found. Ca 16 mg/L (x 2.497), total hardness 55, TDS ~90 from tapwaterscan.com (secondary, uncited, updated 2026). Alkalinity ESTIMATE = 40 mg/L as CaCO3 (assumed ~ Ca+Mg hardness for Ca-HCO3 granite water; no source). SiO2, Cl, SO4 not found.",
+      "silica": null,
+      "calcium_hardness": 40.0,
+      "m_alkalinity": 40.0,
+      "chloride": null,
+      "sulfate": null,
+      "tds": 90.0,
+      "ph": 7.8,
+      "source_url": "https://tapwaterscan.com/madrid",
+      "year": "n/a (page 2026)",
+      "confidence": "low",
+      "estimated": [
+        "m_alkalinity",
+        "calcium_hardness",
+        "tds"
+      ]
+    },
+    "stockholm": {
+      "description": "Stockholm Vatten och Avfall, Norsborg (Lake Malaren), 2024 annual averages at Haninge receiving point: Ca 26 mg/L x 2.497; total hardness 4.7 dH (84 as CaCO3); Cl 16; SO4 44; conductivity 25 mS/m -> TDS x 0.65; pH 8.2. Alkalinity ~55 mg/L HCO3 x 0.82 (2019 declaration). Silica not reported. Lovo plant (same lake) assumed similar.",
+      "silica": null,
+      "calcium_hardness": 64.9,
+      "m_alkalinity": 45.1,
+      "chloride": 16.0,
+      "sulfate": 44.0,
+      "tds": 162.5,
+      "ph": 8.2,
+      "source_url": "https://haninge.se/siteassets/bygga-bo-och-miljo/vatten-och-avlopp/dokument-va/norsborgs-vattenverk-2024.pdf",
+      "year": "2024 (alk 2019)",
+      "confidence": "medium-high",
+      "estimated": []
+    },
+    "riyadh": {
+      "description": "Riyadh distribution network (desalinated Jubail water ~2/3 blended with treated groundwater ~1/3). Ca 58.6, Cl 120, SO4 88.5, TDS 396, pH 7.88 = means of 15 network sites sampled 2020, Aleid et al. (2023) Arabian J. Chem. 17:105431 (Ca x 2.497). Alkalinity not reported: ESTIMATE 80 mg/L as CaCO3 = upper end of SWA mandated desal-water range 50-80 (Fellows & Al-Hamzah 2026, Table 2); blend may be higher. Silica not reported.",
+      "silica": null,
+      "calcium_hardness": 146.4,
+      "m_alkalinity": 80.0,
+      "chloride": 120.0,
+      "sulfate": 88.5,
+      "tds": 395.6,
+      "ph": 7.88,
+      "source_url": "https://doi.org/10.1016/j.arabjc.2023.105431",
+      "year": "2020 sampling (pub. 2023)",
+      "confidence": "medium (academic, not utility; alkalinity estimated)",
+      "estimated": [
+        "m_alkalinity"
+      ]
+    },
+    "mumbai": {
+      "description": "MCGM/BMC (Vaitarna, Bhatsa, Tansa reservoirs; Bhandup/Panjrapur WTPs). No utility ion data found. Total hardness 46.8 (soft), alkalinity 97.3, Cl 9.5, pH 7.0-7.5 from an MSc study of Mumbai tap water (academia.edu, read via search snippet only). Ca hardness ESTIMATE = 0.75 x total hardness. TDS ESTIMATE 120 (no source; 2019 BIS survey: all Mumbai samples met IS 10500, i.e. TDS <500). SiO2, SO4 not found.",
+      "silica": null,
+      "calcium_hardness": 35.0,
+      "m_alkalinity": 97.3,
+      "chloride": 9.5,
+      "sulfate": null,
+      "tds": 120.0,
+      "ph": 7.3,
+      "source_url": "https://www.academia.edu/32312303/ANALYSIS_OF_WATER_FOR_LEAD_pH_ALKALINITY_HARDNESS_AND_CHLORIDE_CONTENT_FROM_DIFFERENT_PARTS_OF_MUMBAI_The_Degree_of_Master_of_Science_By_Papers_In_Biochemistry",
+      "year": "unknown",
+      "confidence": "low",
+      "estimated": [
+        "calcium_hardness",
+        "tds"
+      ]
+    },
+    "singapore": {
+      "description": "PUB potable water (waterworks + desalination), Jan-Dec 2025 averages (ranges): Ca 15.5 (2.8-74.6) mg/L x 2.497; total hardness 42.7; alkalinity 35 (7-68); SiO2 1.23 (0.17-7.4); Cl 30 (<5-167); SO4 7.2; TDS 116 (63-542); pH 8.0 (7.5-8.9). Alternative: NEWater (industrial; Ca <20, hardness <50, Cl <20, SiO2 <3 upper limits).",
+      "silica": 1.23,
+      "calcium_hardness": 38.7,
+      "m_alkalinity": 35.0,
+      "chloride": 30.0,
+      "sulfate": 7.2,
+      "tds": 116.0,
+      "ph": 8.0,
+      "source_url": "https://www.pub.gov.sg/-/media/PUB/PDF/SG-Drinking-Water-Quality.pdf",
+      "year": "2025",
+      "confidence": "high",
+      "estimated": []
+    }
+  },
+  "treatments": {
+    "evapco_galvanized_inhibitor": {
+      "description": "Conventional scale/corrosion inhibitor, no acid, galvanized (G-235) tower. Limits = EVAPCO TWR19AOM (2019) p.18 Table 3 galvanized column: SiO2 <150, Ca hardness 50-500, alkalinity 75-400, Cl <300, conductivity <2400 uS/cm (TDS = x0.65), pH 7.0-8.8. LSI <= 2.0 for polyacrylate/phosphonate inhibitors (Bhatia, PDHonline M324 p.11). ph_cycled 8.5 = ASSUMED natural cycled pH without acid (within EVAPCO 7.0-8.8). Sulfate: no EVAPCO limit.",
+      "limits": {
+        "silica": 150.0,
+        "calcium_hardness": 500.0,
+        "m_alkalinity": 400.0,
+        "chloride": 300.0,
+        "tds": 1560.0
+      },
+      "product_limits": {},
+      "lsi_max": 2.0,
+      "ph_cycled": 8.5,
+      "silica_solubility_factor": 1.0,
+      "min_cycles": 1.5,
+      "max_cycles": 10.0,
+      "source_url": "https://www.evapco.com/sites/evapco.com/files/2019-10/O&M-TWR19AOM-10.2019.pdf ; https://pdhonline.com/courses/m324/m324content.pdf"
+    },
+    "icc_advanced_inhibitor": {
+      "description": "Modern polymer/stabilizer program, no acid, galvanized tower <=43.3 C. Limits = ICC GEW174-14 (EVAPCO proposal to IgCC 703.7.7) Table 703.7.7: LSI 2.8, Ca 800, M-alk 500, SiO2 150, Cl 300, SO4 250, conductivity 4000 uS/cm (TDS = x0.65), stop at 10 cycles. ph_cycled 8.5 ASSUMED.",
+      "limits": {
+        "silica": 150.0,
+        "calcium_hardness": 800.0,
+        "m_alkalinity": 500.0,
+        "chloride": 300.0,
+        "sulfate": 250.0,
+        "tds": 2600.0
+      },
+      "product_limits": {},
+      "lsi_max": 2.8,
+      "ph_cycled": 8.5,
+      "silica_solubility_factor": 1.0,
+      "min_cycles": 1.5,
+      "max_cycles": 10.0,
+      "source_url": "https://www.iccsafe.org/wp-content/uploads/GEW174.pdf"
+    },
+    "acid_feed_ph7p5": {
+      "description": "Acid feed with recirculating pH controlled at 7.5 (CED Engineering course: pH control 7-8) plus stabilizer. Alkalinity is destroyed by acid, so no M-alk limit; SiO2 <= 200 at pH < 7.5 (Demadis 2003, Chemical Processing); Ca 800, Cl 300, conductivity 4000 (ICC GEW174-14); LSI <= 2.8 (ICC) evaluated at pH 7.5. NOTE: chemistry.py scales alkalinity with N in the LSI, which overstates LSI under acid feed (conservative), and does not add sulfate from H2SO4 dosing, so no sulfate limit is applied.",
+      "limits": {
+        "silica": 200.0,
+        "calcium_hardness": 800.0,
+        "chloride": 300.0,
+        "tds": 2600.0
+      },
+      "product_limits": {},
+      "lsi_max": 2.8,
+      "ph_cycled": 7.5,
+      "silica_solubility_factor": 1.0,
+      "min_cycles": 1.5,
+      "max_cycles": 10.0,
+      "source_url": "https://www.chemicalprocessing.com/articles/2003/235 ; https://www.iccsafe.org/wp-content/uploads/GEW174.pdf ; https://www.cedengineering.com/userfiles/An%20Introduction%20to%20Cooling%20Tower%20Water%20Treatment%20R1.pdf"
+    },
+    "bac_galvanized": {
+      "description": "BAC circulating-water guidelines, galvanized steel (Baltibond product sheet PRD1201v04EN p.2): pH 6.5-9.0, total hardness 50-600 (applied here to Ca hardness: lenient), alkalinity <=500, TDS <=1500, Cl <=250, SO4 <=250 (Cl+SO4 <=500 alternative not modelled), conductivity 2400. BAC gives no silica limit; EVAPCO 150 used for silica. LSI/pH: as evapco_galvanized_inhibitor.",
+      "limits": {
+        "silica": 150.0,
+        "calcium_hardness": 600.0,
+        "m_alkalinity": 500.0,
+        "chloride": 250.0,
+        "sulfate": 250.0,
+        "tds": 1500.0
+      },
+      "product_limits": {},
+      "lsi_max": 2.0,
+      "ph_cycled": 8.5,
+      "silica_solubility_factor": 1.0,
+      "min_cycles": 1.5,
+      "max_cycles": 10.0,
+      "source_url": "https://www.BaltimoreAircoil.eu/sites/default/files/uploads/media/document/BAC_Baltibond_PRD1201v04EN.pdf"
+    },
+    "evapco_stainless316": {
+      "description": "316 stainless tower (EVAPCO TWR19AOM Table 3): pH 6.0-9.5, conductivity <5000 (TDS x0.65), alkalinity <600, Ca hardness <600, Cl <2000, SiO2 <150; LSI 2.8 (ICC) with stabilizer, ph_cycled 8.5 ASSUMED.",
+      "limits": {
+        "silica": 150.0,
+        "calcium_hardness": 600.0,
+        "m_alkalinity": 600.0,
+        "chloride": 2000.0,
+        "tds": 3250.0
+      },
+      "product_limits": {},
+      "lsi_max": 2.8,
+      "ph_cycled": 8.5,
+      "silica_solubility_factor": 1.0,
+      "min_cycles": 1.5,
+      "max_cycles": 10.0,
+      "source_url": "https://www.evapco.com/sites/evapco.com/files/2019-10/O&M-TWR19AOM-10.2019.pdf"
+    }
+  }
+}

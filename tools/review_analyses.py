@@ -87,8 +87,8 @@ def design_fill(run):
 
 
 def _rating_point(args):
-    me_d, lg_d, tw_in, mw, ma, t_db, w, p, tw_out_ep = args
-    me = me_d * ((mw / ma) / lg_d) ** (-FILL_EXP)
+    me_d, lg_d, tw_in, mw, ma, t_db, w, p, tw_out_ep, n_exp = args
+    me = me_d * ((mw / ma) / lg_d) ** (-n_exp)
     t_out = ev.outlet_temperature_poppe(me, tw_in, mw, ma, t_db, w, p, n_steps=10)
     if not np.isfinite(t_out):
         return np.nan, np.nan, np.nan
@@ -97,11 +97,11 @@ def _rating_point(args):
     return t_out - tw_out_ep, r.evap_kg_s, mw * ps.CP_WATER * (tw_in - t_out) / q_ep - 1 if q_ep > 0 else np.nan
 
 
-def rating_check(run, d, jobs=32, every=6):
+def rating_check(run, d, jobs=32, every=6, n_exp=FILL_EXP):
     me_d, lg_d, sc_d = design_fill(run)
     on = d[(d.ep_heat_transfer_rate > 0) & (d.pl_airmass > 0)].iloc[::every]
     args = [(me_d, lg_d, r.ep_inlet_temperature, r.ep_mass_flow_rate, r.pl_airmass, r.site_drybulb_temperature,
-             r.site_humidity_ratio, r.site_barometric_pressure, r.ep_outlet_temperature) for r in on.itertuples()]
+             r.site_humidity_ratio, r.site_barometric_pressure, r.ep_outlet_temperature, n_exp) for r in on.itertuples()]
     with ProcessPoolExecutor(jobs) as pool:
         res = list(pool.map(_rating_point, args, chunksize=16))
     dT = np.array([x[0] for x in res])
@@ -109,7 +109,7 @@ def rating_check(run, d, jobs=32, every=6):
     dq = np.array([x[2] for x in res])
     e_acc = on.pl_e_poppe.to_numpy() * RHO_REF
     ok = np.isfinite(dT)
-    return {"site": run.name, "Me_design": me_d, "LG_design": lg_d, "design_air_factor": sc_d, "n_sampled": len(on), "solved_%": 100 * ok.mean(),
+    return {"site": run.name, "fill_exp": n_exp, "Me_design": me_d, "LG_design": lg_d, "design_air_factor": sc_d, "n_sampled": len(on), "solved_%": 100 * ok.mean(),
             "dTwout_median_K": np.median(dT[ok]), "dTwout_p95_K": np.percentile(dT[ok], 95),
             "heat_fixed_fill_vs_EP_%": 100 * np.nanmean(dq[ok]),
             "evap_fixed_fill_vs_accounting_%": 100 * (e_fix[ok].sum() / e_acc[ok].sum() - 1),
@@ -131,7 +131,21 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("run_root", type=Path)
     ap.add_argument("--rating-sites", nargs="*", default=["phoenix_tmyx", "singapore", "frankfurt", "stockholm"])
+    ap.add_argument("--fill-exp-sweep", nargs="*", type=float, default=[],
+                    help="only run the fixed-fill check for these exponents -> review_rating_check_sweep.csv")
     a = ap.parse_args()
+    if a.fill_exp_sweep:
+        rows = []
+        for run in sorted(p for p in a.run_root.iterdir() if p.name in a.rating_sites):
+            _, frames, _ = analyze.load(run)
+            d = next(iter(frames.values()))
+            for n in a.fill_exp_sweep:
+                rows.append(rating_check(run, d, n_exp=n))
+                print("rating check", run.name, n)
+        df = pd.DataFrame(rows)
+        df.to_csv(ROOT / "results" / "study" / "review_rating_check_sweep.csv", index=False)
+        print(df.round(3).to_string(index=False))
+        return
     out = ROOT / "results" / "study"
     out.mkdir(parents=True, exist_ok=True)
     rows1, rows2, rows3 = [], [], []

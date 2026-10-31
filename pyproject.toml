@@ -8,6 +8,7 @@ version = "0.2.0"
 description = "Multi-method, physics-based cooling tower water consumption for EnergyPlus (Python plugin)"
 readme = "README.md"
 requires-python = ">=3.8"
+license = { text = "MIT" }
 authors = [{ name = "Liang Zhang", email = "liangzhang1@arizona.edu" }]
 dependencies = []          # the core and the plugin are standard-library only
 
@@ -16,3 +17,6 @@ analysis = ["numpy", "scipy", "pandas", "matplotlib", "psychrolib"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[project.urls]
+Repository = "https://github.com/TensorBuildLab/EnergyPlus-HeatRejection-Water"

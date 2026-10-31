@@ -1,0 +1,16 @@
+manufacturer,model,type,nominal_tons_per_cell,gpm_per_cell_95_85_78,motor_hp,gpm_per_hp_catalog_78F_WB,EnergyPlus_W_per_W_nominal,source,page
+BAC,S3E-8518-05L,crossflow gravity,293,879,15,58.6,0.0109,BAC Series 3000 handbook Vol V (b8_ct_s3000_20150914.pdf),B31-B32
+BAC,S3E-8518-06M,crossflow gravity,361,1083,20,54.2,0.0117,same,B31-B32
+BAC,S3E-1222-07P,crossflow gravity,607,1821,40,45.5,0.0140,same,B31-B32
+BAC,S3E-1222-10P,crossflow gravity,757,2271,40,56.8,0.0112,same,B31-B32
+BAC,S3E-1424-12R,crossflow gravity,1050,3150,60,52.5,0.0121,same,B31-B32
+SPX Marley,NC8402N,crossflow gravity,236,708,10,70.8,0.0090,TECH-NC-26,5-7
+SPX Marley,NC8403M,crossflow gravity,269,807,7.5,107.6,0.0059,TECH-NC-26,5-7
+SPX Marley,NC8403S,crossflow gravity,420,1260,30,42.0,0.0151,TECH-NC-26,5-7
+SPX Marley,NC8405P,crossflow gravity,403,1209,15,80.6,0.0079,TECH-NC-26,5-7
+SPX Marley,NC8306EL2 (UPDATE 4.7 printout; 2100 gpm/2 cells at 95/85/79),crossflow gravity,,1050,15 (bhp),99.4 (90.1 basis 95/85/75),,PSU AE thesis 2006 appendix B (Marley UPDATE),
+SPX Marley,NC8305FL2 (UPDATE 4.7 printout),crossflow gravity,,1050,20 (bhp),72.6 (90.1 basis),,same,
+Code,ASHRAE 90.1-2013..2019 Table 6.8.1-7 axial open tower minimum,,,,,40.2 (95/85/75),~0.018-0.022 on 78F catalog-ton basis (code gpm/hp / 1.2-1.4),BAC Codes & Standards handbook j22_tr_codesstandards_20150914.pdf; SPEC-NC-26,J23-J24; p5
+Code,California Title 24-2022 140.4(h)5 axial open tower >=900 gpm (prescriptive),,,,,60 (95/85/75),~0.0127-0.0148 (approx),energycodeace.com Table 4-11,
+Guidance,Taylor ASHRAE J. Mar 2012 Part 4 recommended,,,,,>=80 (90.1 basis),~0.0095-0.011 (approx),tayloreng Part 4,p64
+Model,EnergyPlus Merkel default (current model),,,,,60.6 (catalog-ton basis; ~73-85 on 90.1 basis),0.0105,Energy+.idd 22.2,

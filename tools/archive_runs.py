@@ -26,7 +26,8 @@ RUNS, ARCH = ROOT / "runs", ROOT / "results" / "archive"
 def gz(src: Path, dst: Path):
     if src.exists():
         dst.parent.mkdir(parents=True, exist_ok=True)
-        with open(src, "rb") as a, gzip.open(str(dst) + ".gz", "wb", compresslevel=9) as b:
+        with open(src, "rb") as a, open(str(dst) + ".gz", "wb") as raw, \
+                gzip.GzipFile(filename="", mode="wb", compresslevel=9, fileobj=raw, mtime=0) as b:   # deterministic
             shutil.copyfileobj(a, b)
 
 
@@ -82,7 +83,7 @@ def hybrid_study():
 
 def light_runs():
     """Earlier and sensitivity tower runs: summaries, scenarios, configs and logs only (no series)."""
-    for root in sorted(RUNS.glob("sens_*")) + [RUNS / "dc_v1_independent_air"]:
+    for root in sorted(p for p in RUNS.glob("sens_*") if p.is_dir()) + [RUNS / "dc_v1_independent_air"]:
         if not root.exists():
             continue
         for f in ("summary.csv", "scenarios.csv"):

@@ -82,3 +82,11 @@ Caveats:
 - Several sources state that CTI adopts the four-point Tchebycheff integration for KaV/L. For example, "a four-point Tchebycheff integration formula … is adopted by the Cooling Technology Institute for its testing protocol" (UTM *Jurnal Teknologi*, https://journals.utm.my/jurnalteknologi/article/view/20849). A calculator page attributes the method to CTI ATC-105 (2019).
 - The node positions 0.1/0.4/0.6/0.9 with equal weights were seen only in secondary or software sources. They are the standard textbook statement, but I did not confirm them in ATC-105.
 - Recommendation: write "Chebyshev four-point rule as used in CTI practice (CTI ATC-105)" and confirm the nodes against the code, or cite a textbook that prints them.
+
+## Added in round 2 (2026-10-31), not yet checked against publisher records
+- `kloppers2003critical`: Stellenbosch PhD thesis, handle 10019.1/1476. Data were extracted from its appendices R–T.
+- `ashrae2019addendumbd`: the publication year (2021) is unverified. The Set S coefficients were transcribed by a
+  research agent from Table J-5. Check them against the standard before submission.
+- `evapco2019om`, `bac2020baltibond`, `icc2014gew174`, `demadis2003gordian`: URLs are recorded in
+  `docs/WATER_QUALITY_SOURCES.md`. The page and table numbers were given by the research agent. The BAC year (2020) is
+  unverified.

@@ -21,22 +21,25 @@ Building energy simulation is increasingly used to estimate the water use of dat
 tower evaporation with simplified relations. We present an open EnergyPlus Python-plugin framework that evaluates eight
 evaporation models, from rules of thumb to the Poppe heat and mass transfer model with supersaturated air, at the same
 simulated operating point every timestep, with blowdown from makeup-water chemistry. The Poppe implementation agrees with
-an independent solution of the conservation equations within 0.01\,\% in seven cases, including supersaturated
-near-pinch conditions. For a fixed counterflow tower at full load, saturated-exit methods differ from Poppe by $-$18 to
+an independent solution of the conservation equations within 0.01\,\% and reproduces 126 measured fill tests with an
+outlet-air temperature error of 0.84\,K rms. For a fixed counterflow tower at full load, saturated-exit methods differ from Poppe by $-$18 to
 +11\,\% across ambient conditions and empirical methods by $-$39 to +117\,\%. For a 1\,MW water-cooled data center in
 14 climates, the EnergyPlus default (saturated exit) gives 3.7--9.3\,\% less annual evaporation than Poppe, or 3.5--7.6\,\%
-when liquid mist in supersaturated exhaust is excluded; the result changes by at most 1.2 percentage points across tower
-sizing and condenser-control variants, and by at most 0.15\,\% when Poppe is solved for a fixed physical fill.
-Loss-factor estimates over their documented range (0.15--0.27\,\%/K) deviate by $-$22 to +122\,\%. We also show that
+when liquid mist in supersaturated exhaust is excluded; the result changes by at most 1.2 percentage points across plant
+variants, including one built from current data-center equipment, and by at most 0.17\,\% when Poppe is solved for a
+fixed physical fill.
+Loss-factor estimates over their documented range (0.15--0.27\,\%/K) deviate by $-$22 to +122\,\%. With each site's own
+municipal makeup water, the allowable cycles of concentration change makeup by $-$17 to +125\,\% relative to the
+customary four cycles, more than the evaporation model does. We also show that
 the EnergyPlus \texttt{LossFactor} input is applied as a fraction rather than a percentage, inflating that method's
 evaporation 100-fold.
 \end{abstract}
 
 \begin{highlights}
 \item Eight tower evaporation models evaluated on the same EnergyPlus operating point
-\item Poppe implementation verified against an independent solver within 0.01\,\%
+\item Poppe model verified against an independent solver and 126 measured fill tests
 \item EnergyPlus default gives 3.5--9.3\,\% less evaporation than Poppe in 14 climates
-\item Documented loss-factor range spans $-$22 to +122\,\% of Poppe evaporation
+\item Local makeup-water quality changes makeup by $-$17 to +125\,\% vs four cycles
 \item EnergyPlus applies the \texttt{LossFactor} input 100 times too high
 \end{highlights}
 
@@ -99,10 +102,11 @@ truth. The contributions are:
 \item an open framework that evaluates eight evaporation models on the same EnergyPlus operating point every timestep,
 with chemistry-driven blowdown (Section~\ref{sec:methods});
 \item verification of every model, including an independent boundary-value solution of the Poppe equations for
-unsaturated and supersaturated air (Section~\ref{sec:verification});
+unsaturated and supersaturated air and a comparison with 126 measured fill tests (Section~\ref{sec:verification});
 \item a climate-general map of where simplified models depart from Poppe for a fixed tower (Section~\ref{sec:map});
-\item a 14-climate data-center case study with consistency and sensitivity checks, and the identification of a units
-error in the EnergyPlus loss-factor input (Sections~\ref{sec:case}--\ref{sec:lossfactor}).
+\item a 14-climate data-center case study with consistency and sensitivity checks, an equipment-informed plant variant,
+and sourced makeup-water quality for every site; and the identification of a units error in the EnergyPlus loss-factor
+input (Sections~\ref{sec:case}--\ref{sec:lossfactor}).
 \end{enumerate}
 A companion paper applies the framework to hybrid adiabatic dry coolers.
 
@@ -177,8 +181,14 @@ practice cycles are limited by scaling, corrosion and treatment \citep{li2011con
 constituent limits; a calcium carbonate limit $LSI\le LSI_{\max}$ at the hot-water temperature
 \citep{langelier1936analytical}, with the closed form $N_{LSI}=10^{(LSI_{\max}-pH+pH_s(1))/1.9}$, which assumes a
 controlled pH and no alkalinity reduction by acid feed and is therefore conservative; and amorphous-silica solubility
-at the cold-water temperature \citep{fournier1977chemical}. Because the makeup qualities and treatment limits available
-here are illustrative, chemistry results are shown only as a demonstration (Section~\ref{sec:wue}). Units: L/kWh$_{th}$ is
+at the cold-water temperature \citep{fournier1977chemical}. For the case study each site is paired with its own municipal
+supply, compiled from the utilities' latest water-quality reports or, where these give no mineral data, from USGS source-water
+records (calcium, alkalinity, silica, chloride, sulfate, TDS; sources, conversions and a confidence rating per site in the
+supplementary file \texttt{docs/WATER\_QUALITY\_SOURCES.md}). Five sourced limit sets span practice: a conventional inhibitor
+program and a stainless-steel program from a tower manufacturer's guidelines \citep{evapco2019om}, a second manufacturer's
+galvanized-steel guidelines \citep{bac2020baltibond}, a modern-stabiliser program \citep{icc2014gew174} and an acid-fed program
+with pH 7.5 \citep{demadis2003gordian,icc2014gew174}; cycles are capped at 10. The recirculating pH of 8.5 for programs without
+acid is an assumption. Units: L/kWh$_{th}$ is
 evaporation per heat rejected; WUE is site makeup per IT energy (L/kWh$_{IT}$).
 
 %======================================================================
@@ -192,8 +202,35 @@ and two near-pinch cases with $Me_P\approx4$ whose exit air is supersaturated. E
 the plugin's ten RK4 steps; $Me_P$ agrees within 0.003\,\% with 40 steps (near the pinch, ten steps give 0.5\,\% error in
 $Me_P$ but only 0.003\,\% in evaporation). Both formulations share the property functions, so this check verifies the
 transport equations and their numerical solution, not the property data, which are verified separately against
-PsychroLib \citep{meyer2019psychrolib} and IAPWS-95 \citep{wagner2002iapws}. Reproducing a published worked example
-\tbd{Kröger (2004) / Kloppers \& Kröger (2005) example to be added} remains to be done.
+PsychroLib \citep{meyer2019psychrolib} and IAPWS-95 \citep{wagner2002iapws}.
+
+\paragraph{Measured fill tests} \citet{kloppers2003critical} reports 126 counterflow fill tests (trickle fill at three
+heights, splash fill, and film fill at three heights; 18 tests each) with measured inlet air, water temperatures and flows
+and outlet-air temperature, together with his own Poppe analysis of each test. Solving each test with the plugin's Poppe
+model (Table~\ref{tab:kloppers}, Fig.~\ref{fig:kloppers}) gives Merkel numbers 1.0\,\% above Kloppers' on average
+(median absolute difference 0.8\,\%, 95th percentile 2.0\,\%, one test 8.8\,\%) and outlet-air temperatures within 0.3\,K
+of his. This is an independent implementation check with different property routines. Against the measurements, the
+predicted outlet-air temperature has a bias of $-$0.20\,K and an rms error of 0.84\,K, the same as Kloppers' own analysis
+(0.85\,K), i.e.\ within the scatter of the tests. The tests do not measure evaporation directly, so this checks the
+air-side energy balance of the model, not water use. A fill characteristic $Me_P=c\,(L/G)^{-n}$ fitted to each fill gives
+$n=0.51$--0.60; with $n=0.6$ anchored at one test, the leaving-water temperature is predicted within 0.17--0.83\,K rms and
+evaporation within $\pm$4.4\,\% on average (maximum 11.5\,\%, film fill) over a 3--8-fold range of $L/G$. Our Merkel
+numbers are 2.5--4.3\,\% above Kloppers' tabulated Merkel values; the cause (integration or property conventions) was not
+resolved and does not affect the Poppe results.
+
+\begin{table}[t]\centering\scriptsize
+\caption{Poppe model against the 126 fill tests of \citet{kloppers2003critical}. $Me_P$ vs K.: mean (maximum absolute)
+difference from Kloppers' Poppe analysis. $T_{a,o}$: predicted minus measured outlet-air temperature. $n$: fitted fill
+exponent. Last three columns: rating-mode prediction of leaving-water temperature and evaporation with a single-point
+$n=0.6$ law or a fitted $Me_P=a\,G_w^{b}G_a^{c}$ law.}\label{tab:kloppers}
+\input{../results/study/kloppers_table.tex}
+\end{table}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{fig_kloppers_validation}
+\caption{Poppe implementation against the fill tests of \citet{kloppers2003critical}. Left: Merkel number vs Kloppers'
+Poppe analysis of the same tests. Right: predicted vs measured outlet-air temperature.}\label{fig:kloppers}
+\end{figure}
 
 \begin{table}[t]\centering\small
 \caption{Code verification.}\label{tab:verification}
@@ -205,7 +242,9 @@ Poppe vs independent BVP, 7 cases incl.\ supersaturated near-pinch: evaporation 
 \hspace{1em} $Me_P$ (40 steps) & 0.003\,\% \\
 Poppe energy closure, unsaturated and supersaturated & $<0.1$\,\% \\
 Rating mode, same fill: Merkel / Poppe / e-NTU outlet temperature & $<0.5$\,K \\
-EPSAT replica vs EnergyPlus output, annual, all 14 sites & 0.2\,\% \\\bottomrule
+EPSAT replica vs EnergyPlus output, annual, all 14 sites & 0.2\,\% \\
+$Me_P$ vs Kloppers' Poppe analysis, 126 fill tests: mean / 95th pct. & 1.0\,\% / 2.0\,\% \\
+Outlet-air temperature vs measured, 126 fill tests: rms & 0.84\,K \\\bottomrule
 \end{tabular}
 \end{table}
 
@@ -328,27 +367,51 @@ supersaturated.}\label{fig:dcts}
 
 \subsection{Sensitivity}\label{sec:sensitivity}
 Table~\ref{tab:sens} shows that the EnergyPlus--Poppe difference changes by at most 1.2 percentage points when the
-tower is sized for duty instead of N+1 or the condenser floor is lowered to 15\,\textdegree C. Over the documented loss-factor
+tower is sized for duty instead of N+1 or the condenser floor is lowered to 15\,\textdegree C. An equipment-informed plant,
+built from the specifications of chillers and towers common in data centers (supplementary \texttt{docs/EQUIPMENT\_SPECS.md}),
+was run at all 14 sites. It uses 15.5\,\textdegree C chilled water, the ASHRAE 90.1 Set S centrifugal-chiller curves
+\citep{ashrae2019addendumbd}, a 15.5\,\textdegree C condenser floor, UA modifiers fitted to the fill data of
+\citet{kloppers2003critical} ($UA\propto AFR^{0.7}\,WFR^{0.58}$), a 0.25 minimum fan speed and 50\,\% cell turndown. Its
+difference from Poppe is $-$8.4 to $-$2.5\,\%, 0.4--1.2 points smaller than the base plant at every site; PUE stays at
+1.24--1.28. In the fixed-fill consistency check (Section~\ref{sec:consistency}), fill exponents of 0.5, 0.6 and 0.78 (the
+last being the air-flow exponent of the film-fill data) change evaporation per unit heat by at most 0.17\,\%. Over the documented loss-factor
 range (0.15--0.27\,\%/K) the loss-factor estimate spans $-$22 to +122\,\% of Poppe across sites. The Lewis factor changes
 evaporation by 0.1--2.1\,\% (POPPE vs POPPE1). Drift (0.001\,\%) is below 0.2\,\% of makeup in all cases. Weather-year
 variability was not studied; a single typical year per site was used.
 
 \begin{table}[t]\centering\small
-\caption{EnergyPlus SaturatedExit vs Poppe annual evaporation [\%] for plant variants.}\label{tab:sens}
+\caption{EnergyPlus SaturatedExit vs Poppe annual evaporation [\%] for plant variants. $^a$15.5\,\textdegree C chilled water
+and condenser floor, ASHRAE 90.1 Set S chiller curves, fill-data UA curves, 0.25 minimum fan speed, 50\,\% cell turndown.}\label{tab:sens}
 \input{../results/study/sensitivity_plant_table.tex}
 \end{table}
 
-\subsection{Water usage effectiveness}\label{sec:wue}
+\subsection{Water usage effectiveness and makeup-water quality}\label{sec:wue}
 With EnergyPlus' four cycles, replacing EnergyPlus evaporation by Poppe raises WUE by 3.9--10.3\,\%, from 1.56--2.63 to
-1.72--2.74\,L/kWh$_{IT}$ across sites (Fig.~\ref{fig:wue}). As a demonstration of the chemistry model, cycles set by
-constituent limits or by the LSI and silica limits move WUE within the bars of Fig.~\ref{fig:wue}; these ranges follow
-directly from the illustrative makeup qualities and limits (including a 10-cycle cap) and are not results about any site.
+1.72--2.74\,L/kWh$_{IT}$ across sites (Fig.~\ref{fig:wue}). With each site's own makeup water, the allowable cycles and
+hence blowdown differ far more between sites than the evaporation models do (Table~\ref{tab:waterquality}). Soft supplies
+(Atlanta, Portland, Madrid, Singapore, Dublin, Stockholm) reach 5.7--10 cycles under every limit set and WUE falls 9--17\,\%
+below the four-cycle value. Moderately hard supplies (Dallas, Houston, Montreal, Mumbai) are limited by alkalinity unless
+acid is fed, giving $-$17 to +3\,\%. Frankfurt's hard water allows 2.3--4.7 cycles ($-$5 to +31\,\%), Riyadh's chloride
+2.1--4.1 cycles ($-$1 to +44\,\%), and Colorado River water at Phoenix and Las Vegas, which already carries 210--240\,mg/L
+sulfate, allows only 1.5--3.3 cycles under galvanized-steel limits (+7 to +125\,\%). The lowest values occur under the
+strictest sulfate limits for galvanized steel; such sites would in practice use stainless steel, acid feed or side-stream
+treatment, which the upper end of the range represents. At every site, the largest change from using site-specific
+cycles (14--125\,\%) exceeds the change from the evaporation model at fixed cycles (3.8--9.3\,\%); at hard-water sites it is
+several times larger. Two caveats apply. Soft, low-alkalinity waters are in practice limited by corrosion, which the
+model does not represent, so their 10-cycle results are optimistic. Data confidence is low for Atlanta, Dallas, Madrid and
+Mumbai, where no treated-water mineral data were found.
+
+\begin{table}[t]\centering\scriptsize
+\caption{Site makeup water and cycles of concentration. Data: confidence of the water-quality data (H high, M medium,
+L low). $N_c$: range over the five limit sets (time-mean for limits evaluated each timestep). $\Delta$WUE: Poppe makeup per
+IT energy relative to fixed four cycles. ``min.'': raised to the 1.5-cycle minimum.}\label{tab:waterquality}
+\input{../results/study/water_quality_table.tex}
+\end{table}
 
 \begin{figure}[t]\centering
-\includegraphics[width=\linewidth]{fig_dc_wue}
-\caption{WUE by climate. Diamonds: EnergyPlus default (SaturatedExit, 4 cycles). Circles: Poppe evaporation with
-constituent-limited cycles for an illustrative hard-groundwater source. Bars: range over three illustrative makeup sources
-and two chemistry modes (demonstration only).}\label{fig:wue}
+\includegraphics[width=\linewidth]{fig_dc_water_quality}
+\caption{WUE by climate. Diamonds: EnergyPlus default (SaturatedExit, 4 cycles). Circles: Poppe evaporation, 4 cycles.
+Bars: Poppe evaporation with each site's makeup water, range over five treatment limit sets.}\label{fig:wue}
 \end{figure}
 
 %======================================================================
@@ -379,11 +442,12 @@ in cool, humid climates; they should not be used for siting or permitting. Becau
 eliminators, reporting vapour-only and total Poppe evaporation as a range is recommended.
 
 \paragraph{Limitations} (i) Accounting mode uses EnergyPlus' thermal solution and air flow; the fixed-fill check bounds
-the effect on evaporation per unit heat to 0.15\,\% for the sites tested, but an EnergyPlus tower model with a Poppe thermal
-solution would remove the dependence. (ii) No measured validation: manufacturer performance tables and metered makeup and
-blowdown are needed. (iii) One plant type, one typical weather year per site; plant variants changed the main result by up
-to 1.2 percentage points. (iv) Makeup chemistry inputs are illustrative. (v) The fill exponent (0.6) in the consistency check
-is an assumption.
+the effect on evaporation per unit heat to 0.17\,\% for the sites and fill exponents tested, but an EnergyPlus tower model
+with a Poppe thermal solution would remove the dependence. (ii) Validation is against fill tests, which measure outlet-air
+temperature but not evaporation; metered makeup and blowdown of an operating tower are still needed. (iii) One plant type,
+one typical weather year per site; plant variants, including an equipment-informed one, changed the main result by
+at most 1.2 percentage points. (iv) Makeup-water data are of low confidence at four sites, corrosion limits are not modelled,
+and the recirculating pH without acid feed is assumed.
 
 %======================================================================
 \section{Conclusions}
@@ -395,15 +459,18 @@ implementation agrees with an independent solution within 0.01\,\% for unsaturat
 conditions, and empirical models by $-$39 to +117\,\%.
 \item For a 1\,MW data center in 14 climates, the EnergyPlus default gives 3.7--9.3\,\% less annual evaporation than Poppe
 (3.5--7.6\,\% excluding mist), with the largest differences in cold climates; the result is robust to plant variants
-($\le$1.2 points) and to the thermal operating point ($\le$0.15\,\%).
+($\le$1.2 points, including an equipment-informed plant) and to the thermal operating point ($\le$0.17\,\%).
 \item Over the documented loss-factor range, loss-factor estimates deviate from Poppe by $-$22 to +122\,\%.
+\item With each site's own makeup water and sourced treatment limits, cycles of concentration range from 1.5 to 10 and
+change makeup by $-$17 to +125\,\% relative to four cycles. Water quality, not the evaporation model, dominates makeup
+uncertainty at hard-water sites, so site water data should accompany any simulated water-use estimate.
 \item The EnergyPlus \texttt{LossFactor} input is applied as a fraction instead of a percentage, inflating that method's
 evaporation 100-fold.
 \end{enumerate}
 
 \section*{Data and code availability}
 The plugin, models, weather metadata, run archive and scripts that reproduce every figure and table are available at
-\tbd{repository URL} under \tbd{licence}. \texttt{reproduce.sh} regenerates all results with EnergyPlus 22.2.0.
+\url{https://github.com/TensorBuildLab/EnergyPlus-HeatRejection-Water} under the MIT licence. \texttt{reproduce.sh} regenerates all results with EnergyPlus 22.2.0.
 
 \appendix
 \section{Other water-accounting issues in EnergyPlus heat-rejection models}\label{app:issues}

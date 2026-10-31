@@ -52,6 +52,11 @@ TOWER_CELLS = 3
 DRIFT_PCT = 0.001
 COC = 4.0
 CHILLER = "ElectricEIRChiller Carrier 19XR 1407kW/6.04COP/VSD"  # DataSets/Chillers.idf
+# --plant modern: equipment-informed variant (docs/EQUIPMENT_SPECS.md). Values set in set_modern().
+MODERN = False
+SETS_CHILLER = "ASHRAE901 SetS Centrifugal PathB"   # 90.1-2019 App. J (2022 App. L) Set S, 150-300 t, 0.635/0.400 kW/ton
+TOWER_MIN_AFR = 0.2
+CELL_MIN_WFR, CELL_MAX_WFR = 0.33, 2.5
 
 # ---- hybrid adiabatic dry-cooler variant (--heat-rejection hybrid); see DATACENTER_MODEL.md section 6
 # Widest-range water-cooled curve set in DataSets/Chillers.idf that also covers 10 C CHW:
@@ -462,6 +467,36 @@ def loop_side(prefix, inlet_branch, parallel, outlet_branch, side):
         ("Connector:Mixer", "Connector 2 Object Type"), (f"{prefix} {side} Mixer", "Connector 2 Name"))
 
 
+def set_modern():
+    """Equipment-informed plant (docs/EQUIPMENT_SPECS.md, recommendations 1-3, 6, 7)."""
+    global MODERN, T_CHW, CW_MIN, TOWER_MIN_AFR, CELL_MIN_WFR, CELL_MAX_WFR
+    MODERN = True
+    T_CHW = 15.5            # FEMP >= 55 F; modern colocation/hyperscale 15-18 C
+    CW_MIN = 15.5           # 60 F condenser floor (modern centrifugal / magnetic-bearing chillers)
+    TOWER_MIN_AFR = 0.25    # gear-drive minimum motor speed
+    CELL_MIN_WFR, CELL_MAX_WFR = 0.5, 1.2   # weir-dam / 50 % turndown; max flow per cell (assumption)
+
+
+def sets_chiller_curves():
+    """ASHRAE 90.1-2019 Addendum bd App. J Set S (SI, Table J-5). Valid CHWT 4-16 C, ECT 12.8-40 C."""
+    n = SETS_CHILLER
+    obj("Curve:Biquadratic", (n + " CAPFT", "Name"), ("0.971699", "Coefficient1 Constant"), ("0.036192", "Coefficient2 x"),
+        ("-0.001858", "Coefficient3 x**2"), ("-0.005224", "Coefficient4 y"), ("-0.000134", "Coefficient5 y**2"),
+        ("0.000709", "Coefficient6 x*y"), ("4.0", "Minimum Value of x"), ("16.0", "Maximum Value of x"),
+        ("12.8", "Minimum Value of y"), ("40.0", "Maximum Value of y"), ("", "Minimum Curve Output"), ("", "Maximum Curve Output"),
+        ("Temperature", "Input Unit Type for X"), ("Temperature", "Input Unit Type for Y"), ("Dimensionless", "Output Unit Type"),
+        comment="ASHRAE 90.1-2019 Addendum bd, Appendix J, Set S (centrifugal 150-300 t, Path B), SI coefficients")
+    obj("Curve:Biquadratic", (n + " EIRFT", "Name"), ("0.526475", "Coefficient1 Constant"), ("-0.030843", "Coefficient2 x"),
+        ("0.000735", "Coefficient3 x**2"), ("0.035532", "Coefficient4 y"), ("-0.000510", "Coefficient5 y**2"),
+        ("0.000216", "Coefficient6 x*y"), ("4.0", "Minimum Value of x"), ("16.0", "Maximum Value of x"),
+        ("12.8", "Minimum Value of y"), ("40.0", "Maximum Value of y"), ("", "Minimum Curve Output"), ("", "Maximum Curve Output"),
+        ("Temperature", "Input Unit Type for X"), ("Temperature", "Input Unit Type for Y"), ("Dimensionless", "Output Unit Type"))
+    obj("Curve:Quadratic", (n + " EIRFPLR", "Name"), ("0.064979", "Coefficient1 Constant"), ("0.151829", "Coefficient2 x"),
+        ("0.779131", "Coefficient3 x**2"), ("0.0", "Minimum Value of x"), ("1.0", "Maximum Value of x"),
+        ("", "Minimum Curve Output"), ("", "Maximum Curve Output"), ("Dimensionless", "Input Unit Type for X"),
+        ("Dimensionless", "Output Unit Type"))
+
+
 def chiller_curves(name=CHILLER):
     import re
     t = open(os.path.join("/srv/data1/EnergyPlus-22-2-0/DataSets/Chillers.idf"), errors="ignore").read()
@@ -557,16 +592,18 @@ def chw_loop(wse, hybrid=False):
     if hybrid:
         hybrid_chillers()
         return
+    cn = SETS_CHILLER if MODERN else CHILLER
     for k in (1, 2, 3):
         obj("Chiller:Electric:EIR", (f"Chiller {k}", "Name"), ("autosize", "Reference Capacity"),
-            ("6.04", "Reference COP"), ("6.67", "Reference Leaving Chilled Water Temperature"),
-            ("29.44", "Reference Entering Condenser Fluid Temperature"),
+            ("5.54" if MODERN else "6.04", "Reference COP"),
+            ("7.0" if MODERN else "6.67", "Reference Leaving Chilled Water Temperature"),
+            ("30.0" if MODERN else "29.44", "Reference Entering Condenser Fluid Temperature"),
             ("autosize", "Reference Chilled Water Flow Rate"), ("autosize", "Reference Condenser Fluid Flow Rate"),
-            (CHILLER + " CAPFT", "Cooling Capacity Function of Temperature Curve Name"),
-            (CHILLER + " EIRFT", "Electric Input to Cooling Output Ratio Function of Temperature Curve Name"),
-            (CHILLER + " EIRFPLR", "Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name"),
-            ("0.20", "Minimum Part Load Ratio"), ("1.03", "Maximum Part Load Ratio"), ("1.0", "Optimum Part Load Ratio"),
-            ("0.20", "Minimum Unloading Ratio"),
+            (cn + " CAPFT", "Cooling Capacity Function of Temperature Curve Name"),
+            (cn + " EIRFT", "Electric Input to Cooling Output Ratio Function of Temperature Curve Name"),
+            (cn + " EIRFPLR", "Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name"),
+            ("0.25" if MODERN else "0.20", "Minimum Part Load Ratio"), ("1.03", "Maximum Part Load Ratio"),
+            ("1.0", "Optimum Part Load Ratio"), ("0.25" if MODERN else "0.20", "Minimum Unloading Ratio"),
             (f"Chiller {k} CHW Inlet", "Chilled Water Inlet Node Name"), (f"Chiller {k} CHW Outlet", "Chilled Water Outlet Node Name"),
             (f"Chiller {k} CW Inlet", "Condenser Inlet Node Name"), (f"Chiller {k} CW Outlet", "Condenser Outlet Node Name"),
             ("WaterCooled", "Condenser Type"), ("", "Condenser Fan Power Ratio"),
@@ -578,6 +615,9 @@ def chw_loop(wse, hybrid=False):
             ("", "Condenser Heat Recovery Relative Capacity Fraction"),
             ("", "Heat Recovery Inlet High Temperature Limit Schedule Name"),
             ("", "Heat Recovery Leaving Temperature Setpoint Node Name"), ("Chillers", "End-Use Subcategory"))
+    if MODERN:
+        sets_chiller_curves()
+        return
     raw("! Performance curves copied verbatim from EnergyPlus 22.2 DataSets/Chillers.idf (" + CHILLER + ")")
     raw(chiller_curves())
 
@@ -620,17 +660,20 @@ def tower_curves():
         ("0.2", "Minimum Value of x"), ("1.0", "Maximum Value of x"), ("0.0", "Minimum Curve Output"),
         ("1.0", "Maximum Curve Output"), ("Dimensionless", "Input Unit Type for X"), ("Dimensionless", "Output Unit Type"),
         comment="Merkel tower curves from EnergyPlus 22.2 ExampleFiles/CoolingTower_MerkelVariableSpeed.idf")
-    obj("Curve:Quadratic", ("Merkel UA fAirFlowRatio", "Name"), ("0.0", "Coefficient1 Constant"),
-        ("1.3", "Coefficient2 x"), ("-0.3", "Coefficient3 x**2"), ("0.2", "Minimum Value of x"),
+    ua_afr = ("0.1174", "1.1082", "-0.2292") if MODERN else ("0.0", "1.3", "-0.3")    # modern: AFR^0.7 (fill data)
+    ua_wfr = ("0.2473", "0.9169", "-0.1617") if MODERN else ("0.1082", "1.667", "-0.7713")  # modern: WFR^0.58
+    obj("Curve:Quadratic", ("Merkel UA fAirFlowRatio", "Name"), (ua_afr[0], "Coefficient1 Constant"),
+        (ua_afr[1], "Coefficient2 x"), (ua_afr[2], "Coefficient3 x**2"), ("0.2", "Minimum Value of x"),
         ("1.0", "Maximum Value of x"), ("0.0", "Minimum Curve Output"), ("1.0", "Maximum Curve Output"),
         ("Dimensionless", "Input Unit Type for X"), ("Dimensionless", "Output Unit Type"))
     obj("Curve:Linear", ("Merkel UA fWetbulbDifference", "Name"), ("1.0", "Coefficient1 Constant"),
         ("0.0081", "Coefficient2 x"), ("-10", "Minimum Value of x"), ("25.0", "Maximum Value of x"),
         ("0.85", "Minimum Curve Output"), ("1.3", "Maximum Curve Output"),
         ("Dimensionless", "Input Unit Type for X"), ("Dimensionless", "Output Unit Type"))
-    obj("Curve:Quadratic", ("Merkel UA fWaterFlowRatio", "Name"), ("0.1082", "Coefficient1 Constant"),
-        ("1.667", "Coefficient2 x"), ("-0.7713", "Coefficient3 x**2"), ("0.3", "Minimum Value of x"),
-        ("1.0", "Maximum Value of x"), ("0.5", "Minimum Curve Output"), ("1.1", "Maximum Curve Output"),
+    obj("Curve:Quadratic", ("Merkel UA fWaterFlowRatio", "Name"), (ua_wfr[0], "Coefficient1 Constant"),
+        (ua_wfr[1], "Coefficient2 x"), (ua_wfr[2], "Coefficient3 x**2"), ("0.3", "Minimum Value of x"),
+        ("1.5" if MODERN else "1.0", "Maximum Value of x"), ("0.5", "Minimum Curve Output"),
+        ("1.3" if MODERN else "1.1", "Maximum Curve Output"),
         ("Dimensionless", "Input Unit Type for X"), ("Dimensionless", "Output Unit Type"))
 
 
@@ -641,7 +684,7 @@ def merkel_tower(name, inlet, outlet, design_db, design_wb, cells=TOWER_CELLS, s
         ("autocalculate", "Free Convection Nominal Capacity"), ("0.1", "Free Convection Nominal Capacity Sizing Factor"),
         ("autocalculate", "Design Water Flow Rate"), ("5.382E-8", "Design Water Flow Rate per Unit of Nominal Capacity"),
         ("autocalculate", "Design Air Flow Rate"), ("", "Design Air Flow Rate Per Unit of Nominal Capacity"),
-        ("0.2", "Minimum Air Flow Rate Ratio"), ("autocalculate", "Design Fan Power"),
+        (f"{TOWER_MIN_AFR}", "Minimum Air Flow Rate Ratio"), ("autocalculate", "Design Fan Power"),
         ("0.0105", "Design Fan Power Per Unit of Nominal Capacity"),
         ("Merkel Fan Power fAirFlowRatio", "Fan Power Modifier Function of Air Flow Rate Ratio Curve Name"),
         ("autocalculate", "Free Convection Regime Air Flow Rate"), ("0.1", "Free Convection Regime Air Flow Rate Sizing Factor"),
@@ -658,7 +701,7 @@ def merkel_tower(name, inlet, outlet, design_db, design_wb, cells=TOWER_CELLS, s
         (f"{COC}", "Blowdown Concentration Ratio"), ("", "Blowdown Makeup Water Usage Schedule Name"),
         ("", "Supply Water Storage Tank Name"), ("", "Outdoor Air Inlet Node Name"),
         (f"{cells}", "Number of Cells"), ("MaximalCell", "Cell Control"),
-        ("0.33", "Cell Minimum  Water Flow Rate Fraction"), ("2.5", "Cell Maximum Water Flow Rate Fraction"),
+        (f"{CELL_MIN_WFR}", "Cell Minimum  Water Flow Rate Fraction"), (f"{CELL_MAX_WFR}", "Cell Maximum Water Flow Rate Fraction"),
         (sizing_factor, "Sizing Factor"), ("Towers", "End-Use Subcategory"))
 
 
@@ -1029,8 +1072,17 @@ if __name__ == "__main__":
     ap.add_argument("--heat-rejection", choices=("tower", "hybrid"), default="tower",
                     help="tower: evaporative Merkel tower (default, unchanged); hybrid: hybrid adiabatic dry coolers")
     ap.add_argument("--timestep", type=int, default=6)
+    ap.add_argument("--plant", choices=("base", "modern"), default="base",
+                    help="modern: equipment-informed variant (15.5 C CHW and CW floor, 90.1 Set S chiller curves, "
+                         "fill-data UA curves, tower min air 0.25, cell water 0.5-1.2); docs/EQUIPMENT_SPECS.md")
     ap.add_argument("--out")
     a = ap.parse_args()
+    if a.plant == "modern":
+        if a.heat_rejection != "tower" or a.wse:
+            raise SystemExit("--plant modern is for the tower plant only")
+        if not a.out:
+            raise SystemExit("give --out for --plant modern (keep models/ for the base model)")
+        set_modern()
     if a.wse:
         print("WARNING: --wse is EXPERIMENTAL and not validated (CHW unmet hours, coil/HX interaction); "
               "see models/DATACENTER_MODEL.md, 'Known limitations'.")

@@ -121,3 +121,18 @@ created automatically, and the licence is the author's decision.
 3. Measured validation (manufacturer tables, metered makeup and blowdown).
 4. Real makeup water quality and treatment limits.
 5. Confirm and file the EnergyPlus issues on v26.2.
+
+## Addendum (2026-10-31): items closed after the round-1 revision
+- **M6 (placeholder chemistry): closed.** Every site now uses sourced municipal makeup water, evaluated under five sourced
+  treatment limit sets (§2.4, §6.6, Table `tab:waterquality`, Fig. 7). Result: cycles range from 1.5 to 10 and change
+  makeup by −17 to +125 % relative to four cycles, more than the evaporation model at every site. The claim is now based
+  on data, not on placeholders. Four sites have low-confidence data; this is stated.
+- **M8 (no published worked example): closed differently.** The Poppe model was compared with 126 measured fill tests and
+  with Kloppers' own Poppe analysis of them (Kloppers 2003, open-access thesis). Merkel numbers agree to +1.0 % on average
+  (95th percentile 2.0 %). Outlet-air temperature agrees with the measurements to 0.84 K rms, the same as Kloppers' own
+  analysis (§4, Table `tab:kloppers`, Fig. `fig:kloppers`).
+- **M3 (fill exponent assumption):** n = 0.6 is supported by the fitted fill exponents (0.51–0.60). A sweep of
+  0.5/0.6/0.78 changes evaporation per heat by ≤ 0.17 %.
+- **M5 (plant realism):** an equipment-informed plant was run at all 14 sites, giving −2.5 to −8.4 % (Table `tab:sens`).
+  Its sources are in `docs/EQUIPMENT_SPECS.md`.
+- **M12:** the repository URL and the MIT licence are in the paper.

@@ -10,6 +10,8 @@ makeup-water chemistry**. Research context: `CONCEPT_NOTE.md` (Study 2 for the N
 | `docs/METHODS.md` | **Technical reference**: every equation, assumption, source, and verification |
 | `docs/REFERENCES_CHECK.md` | Check of every reference and technical claim against publisher records |
 | `docs/HYBRID_DRY_COOLER.md` | User guide for the hybrid adiabatic dry cooler model |
+| `docs/WATER_QUALITY_SOURCES.md`, `data/water_sources_sourced.json` | **Sourced makeup water for all 14 sites** and five sourced treatment limit sets (URLs, conversions, confidence) |
+| `docs/EQUIPMENT_SPECS.md`, `data/equipment/` | Specifications of data-center towers, chillers and adiabatic coolers; recommended model inputs; **126 measured fill tests** (Kloppers 2003) |
 | `docs/PROJECT_LOG.md` | Record of decisions, findings and open items |
 | `results/archive/` | Compact archive of every simulation run (models, configs, logs, timestep/hourly series); `tools/archive_runs.py` |
 | `paper/manuscript.tex`, `paper/references.bib` | Journal manuscript v2 (Elsevier `elsarticle`), revised after review round 1 |
@@ -70,18 +72,23 @@ reference method `Drift`, `Blowdown`, `Makeup`, `MakeupVol`, `Cycles`, `CycLimit
 
 ## Verification (details in `docs/METHODS.md` §7)
 
-- 38 unit tests, including psychrometrics against PsychroLib (ASHRAE).
-- Poppe vs an independent height-wise boundary-value solution (SciPy): < 1e-4 %.
+- 52 unit tests, including psychrometrics against PsychroLib (ASHRAE).
+- Poppe vs an independent height-wise boundary-value solution (SciPy), 7 cases incl. supersaturated: evaporation 0.008 %.
+- **Poppe vs 126 measured counterflow fill tests** (Kloppers 2003): Merkel number +1.0 % vs Kloppers' own Poppe analysis;
+  outlet-air temperature vs measured 0.84 K rms (Kloppers 0.85 K). `tools/validate_kloppers.py`.
 - Rating mode: Merkel, Poppe and e-NTU agree within 0.5 K for the same fill.
 - The EnergyPlus SaturatedExit replica matches EnergyPlus within 0.2 % at all 14 sites.
 
 ## Main results (1 MW data center, 14 climates, TMYx 2011–2025)
 
 - EnergyPlus default (SaturatedExit) gives **3.7–9.3 % less annual evaporation than Poppe** (3.5–7.6 % excluding liquid mist);
-  robust to plant variants (≤ 1.2 points) and to EnergyPlus' thermal operating point (≤ 0.15 %, fixed-fill check). Model-to-model, not measured.
+  robust to plant variants including an equipment-informed plant (≤ 1.2 points; that plant gives −2.5 to −8.4 %) and to
+  EnergyPlus' thermal operating point (≤ 0.17 % for fill exponents 0.5–0.78). Model-to-model, not measured.
 - EnergyPlus LossFactor (as documented, 0.2 %/K) overestimates by 4–64 %; rule of thumb −20 to +26 %; latent-only −11 to +40 %.
 - Evaporation 1.05–1.65 L/kWh of heat rejected; WUE 1.66–2.63 L/kWh IT.
-- Makeup-water chemistry changes makeup by −13 to +22 %, as much as the choice of evaporation physics.
+- **Site makeup-water quality** (sourced utility data, five sourced limit sets) gives 1.5–10 cycles and changes makeup by
+  −17 to +125 % relative to four cycles. That exceeds the evaporation-model effect at every site, by several times at
+  hard-water sites (Phoenix and Las Vegas on Colorado River water, Riyadh, Frankfurt).
 - Fixed tower at full load over all ambient conditions: saturated exit −18 to +11 %, empirical methods −39 to +117 %.
 - **Hybrid dry cooler** (3 × 50 % fluid coolers, 7 control strategies): wetting above 28 °C keeps chillers within their rated
   range at all sites (dry-only: up to 3,285 h/yr outside) and uses 14–100 % less water than the tower; always-wet in Riyadh uses
@@ -91,11 +98,12 @@ reference method `Drift`, `Blowdown`, `Makeup`, `MakeupVol`, `Cycles`, `CycLimit
 
 ## Before publishing
 
-- Replace the placeholder water sources and treatment limits in `data/water_sources.json` with utility reports and vendor
-  limits; confirm the source of the empirical LSI constants (`docs/REFERENCES_CHECK.md`).
-- Validate against manufacturer performance tables and metered makeup and blowdown (concept note §6).
+- Improve the four low-confidence water-quality sites (Atlanta, Dallas, Madrid, Mumbai; see the gaps list in
+  `docs/WATER_QUALITY_SOURCES.md`); confirm the source of the empirical LSI constants (`docs/REFERENCES_CHECK.md`).
+- Validate evaporation against metered makeup and blowdown of an operating tower (the fill tests validate outlet-air
+  temperature, not evaporation).
 - Confirm the four EnergyPlus defects on v26.2 and file them upstream (`bugreports/README.md`).
-- In the manuscript, resolve the three `\tbd{}` items (affiliation, Kloppers & Kröger claim, repository URL). Compile with
+- In the manuscript, confirm the affiliation (the last `\tbd{}`). Compile with
   pdflatex/bibtex or Overleaf (no LaTeX on this server).
 
 ## Next steps
@@ -103,3 +111,7 @@ reference method `Drift`, `Blowdown`, `Makeup`, `MakeupVol`, `Cycles`, `CycLimit
 - Full Poppe tower as a `PlantComponent:UserDefined` (the rating functions are ready); hybrid and adiabatic dry coolers
   (concept note 4.1); SingleSpeed and TwoSpeed towers and evaporative fluid coolers; water-side economizer variant of the
   data-center model; uncertainty analysis of the chemistry inputs.
+
+## Licence
+
+MIT (see `LICENSE`). Repository: https://github.com/TensorBuildLab/EnergyPlus-HeatRejection-Water
