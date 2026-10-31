@@ -1,0 +1,84 @@
+IT energy (CPU+server fans) [MWh]: 7,539.5
+Mean IT power [kW]: 860.7
+Facility electricity [MWh]: 9,461.7
+PUE (facility / IT): 1.255
+UPS losses [MWh]: 377.0
+UPS losses share of IT [%]: 5.000
+Chillers [MWh]: 960.9
+Chillers share of IT [%]: 12.745
+Tower fans [MWh]: 52.250
+Tower fans share of IT [%]: 0.693
+Pumps [MWh]: 214.4
+Pumps share of IT [%]: 2.844
+CRAH fans [MWh]: 295.7
+CRAH fans share of IT [%]: 3.922
+Lighting [MWh]: 21.900
+Lighting share of IT [%]: 0.290
+Hourly PUE min/mean/max: (1.238, 1.255, 1.314)
+Monthly PUE: (1.244, 1.245, 1.247, 1.249, 1.254, 1.260, 1.267, 1.275, 1.268, 1.256, 1.249, 1.245)
+Towers:
+    TOWER 1:
+        heat rejected [MWh]: 9,367.5
+        peak heat rejection [kW]: 1,215.6
+        evaporation [m3]: 13,915.7
+        drift [m3]: 17.673
+        blowdown [m3]: 4,620.9
+        makeup [m3]: 18,554.3
+        fan energy [MWh]: 52.250
+        hours with water flow: 8760
+        hours with zero flow but evaporation>0: 0
+        fan speed ratio min/mean/max: (0.299, 0.677, 1.000)
+        fan speed ratio hours by bin (0-0.2,..0.8-1): (0, 355, 2320, 3857, 2228)
+        operating cells min/mean/max: (3.000, 3.000, 3.000)
+        inlet T min/max [C]: (22.164, 37.351)
+        outlet T min/max [C]: (18.000, 32.725)
+Tower evaporation total [m3]: 13,915.7
+Tower makeup total [m3]: 18,554.3
+Water:Facility meter [m3]: 18,554.3
+WUE site (makeup / IT) [L/kWh]: 2.461
+Evaporation / IT [L/kWh]: 1.846
+Chillers:
+    CHILLER 1:
+        hours on: 8760
+        PLR mean/min/max when on: (0.734, 0.648, 0.876)
+        annual COP: 8.624
+        ECW min/max when on [C]: (18.000, 32.808)
+    CHILLER 2:
+        hours on: 8760
+        PLR mean/min/max when on: (0.734, 0.648, 0.876)
+        annual COP: 8.624
+        ECW min/max when on [C]: (18.000, 32.808)
+    CHILLER 3:
+        hours on: 0
+        PLR mean/min/max when on: None
+        annual COP: None
+        ECW min/max when on [C]: None
+Hours by number of chillers running [0,1,2,3]: (0, 0, 8760, 0)
+Plant annual COP (evap Q / chiller elec): 8.624
+Tower heat rejected [MWh]: 9,367.5
+Chiller condenser heat [MWh]: 9,247.9
+Chiller evap Q + chiller elec [MWh]: 9,247.9
+IT + UPS + lights + CRAH fans [MWh] (zone/air-side gains): 8,234.1
+Tower Q / (IT + chiller elec): 1.102
+Fan energy / heat rejected [%]: 0.558
+Chiller curve validity: not evaluated (give --idf)
+CHW supply T min/mean/max [C]: (10.000, 10.000, 10.000)
+CHW return T min/mean/max [C]: (15.000, 15.470, 15.830)
+CW supply T min/mean/max [C]: (18.000, 20.230, 32.730)
+CW return T min/mean/max [C]: (22.160, 24.910, 37.350)
+Hours CW supply > setpoint + 0.5 K: 13
+Hours CW supply < setpoint - 0.5 K: 0
+CW supply setpoint min/mean/max [C]: (18.000, 20.230, 29.400)
+Hours CHW supply > 10.5 C: 0
+Outdoor WB min/mean/max [C]: (-3.200, 13.600, 31.900)
+DATAHALL1 zone T min/mean/max [C]: (31.000, 31.000, 31.000)
+DATAHALL1 ITE inlet T min/mean/max [C]: (20.540, 20.550, 20.560)
+DATAHALL1 hours zone T > 31.5 C: 0
+DATAHALL1 ITE inlet out-of-range hours (class A1): 0.000
+DATAHALL2 zone T min/mean/max [C]: (31.000, 31.000, 31.000)
+DATAHALL2 ITE inlet T min/mean/max [C]: (20.540, 20.550, 20.560)
+DATAHALL2 hours zone T > 31.5 C: 0
+DATAHALL2 ITE inlet out-of-range hours (class A1): 0.000
+CHW LOOP hours with unmet demand > 1 kW: 0
+CW LOOP hours with unmet demand > 1 kW: 27
+Unmet cooling setpoint hours (facility, table): 0.000

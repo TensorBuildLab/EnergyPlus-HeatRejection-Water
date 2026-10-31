@@ -1,0 +1,181 @@
+{
+ "IT energy (CPU+server fans) [MWh]": 7539.482675456001,
+ "Mean IT power [kW]": 860.671538294064,
+ "Facility electricity [MWh]": 9423.60410204051,
+ "PUE (facility / IT)": 1.2499006241791724,
+ "UPS losses [MWh]": 376.9741337727904,
+ "UPS losses share of IT [%]": 4.999999999999873,
+ "Chillers [MWh]": 939.0401157089442,
+ "Chillers share of IT [%]": 12.454967484253148,
+ "Tower fans [MWh]": 42.32076690581251,
+ "Tower fans share of IT [%]": 0.5613218933917489,
+ "Pumps [MWh]": 212.22979403229098,
+ "Pumps share of IT [%]": 2.814911886768875,
+ "CRAH fans [MWh]": 291.656616164668,
+ "CRAH fans share of IT [%]": 3.8683902957178438,
+ "Lighting [MWh]": 21.9,
+ "Lighting share of IT [%]": 0.29047085778568293,
+ "Hourly PUE min/mean/max": [
+  1.2351176581119578,
+  1.2496749060529877,
+  1.2940326178138977
+ ],
+ "Monthly PUE": [
+  1.24,
+  1.24,
+  1.242,
+  1.246,
+  1.25,
+  1.26,
+  1.269,
+  1.264,
+  1.257,
+  1.246,
+  1.245,
+  1.24
+ ],
+ "Towers": {
+  "TOWER 1": {
+   "heat rejected [MWh]": 9302.366666453583,
+   "peak heat rejection [kW]": 1213.230893136297,
+   "evaporation [m3]": 9499.806792204034,
+   "drift [m3]": 15.003660773383894,
+   "blowdown [m3]": 3151.598603294617,
+   "makeup [m3]": 12666.409056272034,
+   "fan energy [MWh]": 42.32076690581224,
+   "hours with water flow": 8760,
+   "hours with zero flow but evaporation>0": 0,
+   "fan speed ratio min/mean/max": [
+    0.20276037786856727,
+    0.5764022956866611,
+    1.0
+   ],
+   "fan speed ratio hours by bin (0-0.2,..0.8-1)": [
+    0,
+    2975,
+    1771,
+    1895,
+    2119
+   ],
+   "operating cells min/mean/max": [
+    3.0,
+    3.0,
+    3.0
+   ],
+   "inlet T min/max [C]": [
+    22.135937004356336,
+    34.60280468598183
+   ],
+   "outlet T min/max [C]": [
+    17.999956468345264,
+    29.400000000944136
+   ]
+  }
+ },
+ "Tower evaporation total [m3]": 9499.806792204034,
+ "Tower makeup total [m3]": 12666.409056272034,
+ "Water:Facility meter [m3]": 12666.409056272041,
+ "WUE site (makeup / IT) [L/kWh]": 1.680010366958758,
+ "Evaporation / IT [L/kWh]": 1.2600077752190695,
+ "Chillers": {
+  "CHILLER 1": {
+   "hours on": 8760,
+   "PLR mean/min/max when on": [
+    0.7285007512787104,
+    0.6436433546650031,
+    0.8702209351433462
+   ],
+   "annual COP": 8.779622716748458,
+   "ECW min/max when on [C]": [
+    17.99995649472304,
+    29.400000000561306
+   ]
+  },
+  "CHILLER 2": {
+   "hours on": 8760,
+   "PLR mean/min/max when on": [
+    0.7285007512787104,
+    0.6436433546650031,
+    0.8702209351433462
+   ],
+   "annual COP": 8.779622716748458,
+   "ECW min/max when on [C]": [
+    17.99995649472304,
+    29.400000000561306
+   ]
+  },
+  "CHILLER 3": {
+   "hours on": 0,
+   "PLR mean/min/max when on": null,
+   "annual COP": null,
+   "ECW min/max when on [C]": null
+  }
+ },
+ "Hours by number of chillers running [0,1,2,3]": [
+  0,
+  0,
+  8760,
+  0
+ ],
+ "Plant annual COP (evap Q / chiller elec)": 8.779622716748458,
+ "Tower heat rejected [MWh]": 9302.366666453583,
+ "Chiller condenser heat [MWh]": 9183.458047525353,
+ "Chiller evap Q + chiller elec [MWh]": 9183.458047525333,
+ "IT + UPS + lights + CRAH fans [MWh] (zone/air-side gains)": 8230.01342539346,
+ "Tower Q / (IT + chiller elec)": 1.09716832702828,
+ "CHW supply T min/mean/max [C]": [
+  10.0,
+  10.0,
+  10.0
+ ],
+ "CHW return T min/mean/max [C]": [
+  15.03,
+  15.52,
+  15.9
+ ],
+ "CW supply T min/mean/max [C]": [
+  18.0,
+  19.43,
+  29.4
+ ],
+ "CW return T min/mean/max [C]": [
+  22.14,
+  24.08,
+  34.6
+ ],
+ "Hours CW supply > setpoint + 0.5 K": 0,
+ "Hours CW supply < setpoint - 0.5 K": 0,
+ "Hours CHW supply > 10.5 C": 0,
+ "Outdoor WB min/mean/max [C]": [
+  -23.0,
+  7.2,
+  26.7
+ ],
+ "DATAHALL1 zone T min/mean/max [C]": [
+  31.0,
+  31.0,
+  31.0
+ ],
+ "DATAHALL1 ITE inlet T min/mean/max [C]": [
+  20.54,
+  20.55,
+  20.56
+ ],
+ "DATAHALL1 hours zone T > 31.5 C": 0,
+ "DATAHALL1 ITE inlet out-of-range hours (class A1)": 0.0,
+ "DATAHALL2 zone T min/mean/max [C]": [
+  31.0,
+  31.0,
+  31.0
+ ],
+ "DATAHALL2 ITE inlet T min/mean/max [C]": [
+  20.54,
+  20.55,
+  20.56
+ ],
+ "DATAHALL2 hours zone T > 31.5 C": 0,
+ "DATAHALL2 ITE inlet out-of-range hours (class A1)": 0.0,
+ "CHW LOOP hours with unmet demand > 1 kW": 0,
+ "CW LOOP hours with unmet demand > 1 kW": 92,
+ "Unmet cooling setpoint hours (facility, table)": 0.0
+}

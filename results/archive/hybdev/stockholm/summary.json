@@ -1,0 +1,343 @@
+{
+ "IT energy (CPU+server fans) [MWh]": 7539.482675456001,
+ "Mean IT power [kW]": 860.671538294064,
+ "Facility electricity [MWh]": 9896.168042465524,
+ "PUE (facility / IT)": 1.3125791872539834,
+ "UPS losses [MWh]": 376.9741337727904,
+ "UPS losses share of IT [%]": 4.999999999999873,
+ "Chillers [MWh]": 1412.6791954840974,
+ "Chillers share of IT [%]": 18.73708391270567,
+ "Dry-cooler fans [MWh]": 45.14825198307221,
+ "Dry-cooler fans share of IT [%]": 0.5988242685409655,
+ "Pumps [MWh]": 215.1366260858151,
+ "Pumps share of IT [%]": 2.8534666812906133,
+ "CRAH fans [MWh]": 284.84715968382966,
+ "CRAH fans share of IT [%]": 3.778073005076593,
+ "Lighting [MWh]": 21.9,
+ "Lighting share of IT [%]": 0.29047085778568293,
+ "Hourly PUE min/mean/max": [
+  1.3054924392679785,
+  1.3124786858508708,
+  1.3524545864371926
+ ],
+ "Monthly PUE": [
+  1.308,
+  1.308,
+  1.309,
+  1.31,
+  1.314,
+  1.319,
+  1.323,
+  1.319,
+  1.313,
+  1.31,
+  1.309,
+  1.308
+ ],
+ "Hybrid coolers": {
+  "HYBRID COOLER 1": {
+   "heat rejected [MWh]": 3254.8416878901116,
+   "peak heat rejection [kW]": 426.140469631938,
+   "fan energy [MWh]": 15.049417327690923,
+   "hours with water flow": 8760,
+   "inlet T min/max [C]": [
+    27.298410120513804,
+    39.801305003307256
+   ],
+   "outlet T min/max [C]": [
+    23.0,
+    34.550000000000004
+   ],
+   "design high-speed fan power [kW]": 13.092,
+   "hours at full high-speed fan [TimeStep data]": 0.0,
+   "max fan power [kW]": 6.144668745277939,
+   "mean fan power [kW]": 1.7179700145765817
+  },
+  "HYBRID COOLER 2": {
+   "heat rejected [MWh]": 3254.8416878901116,
+   "peak heat rejection [kW]": 426.140469631938,
+   "fan energy [MWh]": 15.049417327690923,
+   "hours with water flow": 8760,
+   "inlet T min/max [C]": [
+    27.298410120513804,
+    39.801305003307256
+   ],
+   "outlet T min/max [C]": [
+    23.0,
+    34.550000000000004
+   ],
+   "design high-speed fan power [kW]": 13.092,
+   "hours at full high-speed fan [TimeStep data]": 0.0,
+   "max fan power [kW]": 6.144668745277939,
+   "mean fan power [kW]": 1.7179700145765817
+  },
+  "HYBRID COOLER 3": {
+   "heat rejected [MWh]": 3254.8416878901116,
+   "peak heat rejection [kW]": 426.140469631938,
+   "fan energy [MWh]": 15.049417327690923,
+   "hours with water flow": 8760,
+   "inlet T min/max [C]": [
+    27.298410120513804,
+    39.801305003307256
+   ],
+   "outlet T min/max [C]": [
+    23.0,
+    34.550000000000004
+   ],
+   "design high-speed fan power [kW]": 13.092,
+   "hours at full high-speed fan [TimeStep data]": 0.0,
+   "max fan power [kW]": 6.144668745277939,
+   "mean fan power [kW]": 1.7179700145765817
+  }
+ },
+ "Heat-rejection water use": "none in EnergyPlus (dry coolers); pad water comes from the plugin",
+ "Dry-cooler fan energy total [MWh]": 45.14825198307277,
+ "Chillers": {
+  "CHILLER 1": {
+   "hours on": 8760,
+   "PLR mean/min/max when on": [
+    0.7007673534803743,
+    0.6234007057374792,
+    0.8594051716369807
+   ],
+   "annual COP": 5.823399944843704,
+   "ECW min/max when on [C]": [
+    23.0,
+    34.53493822321998
+   ]
+  },
+  "CHILLER 2": {
+   "hours on": 8760,
+   "PLR mean/min/max when on": [
+    0.7007673534803743,
+    0.6234007057374792,
+    0.8594051716369807
+   ],
+   "annual COP": 5.823399944843704,
+   "ECW min/max when on [C]": [
+    23.0,
+    34.53493822321998
+   ]
+  },
+  "CHILLER 3": {
+   "hours on": 0,
+   "PLR mean/min/max when on": null,
+   "annual COP": null,
+   "ECW min/max when on [C]": null
+  }
+ },
+ "Hours by number of chillers running [0,1,2,3]": [
+  0,
+  0,
+  8760,
+  0
+ ],
+ "Plant annual COP (evap Q / chiller elec)": 5.823399944843704,
+ "Dry-cooler heat rejected [MWh]": 9764.525063670335,
+ "Chiller condenser heat [MWh]": 9639.27514454807,
+ "Chiller evap Q + chiller elec [MWh]": 9639.275144548079,
+ "IT + UPS + lights + CRAH fans [MWh] (zone/air-side gains)": 8223.20396891262,
+ "Cooler Q / (IT + chiller elec)": 1.0907449177574944,
+ "Fan energy / heat rejected [%]": 0.46237017866900404,
+ "Chiller hours outside curve limits (any running chiller, TimeStep data)": 0.0,
+ "Chiller curve validity (from model.idf)": {
+  "CHILLER 1": {
+   "curves": "ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes CAPFT, ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFT, ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFPLR",
+   "valid CHW leaving [C]": [
+    6.11,
+    10.0
+   ],
+   "valid leaving condenser [C]": [
+    26.77,
+    41.11
+   ],
+   "valid PLR": [
+    0.29,
+    1.02
+   ],
+   "hours outside limits (TimeStep data)": {
+    "on": 8760.0,
+    "CHW leaving < min": 0.0,
+    "CHW leaving > max": 0.0,
+    "leaving condenser < min": 0.0,
+    "leaving condenser > max": 0.0,
+    "PLR < min": 0.0,
+    "PLR > max": 0.0,
+    "any limit": 0.0,
+    "max leaving condenser T when on [C]": 40.01,
+    "max excess above leaving condenser limit [K]": 0.0
+   },
+   "hours outside limits (Hourly data)": {
+    "on": 8760.0,
+    "CHW leaving < min": 0.0,
+    "CHW leaving > max": 0.0,
+    "leaving condenser < min": 0.0,
+    "leaving condenser > max": 0.0,
+    "PLR < min": 0.0,
+    "PLR > max": 0.0,
+    "any limit": 0.0,
+    "max leaving condenser T when on [C]": 39.75,
+    "max excess above leaving condenser limit [K]": 0.0
+   }
+  },
+  "CHILLER 2": {
+   "curves": "ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes CAPFT, ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFT, ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFPLR",
+   "valid CHW leaving [C]": [
+    6.11,
+    10.0
+   ],
+   "valid leaving condenser [C]": [
+    26.77,
+    41.11
+   ],
+   "valid PLR": [
+    0.29,
+    1.02
+   ],
+   "hours outside limits (TimeStep data)": {
+    "on": 8760.0,
+    "CHW leaving < min": 0.0,
+    "CHW leaving > max": 0.0,
+    "leaving condenser < min": 0.0,
+    "leaving condenser > max": 0.0,
+    "PLR < min": 0.0,
+    "PLR > max": 0.0,
+    "any limit": 0.0,
+    "max leaving condenser T when on [C]": 40.01,
+    "max excess above leaving condenser limit [K]": 0.0
+   },
+   "hours outside limits (Hourly data)": {
+    "on": 8760.0,
+    "CHW leaving < min": 0.0,
+    "CHW leaving > max": 0.0,
+    "leaving condenser < min": 0.0,
+    "leaving condenser > max": 0.0,
+    "PLR < min": 0.0,
+    "PLR > max": 0.0,
+    "any limit": 0.0,
+    "max leaving condenser T when on [C]": 39.75,
+    "max excess above leaving condenser limit [K]": 0.0
+   }
+  },
+  "CHILLER 3": {
+   "curves": "ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes CAPFT, ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFT, ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFPLR",
+   "valid CHW leaving [C]": [
+    6.11,
+    10.0
+   ],
+   "valid leaving condenser [C]": [
+    26.77,
+    41.11
+   ],
+   "valid PLR": [
+    0.29,
+    1.02
+   ],
+   "hours outside limits (TimeStep data)": {
+    "on": 0.0,
+    "CHW leaving < min": 0.0,
+    "CHW leaving > max": 0.0,
+    "leaving condenser < min": 0.0,
+    "leaving condenser > max": 0.0,
+    "PLR < min": 0.0,
+    "PLR > max": 0.0,
+    "any limit": 0.0,
+    "max leaving condenser T when on [C]": null,
+    "max excess above leaving condenser limit [K]": 0.0
+   },
+   "hours outside limits (Hourly data)": {
+    "on": 0.0,
+    "CHW leaving < min": 0.0,
+    "CHW leaving > max": 0.0,
+    "leaving condenser < min": 0.0,
+    "leaving condenser > max": 0.0,
+    "PLR < min": 0.0,
+    "PLR > max": 0.0,
+    "any limit": 0.0,
+    "max leaving condenser T when on [C]": null,
+    "max excess above leaving condenser limit [K]": 0.0
+   }
+  }
+ },
+ "CHW supply T min/mean/max [C]": [
+  10.0,
+  10.0,
+  10.0
+ ],
+ "CHW return T min/mean/max [C]": [
+  15.04,
+  15.51,
+  15.89
+ ],
+ "CW supply T min/mean/max [C]": [
+  23.0,
+  23.34,
+  34.55
+ ],
+ "CW return T min/mean/max [C]": [
+  27.3,
+  28.13,
+  39.8
+ ],
+ "Hours CW supply > setpoint + 0.5 K": 0,
+ "Hours CW supply < setpoint - 0.5 K": 0,
+ "CW supply setpoint min/mean/max [C]": [
+  23.0,
+  23.34,
+  34.55
+ ],
+ "Hours CW supply > setpoint + 0.5 K (timestep data)": 0.0,
+ "Hours CW supply > setpoint + 2 K (timestep data)": 0.0,
+ "Max CW supply - setpoint [K] (timestep data)": 0.0,
+ "Cooler air inlet node DB min/mean/max [C]": [
+  -13.74,
+  7.51,
+  28.95
+ ],
+ "Outdoor DB min/mean/max [C]": [
+  -13.7,
+  7.5,
+  28.9
+ ],
+ "Mean outdoor DB - cooler inlet DB [K] (pre-cooling)": 0.0,
+ "Cooler air inlet node WB min/mean/max [C]": [
+  -14.07,
+  5.43,
+  20.31
+ ],
+ "Hours CW supply at setpoint max (pinned)": 1,
+ "Hours CW supply setpoint at min": 7644,
+ "Hours CHW supply > 10.5 C": 0,
+ "Outdoor WB min/mean/max [C]": [
+  -14.1,
+  5.4,
+  20.3
+ ],
+ "DATAHALL1 zone T min/mean/max [C]": [
+  31.0,
+  31.0,
+  31.0
+ ],
+ "DATAHALL1 ITE inlet T min/mean/max [C]": [
+  20.54,
+  20.55,
+  20.56
+ ],
+ "DATAHALL1 hours zone T > 31.5 C": 0,
+ "DATAHALL1 ITE inlet out-of-range hours (class A1)": 0.0,
+ "DATAHALL2 zone T min/mean/max [C]": [
+  31.0,
+  31.0,
+  31.0
+ ],
+ "DATAHALL2 ITE inlet T min/mean/max [C]": [
+  20.54,
+  20.55,
+  20.56
+ ],
+ "DATAHALL2 hours zone T > 31.5 C": 0,
+ "DATAHALL2 ITE inlet out-of-range hours (class A1)": 0.0,
+ "CHW LOOP hours with unmet demand > 1 kW": 0,
+ "CW LOOP hours with unmet demand > 1 kW": 0,
+ "Unmet cooling setpoint hours (facility, table)": 0.0
+}

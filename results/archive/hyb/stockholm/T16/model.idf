@@ -1,0 +1,2667 @@
+Version,
+    22.2;
+
+SimulationControl,
+    Yes,
+    Yes,
+    Yes,
+    No,
+    Yes,
+    No,
+    1;
+
+Building,
+    Representative Water-Cooled Data Center 1MW IT,
+    0,
+    City,
+    0.04,
+    0.2,
+    MinimalShadowing,
+    25,
+    6;
+
+Timestep,
+    6;
+
+ConvergenceLimits,
+    1,
+    20,
+    2,
+    8;
+
+RunPeriod,
+    Annual,
+    1,
+    1,
+    ,
+    12,
+    31,
+    ,
+    ,
+    Yes,
+    Yes,
+    No,
+    Yes,
+    Yes;
+
+GlobalGeometryRules,
+    UpperLeftCorner,
+    Counterclockwise,
+    Relative;
+
+Sizing:Parameters,
+    1.0,
+    1.0,
+    6;
+
+Site:Location,
+    Stockholm.Arlanda.AP_ST_SWE Design_Conditions,
+    59.63,
+    17.95,
+    1.00,
+    41.80;
+
+SizingPeriod:DesignDay,
+    Stockholm.Arlanda.AP Ann Clg .4% Condns DB=>MWB,
+    7,
+    21,
+    SummerDesignDay,
+    27.3,
+    13.0,
+    DefaultMultipliers,
+    ,
+    Wetbulb,
+    18.0,
+    ,
+    ,
+    ,
+    5.3,
+    100824.,
+    4.3,
+    130,
+    No,
+    No,
+    No,
+    ASHRAETau2017,
+    ,
+    ,
+    0.379,
+    2.406;
+
+SizingPeriod:DesignDay,
+    Stockholm.Arlanda.AP Ann Clg .4% Condns WB=>MDB,
+    7,
+    21,
+    SummerDesignDay,
+    24.1,
+    10.7,
+    DefaultMultipliers,
+    ,
+    Wetbulb,
+    19.5,
+    ,
+    ,
+    ,
+    5.1,
+    100824.,
+    4.3,
+    130,
+    No,
+    No,
+    No,
+    ASHRAETau2017,
+    ,
+    ,
+    0.379,
+    2.406;
+
+SizingPeriod:DesignDay,
+    Stockholm.Arlanda.AP Ann Htg 99.6% Condns DB,
+    1,
+    21,
+    WinterDesignDay,
+    -15.7,
+    0.0,
+    DefaultMultipliers,
+    ,
+    Wetbulb,
+    -15.7,
+    ,
+    ,
+    ,
+    ,
+    100824.,
+    1.8,
+    240,
+    No,
+    No,
+    No,
+    ASHRAEClearSky,
+    ,
+    ,
+    ,
+    ,
+    0.00;
+
+ScheduleTypeLimits,
+    Fraction,
+    0,
+    1,
+    Continuous;
+
+ScheduleTypeLimits,
+    Temperature,
+    -60,
+    200,
+    Continuous,
+    Temperature;
+
+ScheduleTypeLimits,
+    Control Type,
+    0,
+    4,
+    Discrete;
+
+ScheduleTypeLimits,
+    On/Off,
+    0,
+    1,
+    Discrete;
+
+Schedule:Compact,
+    Always On,
+    On/Off,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00,
+    1;
+
+Schedule:Compact,
+    ITE Installed Fraction,
+    Fraction,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00,
+    1.0;
+
+Schedule:Compact,
+    Lights Fraction,
+    Fraction,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00,
+    0.5;
+
+Schedule:Compact,
+    Zone Cooling Setpoint,
+    Temperature,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00,
+    31.0;
+
+Schedule:Compact,
+    Zone Control Type,
+    Control Type,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00,
+    2;
+
+Schedule:Compact,
+    CRAH Supply Air Setpoint,
+    Temperature,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00,
+    20.0;
+
+Schedule:Compact,
+    CHW Supply Setpoint,
+    Temperature,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00,
+    10.0;
+
+Schedule:Compact,
+    ITE CPU Utilization,
+    Fraction,
+    Through: 12/31,
+    For: SummerDesignDay WinterDesignDay,
+    Until: 24:00,
+    1.0,
+    For: Weekdays,
+    Until: 06:00,
+    0.75,
+    Until: 09:00,
+    0.80,
+    Until: 18:00,
+    0.90,
+    Until: 22:00,
+    0.85,
+    Until: 24:00,
+    0.78,
+    For: Weekends Holidays,
+    Until: 06:00,
+    0.70,
+    Until: 18:00,
+    0.80,
+    Until: 24:00,
+    0.75,
+    For: AllOtherDays,
+    Until: 24:00,
+    0.80;
+
+Material,
+    Metal Panel Skin,
+    Smooth,
+    0.0008,
+    45.0,
+    7800,
+    500;
+
+Material,
+    PIR Insulation 100mm,
+    MediumRough,
+    0.10,
+    0.025,
+    32,
+    1400;
+
+Material,
+    PIR Insulation 140mm,
+    MediumRough,
+    0.14,
+    0.025,
+    32,
+    1400;
+
+Material,
+    Concrete 200mm,
+    MediumRough,
+    0.20,
+    1.95,
+    2240,
+    900;
+
+Material,
+    Gypsum 16mm,
+    Smooth,
+    0.016,
+    0.16,
+    800,
+    1090;
+
+Construction,
+    Ext Wall IMP,
+    Metal Panel Skin,
+    PIR Insulation 100mm,
+    Metal Panel Skin;
+
+Construction,
+    Roof Insulated Deck,
+    Metal Panel Skin,
+    PIR Insulation 140mm,
+    Concrete 200mm;
+
+Construction,
+    Slab,
+    Concrete 200mm;
+
+Construction,
+    Interior Partition,
+    Gypsum 16mm,
+    Concrete 200mm,
+    Gypsum 16mm;
+
+Zone,
+    DataHall1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    4.5,
+    autocalculate;
+
+BuildingSurface:Detailed,
+    DataHall1 South Wall,
+    Wall,
+    Ext Wall IMP,
+    DataHall1,
+    ,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    autocalculate,
+    4,
+    0,
+    0,
+    4.5,
+    0,
+    0,
+    0,
+    25,
+    0,
+    0,
+    25,
+    0,
+    4.5;
+
+BuildingSurface:Detailed,
+    DataHall1 North Wall,
+    Wall,
+    Ext Wall IMP,
+    DataHall1,
+    ,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    autocalculate,
+    4,
+    25,
+    20,
+    4.5,
+    25,
+    20,
+    0,
+    0,
+    20,
+    0,
+    0,
+    20,
+    4.5;
+
+BuildingSurface:Detailed,
+    DataHall1 Roof,
+    Roof,
+    Roof Insulated Deck,
+    DataHall1,
+    ,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    autocalculate,
+    4,
+    25,
+    20,
+    4.5,
+    0,
+    20,
+    4.5,
+    0,
+    0,
+    4.5,
+    25,
+    0,
+    4.5;
+
+BuildingSurface:Detailed,
+    DataHall1 Floor,
+    Floor,
+    Slab,
+    DataHall1,
+    ,
+    Adiabatic,
+    ,
+    NoSun,
+    NoWind,
+    autocalculate,
+    4,
+    0,
+    0,
+    0,
+    0,
+    20,
+    0,
+    25,
+    20,
+    0,
+    25,
+    0,
+    0;
+
+BuildingSurface:Detailed,
+    DataHall1 West Wall,
+    Wall,
+    Ext Wall IMP,
+    DataHall1,
+    ,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    autocalculate,
+    4,
+    0,
+    20,
+    4.5,
+    0,
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    4.5;
+
+BuildingSurface:Detailed,
+    DataHall1 East Partition,
+    Wall,
+    Interior Partition,
+    DataHall1,
+    ,
+    Surface,
+    DataHall2 West Partition,
+    NoSun,
+    NoWind,
+    autocalculate,
+    4,
+    25,
+    0,
+    4.5,
+    25,
+    0,
+    0,
+    25,
+    20,
+    0,
+    25,
+    20,
+    4.5;
+
+Zone,
+    DataHall2,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    4.5,
+    autocalculate;
+
+BuildingSurface:Detailed,
+    DataHall2 South Wall,
+    Wall,
+    Ext Wall IMP,
+    DataHall2,
+    ,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    autocalculate,
+    4,
+    25,
+    0,
+    4.5,
+    25,
+    0,
+    0,
+    50,
+    0,
+    0,
+    50,
+    0,
+    4.5;
+
+BuildingSurface:Detailed,
+    DataHall2 North Wall,
+    Wall,
+    Ext Wall IMP,
+    DataHall2,
+    ,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    autocalculate,
+    4,
+    50,
+    20,
+    4.5,
+    50,
+    20,
+    0,
+    25,
+    20,
+    0,
+    25,
+    20,
+    4.5;
+
+BuildingSurface:Detailed,
+    DataHall2 Roof,
+    Roof,
+    Roof Insulated Deck,
+    DataHall2,
+    ,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    autocalculate,
+    4,
+    50,
+    20,
+    4.5,
+    25,
+    20,
+    4.5,
+    25,
+    0,
+    4.5,
+    50,
+    0,
+    4.5;
+
+BuildingSurface:Detailed,
+    DataHall2 Floor,
+    Floor,
+    Slab,
+    DataHall2,
+    ,
+    Adiabatic,
+    ,
+    NoSun,
+    NoWind,
+    autocalculate,
+    4,
+    25,
+    0,
+    0,
+    25,
+    20,
+    0,
+    50,
+    20,
+    0,
+    50,
+    0,
+    0;
+
+BuildingSurface:Detailed,
+    DataHall2 West Partition,
+    Wall,
+    Interior Partition,
+    DataHall2,
+    ,
+    Surface,
+    DataHall1 East Partition,
+    NoSun,
+    NoWind,
+    autocalculate,
+    4,
+    25,
+    20,
+    4.5,
+    25,
+    20,
+    0,
+    25,
+    0,
+    0,
+    25,
+    0,
+    4.5;
+
+BuildingSurface:Detailed,
+    DataHall2 East Wall,
+    Wall,
+    Ext Wall IMP,
+    DataHall2,
+    ,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    autocalculate,
+    4,
+    50,
+    0,
+    4.5,
+    50,
+    0,
+    0,
+    50,
+    20,
+    0,
+    50,
+    20,
+    4.5;
+
+Curve:Biquadratic,
+    ITE CPU Power fLoadTemp,
+    0.30,
+    0.70,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1.0,
+    -10,
+    99,
+    0.0,
+    1.0,
+    Dimensionless,
+    Temperature,
+    Dimensionless;
+
+Curve:Biquadratic,
+    ITE Airflow fLoadTemp,
+    0.60,
+    0.40,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1.0,
+    -10,
+    99,
+    0.0,
+    1.0,
+    Dimensionless,
+    Temperature,
+    Dimensionless;
+
+Curve:Cubic,
+    ITE Fan Power fFlow,
+    0,
+    0,
+    0,
+    1.0,
+    0,
+    1.5;
+
+Curve:Biquadratic,
+    ITE Recirc fLoadTemp,
+    1.0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1.5,
+    -10,
+    99,
+    0.0,
+    1.0,
+    Dimensionless,
+    Temperature,
+    Dimensionless;
+
+Curve:Quadratic,
+    UPS Efficiency fPLR,
+    1.0,
+    0,
+    0,
+    0,
+    1.5;
+
+ElectricEquipment:ITE:AirCooled,
+    DataHall1 ITE,
+    DataHall1,
+    FlowFromSystem,
+    Watts/Area,
+    ,
+    ,
+    1000.0,
+    ITE Installed Fraction,
+    ITE CPU Utilization,
+    ITE CPU Power fLoadTemp,
+    0.1,
+    7.5e-05,
+    ITE Airflow fLoadTemp,
+    ITE Fan Power fFlow,
+    20.0,
+    A1,
+    AdjustedSupply,
+    ,
+    ,
+    DataHall1 Supply Inlet Node,
+    0.05,
+    ITE Recirc fLoadTemp,
+    0.95,
+    UPS Efficiency fPLR,
+    1.0,
+    ITE-CPU,
+    ITE-Fans,
+    ITE-UPS;
+
+Lights,
+    DataHall1 Lights,
+    DataHall1,
+    Lights Fraction,
+    Watts/Area,
+    ,
+    5.0,
+    ,
+    0,
+    0.4,
+    0.2,
+    1.0,
+    Lighting;
+
+ElectricEquipment:ITE:AirCooled,
+    DataHall2 ITE,
+    DataHall2,
+    FlowFromSystem,
+    Watts/Area,
+    ,
+    ,
+    1000.0,
+    ITE Installed Fraction,
+    ITE CPU Utilization,
+    ITE CPU Power fLoadTemp,
+    0.1,
+    7.5e-05,
+    ITE Airflow fLoadTemp,
+    ITE Fan Power fFlow,
+    20.0,
+    A1,
+    AdjustedSupply,
+    ,
+    ,
+    DataHall2 Supply Inlet Node,
+    0.05,
+    ITE Recirc fLoadTemp,
+    0.95,
+    UPS Efficiency fPLR,
+    1.0,
+    ITE-CPU,
+    ITE-Fans,
+    ITE-UPS;
+
+Lights,
+    DataHall2 Lights,
+    DataHall2,
+    Lights Fraction,
+    Watts/Area,
+    ,
+    5.0,
+    ,
+    0,
+    0.4,
+    0.2,
+    1.0,
+    Lighting;
+
+ThermostatSetpoint:SingleCooling,
+    Return Air Cooling SP,
+    Zone Cooling Setpoint;
+
+Sizing:Zone,
+    DataHall1,
+    SupplyAirTemperature,
+    20.0,
+    ,
+    SupplyAirTemperature,
+    30,
+    ,
+    0.008,
+    0.008,
+    ,
+    1.0,
+    1.0,
+    DesignDay;
+
+ZoneControl:Thermostat,
+    DataHall1 Thermostat,
+    DataHall1,
+    Zone Control Type,
+    ThermostatSetpoint:SingleCooling,
+    Return Air Cooling SP;
+
+ZoneHVAC:EquipmentConnections,
+    DataHall1,
+    DataHall1 Equipment,
+    DataHall1 Supply Inlet Node,
+    ,
+    DataHall1 Air Node,
+    DataHall1 Return Outlet Node;
+
+ZoneHVAC:EquipmentList,
+    DataHall1 Equipment,
+    SequentialLoad,
+    ZoneHVAC:AirDistributionUnit,
+    DataHall1 ADU,
+    1,
+    1,
+    ,
+    ;
+
+ZoneHVAC:AirDistributionUnit,
+    DataHall1 ADU,
+    DataHall1 Supply Inlet Node,
+    AirTerminal:SingleDuct:VAV:NoReheat,
+    DataHall1 VAV;
+
+AirTerminal:SingleDuct:VAV:NoReheat,
+    DataHall1 VAV,
+    Always On,
+    DataHall1 Supply Inlet Node,
+    DataHall1 Terminal Inlet Node,
+    autosize,
+    Constant,
+    0.3;
+
+Sizing:System,
+    DataHall1 CRAH,
+    Sensible,
+    0,
+    1.0,
+    7,
+    0.008,
+    12.8,
+    0.008,
+    19.5,
+    30,
+    NonCoincident,
+    No,
+    No,
+    0.008,
+    0.008,
+    DesignDay,
+    ,
+    ,
+    ,
+    ,
+    DesignDay,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ZoneSum,
+    1.0,
+    CoolingDesignCapacity,
+    autosize,
+    ,
+    ,
+    None,
+    ,
+    ,
+    ,
+    OnOff;
+
+AirLoopHVAC,
+    DataHall1 CRAH,
+    DataHall1 CRAH Controllers,
+    DataHall1 CRAH Avail List,
+    autosize,
+    DataHall1 CRAH Branches,
+    ,
+    DataHall1 CRAH Supply Inlet Node,
+    DataHall1 CRAH Demand Outlet Node,
+    DataHall1 CRAH Demand Inlet Node,
+    DataHall1 CRAH Supply Outlet Node;
+
+AvailabilityManagerAssignmentList,
+    DataHall1 CRAH Avail List,
+    AvailabilityManager:Scheduled,
+    DataHall1 CRAH Avail;
+
+AvailabilityManager:Scheduled,
+    DataHall1 CRAH Avail,
+    Always On;
+
+AirLoopHVAC:ControllerList,
+    DataHall1 CRAH Controllers,
+    Controller:WaterCoil,
+    DataHall1 CRAH Coil Controller;
+
+BranchList,
+    DataHall1 CRAH Branches,
+    DataHall1 CRAH Main Branch;
+
+Branch,
+    DataHall1 CRAH Main Branch,
+    ,
+    Coil:Cooling:Water,
+    DataHall1 CRAH CHW Coil,
+    DataHall1 CRAH Supply Inlet Node,
+    DataHall1 CRAH Coil Outlet Node,
+    Fan:VariableVolume,
+    DataHall1 CRAH Fan,
+    DataHall1 CRAH Coil Outlet Node,
+    DataHall1 CRAH Supply Outlet Node;
+
+Coil:Cooling:Water,
+    DataHall1 CRAH CHW Coil,
+    Always On,
+    autosize,
+    autosize,
+    autosize,
+    autosize,
+    19.5,
+    autosize,
+    autosize,
+    DataHall1 CRAH CHW Coil Water Inlet,
+    DataHall1 CRAH CHW Coil Water Outlet,
+    DataHall1 CRAH Supply Inlet Node,
+    DataHall1 CRAH Coil Outlet Node,
+    DetailedAnalysis,
+    CounterFlow,
+    ,
+    6.0;
+
+Controller:WaterCoil,
+    DataHall1 CRAH Coil Controller,
+    Temperature,
+    Reverse,
+    Flow,
+    DataHall1 CRAH Coil Outlet Node,
+    DataHall1 CRAH CHW Coil Water Inlet,
+    0.01,
+    autosize,
+    0.0;
+
+Fan:VariableVolume,
+    DataHall1 CRAH Fan,
+    Always On,
+    0.65,
+    400.0,
+    autosize,
+    Fraction,
+    0.2,
+    ,
+    0.93,
+    1.0,
+    0.040759894,
+    0.08804497,
+    -0.07292612,
+    0.943739823,
+    0,
+    DataHall1 CRAH Coil Outlet Node,
+    DataHall1 CRAH Supply Outlet Node,
+    CRAH Fans;
+
+SetpointManager:Scheduled,
+    DataHall1 CRAH Supply SPM,
+    Temperature,
+    CRAH Supply Air Setpoint,
+    DataHall1 CRAH Supply Outlet Node;
+
+SetpointManager:MixedAir,
+    DataHall1 CRAH Coil SPM,
+    Temperature,
+    DataHall1 CRAH Supply Outlet Node,
+    DataHall1 CRAH Coil Outlet Node,
+    DataHall1 CRAH Supply Outlet Node,
+    DataHall1 CRAH Coil Outlet Node;
+
+AirLoopHVAC:SupplyPath,
+    DataHall1 CRAH Supply Path,
+    DataHall1 CRAH Demand Inlet Node,
+    AirLoopHVAC:ZoneSplitter,
+    DataHall1 CRAH Zone Splitter;
+
+AirLoopHVAC:ZoneSplitter,
+    DataHall1 CRAH Zone Splitter,
+    DataHall1 CRAH Demand Inlet Node,
+    DataHall1 Terminal Inlet Node;
+
+AirLoopHVAC:ReturnPath,
+    DataHall1 CRAH Return Path,
+    DataHall1 CRAH Demand Outlet Node,
+    AirLoopHVAC:ZoneMixer,
+    DataHall1 CRAH Zone Mixer;
+
+AirLoopHVAC:ZoneMixer,
+    DataHall1 CRAH Zone Mixer,
+    DataHall1 CRAH Demand Outlet Node,
+    DataHall1 Return Outlet Node;
+
+Sizing:Zone,
+    DataHall2,
+    SupplyAirTemperature,
+    20.0,
+    ,
+    SupplyAirTemperature,
+    30,
+    ,
+    0.008,
+    0.008,
+    ,
+    1.0,
+    1.0,
+    DesignDay;
+
+ZoneControl:Thermostat,
+    DataHall2 Thermostat,
+    DataHall2,
+    Zone Control Type,
+    ThermostatSetpoint:SingleCooling,
+    Return Air Cooling SP;
+
+ZoneHVAC:EquipmentConnections,
+    DataHall2,
+    DataHall2 Equipment,
+    DataHall2 Supply Inlet Node,
+    ,
+    DataHall2 Air Node,
+    DataHall2 Return Outlet Node;
+
+ZoneHVAC:EquipmentList,
+    DataHall2 Equipment,
+    SequentialLoad,
+    ZoneHVAC:AirDistributionUnit,
+    DataHall2 ADU,
+    1,
+    1,
+    ,
+    ;
+
+ZoneHVAC:AirDistributionUnit,
+    DataHall2 ADU,
+    DataHall2 Supply Inlet Node,
+    AirTerminal:SingleDuct:VAV:NoReheat,
+    DataHall2 VAV;
+
+AirTerminal:SingleDuct:VAV:NoReheat,
+    DataHall2 VAV,
+    Always On,
+    DataHall2 Supply Inlet Node,
+    DataHall2 Terminal Inlet Node,
+    autosize,
+    Constant,
+    0.3;
+
+Sizing:System,
+    DataHall2 CRAH,
+    Sensible,
+    0,
+    1.0,
+    7,
+    0.008,
+    12.8,
+    0.008,
+    19.5,
+    30,
+    NonCoincident,
+    No,
+    No,
+    0.008,
+    0.008,
+    DesignDay,
+    ,
+    ,
+    ,
+    ,
+    DesignDay,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ZoneSum,
+    1.0,
+    CoolingDesignCapacity,
+    autosize,
+    ,
+    ,
+    None,
+    ,
+    ,
+    ,
+    OnOff;
+
+AirLoopHVAC,
+    DataHall2 CRAH,
+    DataHall2 CRAH Controllers,
+    DataHall2 CRAH Avail List,
+    autosize,
+    DataHall2 CRAH Branches,
+    ,
+    DataHall2 CRAH Supply Inlet Node,
+    DataHall2 CRAH Demand Outlet Node,
+    DataHall2 CRAH Demand Inlet Node,
+    DataHall2 CRAH Supply Outlet Node;
+
+AvailabilityManagerAssignmentList,
+    DataHall2 CRAH Avail List,
+    AvailabilityManager:Scheduled,
+    DataHall2 CRAH Avail;
+
+AvailabilityManager:Scheduled,
+    DataHall2 CRAH Avail,
+    Always On;
+
+AirLoopHVAC:ControllerList,
+    DataHall2 CRAH Controllers,
+    Controller:WaterCoil,
+    DataHall2 CRAH Coil Controller;
+
+BranchList,
+    DataHall2 CRAH Branches,
+    DataHall2 CRAH Main Branch;
+
+Branch,
+    DataHall2 CRAH Main Branch,
+    ,
+    Coil:Cooling:Water,
+    DataHall2 CRAH CHW Coil,
+    DataHall2 CRAH Supply Inlet Node,
+    DataHall2 CRAH Coil Outlet Node,
+    Fan:VariableVolume,
+    DataHall2 CRAH Fan,
+    DataHall2 CRAH Coil Outlet Node,
+    DataHall2 CRAH Supply Outlet Node;
+
+Coil:Cooling:Water,
+    DataHall2 CRAH CHW Coil,
+    Always On,
+    autosize,
+    autosize,
+    autosize,
+    autosize,
+    19.5,
+    autosize,
+    autosize,
+    DataHall2 CRAH CHW Coil Water Inlet,
+    DataHall2 CRAH CHW Coil Water Outlet,
+    DataHall2 CRAH Supply Inlet Node,
+    DataHall2 CRAH Coil Outlet Node,
+    DetailedAnalysis,
+    CounterFlow,
+    ,
+    6.0;
+
+Controller:WaterCoil,
+    DataHall2 CRAH Coil Controller,
+    Temperature,
+    Reverse,
+    Flow,
+    DataHall2 CRAH Coil Outlet Node,
+    DataHall2 CRAH CHW Coil Water Inlet,
+    0.01,
+    autosize,
+    0.0;
+
+Fan:VariableVolume,
+    DataHall2 CRAH Fan,
+    Always On,
+    0.65,
+    400.0,
+    autosize,
+    Fraction,
+    0.2,
+    ,
+    0.93,
+    1.0,
+    0.040759894,
+    0.08804497,
+    -0.07292612,
+    0.943739823,
+    0,
+    DataHall2 CRAH Coil Outlet Node,
+    DataHall2 CRAH Supply Outlet Node,
+    CRAH Fans;
+
+SetpointManager:Scheduled,
+    DataHall2 CRAH Supply SPM,
+    Temperature,
+    CRAH Supply Air Setpoint,
+    DataHall2 CRAH Supply Outlet Node;
+
+SetpointManager:MixedAir,
+    DataHall2 CRAH Coil SPM,
+    Temperature,
+    DataHall2 CRAH Supply Outlet Node,
+    DataHall2 CRAH Coil Outlet Node,
+    DataHall2 CRAH Supply Outlet Node,
+    DataHall2 CRAH Coil Outlet Node;
+
+AirLoopHVAC:SupplyPath,
+    DataHall2 CRAH Supply Path,
+    DataHall2 CRAH Demand Inlet Node,
+    AirLoopHVAC:ZoneSplitter,
+    DataHall2 CRAH Zone Splitter;
+
+AirLoopHVAC:ZoneSplitter,
+    DataHall2 CRAH Zone Splitter,
+    DataHall2 CRAH Demand Inlet Node,
+    DataHall2 Terminal Inlet Node;
+
+AirLoopHVAC:ReturnPath,
+    DataHall2 CRAH Return Path,
+    DataHall2 CRAH Demand Outlet Node,
+    AirLoopHVAC:ZoneMixer,
+    DataHall2 CRAH Zone Mixer;
+
+AirLoopHVAC:ZoneMixer,
+    DataHall2 CRAH Zone Mixer,
+    DataHall2 CRAH Demand Outlet Node,
+    DataHall2 Return Outlet Node;
+
+Branch,
+    CHW Supply Inlet Branch,
+    ,
+    Pump:VariableSpeed,
+    CHW Primary Pump,
+    CHW Supply Inlet Node,
+    CHW Pump Outlet Node;
+
+Branch,
+    CHW Chiller1 Branch,
+    ,
+    Chiller:Electric:ReformulatedEIR,
+    Chiller 1,
+    Chiller 1 CHW Inlet,
+    Chiller 1 CHW Outlet;
+
+Branch,
+    CHW Chiller2 Branch,
+    ,
+    Chiller:Electric:ReformulatedEIR,
+    Chiller 2,
+    Chiller 2 CHW Inlet,
+    Chiller 2 CHW Outlet;
+
+Branch,
+    CHW Chiller3 Branch,
+    ,
+    Chiller:Electric:ReformulatedEIR,
+    Chiller 3,
+    Chiller 3 CHW Inlet,
+    Chiller 3 CHW Outlet;
+
+Branch,
+    CHW Supply Bypass Branch,
+    ,
+    Pipe:Adiabatic,
+    CHW Supply Bypass Pipe,
+    CHW Supply Bypass Inlet,
+    CHW Supply Bypass Outlet;
+
+Pipe:Adiabatic,
+    CHW Supply Bypass Pipe,
+    CHW Supply Bypass Inlet,
+    CHW Supply Bypass Outlet;
+
+Branch,
+    CHW Supply Outlet Branch,
+    ,
+    Pipe:Adiabatic,
+    CHW Supply Outlet Pipe,
+    CHW Supply Mixer Outlet,
+    CHW Supply Outlet Node;
+
+Pipe:Adiabatic,
+    CHW Supply Outlet Pipe,
+    CHW Supply Mixer Outlet,
+    CHW Supply Outlet Node;
+
+BranchList,
+    CHW Supply Branches,
+    CHW Supply Inlet Branch,
+    CHW Chiller1 Branch,
+    CHW Chiller2 Branch,
+    CHW Chiller3 Branch,
+    CHW Supply Bypass Branch,
+    CHW Supply Outlet Branch;
+
+Connector:Splitter,
+    CHW Supply Splitter,
+    CHW Supply Inlet Branch,
+    CHW Chiller1 Branch,
+    CHW Chiller2 Branch,
+    CHW Chiller3 Branch,
+    CHW Supply Bypass Branch;
+
+Connector:Mixer,
+    CHW Supply Mixer,
+    CHW Supply Outlet Branch,
+    CHW Chiller1 Branch,
+    CHW Chiller2 Branch,
+    CHW Chiller3 Branch,
+    CHW Supply Bypass Branch;
+
+ConnectorList,
+    CHW Supply Connectors,
+    Connector:Splitter,
+    CHW Supply Splitter,
+    Connector:Mixer,
+    CHW Supply Mixer;
+
+Branch,
+    CHW Demand Inlet Branch,
+    ,
+    Pipe:Adiabatic,
+    CHW Demand Inlet Pipe,
+    CHW Demand Inlet Node,
+    CHW Demand Inlet Pipe Outlet;
+
+Pipe:Adiabatic,
+    CHW Demand Inlet Pipe,
+    CHW Demand Inlet Node,
+    CHW Demand Inlet Pipe Outlet;
+
+Branch,
+    CHW DataHall1 Coil Branch,
+    ,
+    Coil:Cooling:Water,
+    DataHall1 CRAH CHW Coil,
+    DataHall1 CRAH CHW Coil Water Inlet,
+    DataHall1 CRAH CHW Coil Water Outlet;
+
+Branch,
+    CHW DataHall2 Coil Branch,
+    ,
+    Coil:Cooling:Water,
+    DataHall2 CRAH CHW Coil,
+    DataHall2 CRAH CHW Coil Water Inlet,
+    DataHall2 CRAH CHW Coil Water Outlet;
+
+Branch,
+    CHW Demand Bypass Branch,
+    ,
+    Pipe:Adiabatic,
+    CHW Demand Bypass Pipe,
+    CHW Demand Bypass Inlet,
+    CHW Demand Bypass Outlet;
+
+Pipe:Adiabatic,
+    CHW Demand Bypass Pipe,
+    CHW Demand Bypass Inlet,
+    CHW Demand Bypass Outlet;
+
+Branch,
+    CHW Demand Outlet Branch,
+    ,
+    Pipe:Adiabatic,
+    CHW Demand Outlet Pipe,
+    CHW Demand Outlet Pipe Inlet,
+    CHW Demand Outlet Node;
+
+Pipe:Adiabatic,
+    CHW Demand Outlet Pipe,
+    CHW Demand Outlet Pipe Inlet,
+    CHW Demand Outlet Node;
+
+BranchList,
+    CHW Demand Branches,
+    CHW Demand Inlet Branch,
+    CHW DataHall1 Coil Branch,
+    CHW DataHall2 Coil Branch,
+    CHW Demand Bypass Branch,
+    CHW Demand Outlet Branch;
+
+Connector:Splitter,
+    CHW Demand Splitter,
+    CHW Demand Inlet Branch,
+    CHW DataHall1 Coil Branch,
+    CHW DataHall2 Coil Branch,
+    CHW Demand Bypass Branch;
+
+Connector:Mixer,
+    CHW Demand Mixer,
+    CHW Demand Outlet Branch,
+    CHW DataHall1 Coil Branch,
+    CHW DataHall2 Coil Branch,
+    CHW Demand Bypass Branch;
+
+ConnectorList,
+    CHW Demand Connectors,
+    Connector:Splitter,
+    CHW Demand Splitter,
+    Connector:Mixer,
+    CHW Demand Mixer;
+
+PlantLoop,
+    CHW Loop,
+    Water,
+    ,
+    CHW Operation Schemes,
+    CHW Supply Outlet Node,
+    30,
+    3,
+    autosize,
+    0,
+    autocalculate,
+    CHW Supply Inlet Node,
+    CHW Supply Outlet Node,
+    CHW Supply Branches,
+    CHW Supply Connectors,
+    CHW Demand Inlet Node,
+    CHW Demand Outlet Node,
+    CHW Demand Branches,
+    CHW Demand Connectors,
+    SequentialUniformPLR,
+    ,
+    SingleSetpoint,
+    None;
+
+Sizing:Plant,
+    CHW Loop,
+    Cooling,
+    10.0,
+    6.0;
+
+SetpointManager:Scheduled,
+    CHW Supply SPM,
+    Temperature,
+    CHW Supply Setpoint,
+    CHW Setpoint Nodes;
+
+NodeList,
+    CHW Setpoint Nodes,
+    CHW Supply Outlet Node,
+    Chiller 1 CHW Outlet,
+    Chiller 2 CHW Outlet,
+    Chiller 3 CHW Outlet;
+
+Pump:VariableSpeed,
+    CHW Primary Pump,
+    CHW Supply Inlet Node,
+    CHW Pump Outlet Node,
+    autosize,
+    250000,
+    autosize,
+    0.92,
+    0.0,
+    0,
+    0.4,
+    0,
+    0.6,
+    0,
+    Intermittent,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    PowerPerFlowPerPressure,
+    ,
+    1.282051282,
+    0.25,
+    CHW Pumps;
+
+PlantEquipmentOperationSchemes,
+    CHW Operation Schemes,
+    PlantEquipmentOperation:CoolingLoad,
+    CHW Chiller Staging,
+    Always On;
+
+PlantEquipmentOperation:CoolingLoad,
+    CHW Chiller Staging,
+    0,
+    100000000,
+    CHW Chillers;
+
+PlantEquipmentList,
+    CHW Chillers,
+    Chiller:Electric:ReformulatedEIR,
+    Chiller 1,
+    Chiller:Electric:ReformulatedEIR,
+    Chiller 2,
+    Chiller:Electric:ReformulatedEIR,
+    Chiller 3;
+
+Chiller:Electric:ReformulatedEIR,
+    Chiller 1,
+    552000,
+    5.38,
+    6.11,
+    34.80,
+    autosize,
+    0.02797,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes CAPFT,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFT,
+    LeavingCondenserWaterTemperature,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFPLR,
+    0.29,
+    1.02,
+    1.0,
+    0.29,
+    Chiller 1 CHW Inlet,
+    Chiller 1 CHW Outlet,
+    Chiller 1 CW Inlet,
+    Chiller 1 CW Outlet,
+    1.0,
+    2.0,
+    LeavingSetpointModulated,
+    0,
+    ,
+    ,
+    0.5,
+    ,
+    ,
+    ,
+    Chillers;
+
+Chiller:Electric:ReformulatedEIR,
+    Chiller 2,
+    552000,
+    5.38,
+    6.11,
+    34.80,
+    autosize,
+    0.02797,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes CAPFT,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFT,
+    LeavingCondenserWaterTemperature,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFPLR,
+    0.29,
+    1.02,
+    1.0,
+    0.29,
+    Chiller 2 CHW Inlet,
+    Chiller 2 CHW Outlet,
+    Chiller 2 CW Inlet,
+    Chiller 2 CW Outlet,
+    1.0,
+    2.0,
+    LeavingSetpointModulated,
+    0,
+    ,
+    ,
+    0.5,
+    ,
+    ,
+    ,
+    Chillers;
+
+Chiller:Electric:ReformulatedEIR,
+    Chiller 3,
+    552000,
+    5.38,
+    6.11,
+    34.80,
+    autosize,
+    0.02797,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes CAPFT,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFT,
+    LeavingCondenserWaterTemperature,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFPLR,
+    0.29,
+    1.02,
+    1.0,
+    0.29,
+    Chiller 3 CHW Inlet,
+    Chiller 3 CHW Outlet,
+    Chiller 3 CW Inlet,
+    Chiller 3 CW Outlet,
+    1.0,
+    2.0,
+    LeavingSetpointModulated,
+    0,
+    ,
+    ,
+    0.5,
+    ,
+    ,
+    ,
+    Chillers;
+
+Curve:Biquadratic,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes CAPFT,
+    2.971340E-01,
+    1.063097E-01,
+    -4.449876E-03,
+    2.540435E-02,
+    -5.696223E-04,
+    1.269921E-04,
+    6.11,
+    10.00,
+    26.77,
+    41.98;
+
+Curve:Biquadratic,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFT,
+    9.460623E-01,
+    3.685465E-02,
+    -7.530867E-04,
+    -1.753701E-02,
+    5.832929E-04,
+    -1.143458E-03,
+    6.11,
+    10.00,
+    26.77,
+    41.98;
+
+Curve:Bicubic,
+    ReformEIRChiller Trane CVHE 1329kW/5.38COP/Vanes EIRFPLR,
+    -9.512023E-02,
+    8.704652E-03,
+    -6.499682E-06,
+    1.336749E+00,
+    -6.968012E-01,
+    -8.318175E-03,
+    0.000000E+00,
+    4.497796E-01,
+    0.000000E+00,
+    0.000000E+00,
+    21.44,
+    41.11,
+    0.29,
+    1.02;
+
+Branch,
+    CW Supply Inlet Branch,
+    ,
+    Pump:VariableSpeed,
+    CW Pump,
+    CW Supply Inlet Node,
+    CW Pump Outlet Node;
+
+Branch,
+    CW Hybrid Cooler1 Branch,
+    ,
+    FluidCooler:TwoSpeed,
+    Hybrid Cooler 1,
+    Hybrid Cooler 1 Water Inlet,
+    Hybrid Cooler 1 Water Outlet;
+
+Branch,
+    CW Hybrid Cooler2 Branch,
+    ,
+    FluidCooler:TwoSpeed,
+    Hybrid Cooler 2,
+    Hybrid Cooler 2 Water Inlet,
+    Hybrid Cooler 2 Water Outlet;
+
+Branch,
+    CW Hybrid Cooler3 Branch,
+    ,
+    FluidCooler:TwoSpeed,
+    Hybrid Cooler 3,
+    Hybrid Cooler 3 Water Inlet,
+    Hybrid Cooler 3 Water Outlet;
+
+Branch,
+    CW Supply Bypass Branch,
+    ,
+    Pipe:Adiabatic,
+    CW Supply Bypass Pipe,
+    CW Supply Bypass Inlet,
+    CW Supply Bypass Outlet;
+
+Pipe:Adiabatic,
+    CW Supply Bypass Pipe,
+    CW Supply Bypass Inlet,
+    CW Supply Bypass Outlet;
+
+Branch,
+    CW Supply Outlet Branch,
+    ,
+    Pipe:Adiabatic,
+    CW Supply Outlet Pipe,
+    CW Supply Mixer Outlet,
+    CW Supply Outlet Node;
+
+Pipe:Adiabatic,
+    CW Supply Outlet Pipe,
+    CW Supply Mixer Outlet,
+    CW Supply Outlet Node;
+
+BranchList,
+    CW Supply Branches,
+    CW Supply Inlet Branch,
+    CW Hybrid Cooler1 Branch,
+    CW Hybrid Cooler2 Branch,
+    CW Hybrid Cooler3 Branch,
+    CW Supply Bypass Branch,
+    CW Supply Outlet Branch;
+
+Connector:Splitter,
+    CW Supply Splitter,
+    CW Supply Inlet Branch,
+    CW Hybrid Cooler1 Branch,
+    CW Hybrid Cooler2 Branch,
+    CW Hybrid Cooler3 Branch,
+    CW Supply Bypass Branch;
+
+Connector:Mixer,
+    CW Supply Mixer,
+    CW Supply Outlet Branch,
+    CW Hybrid Cooler1 Branch,
+    CW Hybrid Cooler2 Branch,
+    CW Hybrid Cooler3 Branch,
+    CW Supply Bypass Branch;
+
+ConnectorList,
+    CW Supply Connectors,
+    Connector:Splitter,
+    CW Supply Splitter,
+    Connector:Mixer,
+    CW Supply Mixer;
+
+Branch,
+    CW Demand Inlet Branch,
+    ,
+    Pipe:Adiabatic,
+    CW Demand Inlet Pipe,
+    CW Demand Inlet Node,
+    CW Demand Inlet Pipe Outlet;
+
+Pipe:Adiabatic,
+    CW Demand Inlet Pipe,
+    CW Demand Inlet Node,
+    CW Demand Inlet Pipe Outlet;
+
+Branch,
+    CW Chiller1 Branch,
+    ,
+    Chiller:Electric:ReformulatedEIR,
+    Chiller 1,
+    Chiller 1 CW Inlet,
+    Chiller 1 CW Outlet;
+
+Branch,
+    CW Chiller2 Branch,
+    ,
+    Chiller:Electric:ReformulatedEIR,
+    Chiller 2,
+    Chiller 2 CW Inlet,
+    Chiller 2 CW Outlet;
+
+Branch,
+    CW Chiller3 Branch,
+    ,
+    Chiller:Electric:ReformulatedEIR,
+    Chiller 3,
+    Chiller 3 CW Inlet,
+    Chiller 3 CW Outlet;
+
+Branch,
+    CW Demand Bypass Branch,
+    ,
+    Pipe:Adiabatic,
+    CW Demand Bypass Pipe,
+    CW Demand Bypass Inlet,
+    CW Demand Bypass Outlet;
+
+Pipe:Adiabatic,
+    CW Demand Bypass Pipe,
+    CW Demand Bypass Inlet,
+    CW Demand Bypass Outlet;
+
+Branch,
+    CW Demand Outlet Branch,
+    ,
+    Pipe:Adiabatic,
+    CW Demand Outlet Pipe,
+    CW Demand Outlet Pipe Inlet,
+    CW Demand Outlet Node;
+
+Pipe:Adiabatic,
+    CW Demand Outlet Pipe,
+    CW Demand Outlet Pipe Inlet,
+    CW Demand Outlet Node;
+
+BranchList,
+    CW Demand Branches,
+    CW Demand Inlet Branch,
+    CW Chiller1 Branch,
+    CW Chiller2 Branch,
+    CW Chiller3 Branch,
+    CW Demand Bypass Branch,
+    CW Demand Outlet Branch;
+
+Connector:Splitter,
+    CW Demand Splitter,
+    CW Demand Inlet Branch,
+    CW Chiller1 Branch,
+    CW Chiller2 Branch,
+    CW Chiller3 Branch,
+    CW Demand Bypass Branch;
+
+Connector:Mixer,
+    CW Demand Mixer,
+    CW Demand Outlet Branch,
+    CW Chiller1 Branch,
+    CW Chiller2 Branch,
+    CW Chiller3 Branch,
+    CW Demand Bypass Branch;
+
+ConnectorList,
+    CW Demand Connectors,
+    Connector:Splitter,
+    CW Demand Splitter,
+    Connector:Mixer,
+    CW Demand Mixer;
+
+CondenserLoop,
+    CW Loop,
+    Water,
+    ,
+    CW Operation Schemes,
+    CW Supply Outlet Node,
+    80,
+    5,
+    autosize,
+    0,
+    autocalculate,
+    CW Supply Inlet Node,
+    CW Supply Outlet Node,
+    CW Supply Branches,
+    CW Supply Connectors,
+    CW Demand Inlet Node,
+    CW Demand Outlet Node,
+    CW Demand Branches,
+    CW Demand Connectors,
+    UniformLoad;
+
+Sizing:Plant,
+    CW Loop,
+    Condenser,
+    23.40,
+    5.6;
+
+OutdoorAir:Node,
+    Hybrid Cooler Air Inlet;
+
+SetpointManager:FollowSystemNodeTemperature,
+    Hybrid Condenser Setpoint,
+    Temperature,
+    Hybrid Cooler Air Inlet,
+    NodeDryBulb,
+    5.6,
+    40.0,
+    23.0,
+    CW Supply Outlet Node;
+
+Pump:VariableSpeed,
+    CW Pump,
+    CW Supply Inlet Node,
+    CW Pump Outlet Node,
+    autosize,
+    200000,
+    autosize,
+    0.92,
+    0.0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    Intermittent,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    PowerPerFlowPerPressure,
+    ,
+    1.282051282,
+    0,
+    CW Pumps;
+
+CondenserEquipmentOperationSchemes,
+    CW Operation Schemes,
+    PlantEquipmentOperation:CoolingLoad,
+    CW Cooler Operation,
+    Always On;
+
+PlantEquipmentOperation:CoolingLoad,
+    CW Cooler Operation,
+    0,
+    100000000,
+    CW Coolers;
+
+CondenserEquipmentList,
+    CW Coolers,
+    FluidCooler:TwoSpeed,
+    Hybrid Cooler 1,
+    FluidCooler:TwoSpeed,
+    Hybrid Cooler 2,
+    FluidCooler:TwoSpeed,
+    Hybrid Cooler 3;
+
+FluidCooler:TwoSpeed,
+    Hybrid Cooler 1,
+    Hybrid Cooler 1 Water Inlet,
+    Hybrid Cooler 1 Water Outlet,
+    NominalCapacity,
+    ,
+    ,
+    ,
+    654602,
+    389416,
+    ,
+    35.48,
+    24.28,
+    20.80,
+    0.02797,
+    71.163,
+    13092,
+    35.581,
+    ,
+    2095,
+    ,
+    Hybrid Cooler Air Inlet;
+
+FluidCooler:TwoSpeed,
+    Hybrid Cooler 2,
+    Hybrid Cooler 2 Water Inlet,
+    Hybrid Cooler 2 Water Outlet,
+    NominalCapacity,
+    ,
+    ,
+    ,
+    654602,
+    389416,
+    ,
+    35.48,
+    24.28,
+    20.80,
+    0.02797,
+    71.163,
+    13092,
+    35.581,
+    ,
+    2095,
+    ,
+    Hybrid Cooler Air Inlet;
+
+FluidCooler:TwoSpeed,
+    Hybrid Cooler 3,
+    Hybrid Cooler 3 Water Inlet,
+    Hybrid Cooler 3 Water Outlet,
+    NominalCapacity,
+    ,
+    ,
+    ,
+    654602,
+    389416,
+    ,
+    35.48,
+    24.28,
+    20.80,
+    0.02797,
+    71.163,
+    13092,
+    35.581,
+    ,
+    2095,
+    ,
+    Hybrid Cooler Air Inlet;
+
+Output:VariableDictionary,
+    IDF,
+    Unsorted;
+
+Output:Table:SummaryReports,
+    AllSummary;
+
+OutputControl:Table:Style,
+    CommaAndHTML,
+    JtoKWH;
+
+Output:SQLite,
+    SimpleAndTabular;
+
+Output:Diagnostics,
+    DisplayAdvancedReportVariables;
+
+Output:Meter,
+    Electricity:Facility,
+    Hourly;
+
+Output:Meter,
+    Electricity:Facility,
+    RunPeriod;
+
+Output:Meter,
+    ITE-CPU:InteriorEquipment:Electricity,
+    Hourly;
+
+Output:Meter,
+    ITE-CPU:InteriorEquipment:Electricity,
+    RunPeriod;
+
+Output:Meter,
+    ITE-Fans:InteriorEquipment:Electricity,
+    Hourly;
+
+Output:Meter,
+    ITE-Fans:InteriorEquipment:Electricity,
+    RunPeriod;
+
+Output:Meter,
+    ITE-UPS:InteriorEquipment:Electricity,
+    Hourly;
+
+Output:Meter,
+    ITE-UPS:InteriorEquipment:Electricity,
+    RunPeriod;
+
+Output:Meter,
+    InteriorLights:Electricity,
+    Hourly;
+
+Output:Meter,
+    InteriorLights:Electricity,
+    RunPeriod;
+
+Output:Meter,
+    Cooling:Electricity,
+    Hourly;
+
+Output:Meter,
+    Cooling:Electricity,
+    RunPeriod;
+
+Output:Meter,
+    Chillers:Cooling:Electricity,
+    Hourly;
+
+Output:Meter,
+    Chillers:Cooling:Electricity,
+    RunPeriod;
+
+Output:Meter,
+    HeatRejection:Electricity,
+    Hourly;
+
+Output:Meter,
+    HeatRejection:Electricity,
+    RunPeriod;
+
+Output:Meter,
+    Pumps:Electricity,
+    Hourly;
+
+Output:Meter,
+    Pumps:Electricity,
+    RunPeriod;
+
+Output:Meter,
+    Fans:Electricity,
+    Hourly;
+
+Output:Meter,
+    Fans:Electricity,
+    RunPeriod;
+
+Output:Variable,
+    *,
+    ITE Total Heat Gain to Zone Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    ITE CPU Electricity Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    ITE Fan Electricity Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    ITE UPS Electricity Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    ITE Air Inlet Dry-Bulb Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    ITE Air Inlet Operating Range Exceeded Time,
+    Hourly;
+
+Output:Variable,
+    *,
+    ITE Standard Density Air Volume Flow Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Zone Air Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Zone Air Relative Humidity,
+    Hourly;
+
+Output:Variable,
+    *,
+    Fan Electricity Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Fan Air Mass Flow Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Cooling Coil Total Cooling Rate,
+    Hourly;
+
+Output:Variable,
+    DataHall1 CRAH CHW Coil Water Outlet,
+    System Node Temperature,
+    Hourly;
+
+Output:Variable,
+    DataHall1 CRAH CHW Coil Water Outlet,
+    System Node Mass Flow Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Evaporator Cooling Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Condenser Heat Transfer Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller COP,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Evaporator Inlet Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Evaporator Mass Flow Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Condenser Mass Flow Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Cycling Ratio,
+    Hourly;
+
+Output:Variable,
+    *,
+    Pump Electricity Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Pump Mass Flow Rate,
+    Hourly;
+
+Output:Variable,
+    CHW Supply Outlet Node,
+    System Node Temperature,
+    Hourly;
+
+Output:Variable,
+    CHW Supply Inlet Node,
+    System Node Temperature,
+    Hourly;
+
+Output:Variable,
+    CHW Supply Outlet Node,
+    System Node Setpoint Temperature,
+    Hourly;
+
+Output:Variable,
+    CHW Supply Outlet Node,
+    System Node Mass Flow Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Plant Supply Side Unmet Demand Rate,
+    Hourly;
+
+Output:Variable,
+    DataHall1 CRAH Supply Outlet Node,
+    System Node Temperature,
+    Hourly;
+
+Output:Variable,
+    DataHall2 CRAH Supply Outlet Node,
+    System Node Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Cooling Tower Heat Transfer Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Cooling Tower Inlet Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Cooling Tower Outlet Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Cooling Tower Mass Flow Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Cooling Tower Fan Electricity Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Cooling Tower Fan Electricity Energy,
+    Hourly;
+
+Output:Variable,
+    Hybrid Cooler Air Inlet,
+    System Node Temperature,
+    Hourly;
+
+Output:Variable,
+    Hybrid Cooler Air Inlet,
+    System Node Wetbulb Temperature,
+    Hourly;
+
+Output:Variable,
+    Hybrid Cooler Air Inlet,
+    System Node Humidity Ratio,
+    Hourly;
+
+Output:Variable,
+    Hybrid Cooler Air Inlet,
+    System Node Pressure,
+    Hourly;
+
+Output:Variable,
+    CW Supply Outlet Node,
+    System Node Temperature,
+    Hourly;
+
+Output:Variable,
+    CW Supply Outlet Node,
+    System Node Setpoint Temperature,
+    Hourly;
+
+Output:Variable,
+    CW Supply Inlet Node,
+    System Node Temperature,
+    Hourly;
+
+Output:Variable,
+    CW Supply Outlet Node,
+    System Node Mass Flow Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Site Outdoor Air Drybulb Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Site Outdoor Air Wetbulb Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Site Outdoor Air Humidity Ratio,
+    Hourly;
+
+Output:Variable,
+    *,
+    Site Outdoor Air Barometric Pressure,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Electricity Rate,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Part Load Ratio,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Evaporator Outlet Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Condenser Inlet Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Chiller Condenser Outlet Temperature,
+    Hourly;
+
+Output:Variable,
+    *,
+    Cooling Tower Heat Transfer Rate,
+    Timestep;
+
+Output:Variable,
+    *,
+    Cooling Tower Inlet Temperature,
+    Timestep;
+
+Output:Variable,
+    *,
+    Cooling Tower Outlet Temperature,
+    Timestep;
+
+Output:Variable,
+    *,
+    Cooling Tower Mass Flow Rate,
+    Timestep;
+
+Output:Variable,
+    *,
+    Cooling Tower Fan Electricity Rate,
+    Timestep;
+
+Output:Variable,
+    *,
+    Cooling Tower Fan Electricity Energy,
+    Timestep;
+
+Output:Variable,
+    Hybrid Cooler Air Inlet,
+    System Node Temperature,
+    Timestep;
+
+Output:Variable,
+    Hybrid Cooler Air Inlet,
+    System Node Wetbulb Temperature,
+    Timestep;
+
+Output:Variable,
+    Hybrid Cooler Air Inlet,
+    System Node Humidity Ratio,
+    Timestep;
+
+Output:Variable,
+    Hybrid Cooler Air Inlet,
+    System Node Pressure,
+    Timestep;
+
+Output:Variable,
+    CW Supply Outlet Node,
+    System Node Temperature,
+    Timestep;
+
+Output:Variable,
+    CW Supply Outlet Node,
+    System Node Setpoint Temperature,
+    Timestep;
+
+Output:Variable,
+    CW Supply Inlet Node,
+    System Node Temperature,
+    Timestep;
+
+Output:Variable,
+    CW Supply Outlet Node,
+    System Node Mass Flow Rate,
+    Timestep;
+
+Output:Variable,
+    *,
+    Site Outdoor Air Drybulb Temperature,
+    Timestep;
+
+Output:Variable,
+    *,
+    Site Outdoor Air Wetbulb Temperature,
+    Timestep;
+
+Output:Variable,
+    *,
+    Site Outdoor Air Humidity Ratio,
+    Timestep;
+
+Output:Variable,
+    *,
+    Site Outdoor Air Barometric Pressure,
+    Timestep;
+
+Output:Variable,
+    *,
+    Chiller Electricity Rate,
+    Timestep;
+
+Output:Variable,
+    *,
+    Chiller Part Load Ratio,
+    Timestep;
+
+Output:Variable,
+    *,
+    Chiller Evaporator Outlet Temperature,
+    Timestep;
+
+Output:Variable,
+    *,
+    Chiller Condenser Inlet Temperature,
+    Timestep;
+
+Output:Variable,
+    *,
+    Chiller Condenser Outlet Temperature,
+    Timestep;
+
+PythonPlugin:SearchPaths,
+    Hybrid Paths,
+    Yes,
+    Yes,
+    No,
+    /srv/data1/liangzhang/EnergyPlus-HeatRejection-Water/src,
+    /srv/data1/liangzhang/EnergyPlus-HeatRejection-Water/runs/hyb/stockholm/T16;
+
+PythonPlugin:Instance,
+    HybridCooler,
+    Yes,
+    hybrid_model_plugin,
+    ModelHybridCooler;
+
+PythonPlugin:Variables,
+    Hybrid Vars 1,
+    HC_Wet,
+    HC_PreT,
+    HC_PreW,
+    HC_Eps,
+    HC_Air,
+    HC_Heat,
+    HC_FanPower,
+    HC_FanPenalty,
+    HC_Evap,
+    HC_Bleed;
+
+PythonPlugin:Variables,
+    Hybrid Vars 2,
+    HC_Makeup,
+    HC_MakeupVol,
+    HC_Cycles;
+
+PythonPlugin:OutputVariable,
+    HC_Wet,
+    HC_Wet,
+    Averaged,
+    SystemTimestep,
+    ;
+
+PythonPlugin:OutputVariable,
+    HC_PreT,
+    HC_PreT,
+    Averaged,
+    SystemTimestep,
+    C;
+
+PythonPlugin:OutputVariable,
+    HC_PreW,
+    HC_PreW,
+    Averaged,
+    SystemTimestep,
+    kgWater/kgDryAir;
+
+PythonPlugin:OutputVariable,
+    HC_Eps,
+    HC_Eps,
+    Averaged,
+    SystemTimestep,
+    ;
+
+PythonPlugin:OutputVariable,
+    HC_Air,
+    HC_Air,
+    Averaged,
+    SystemTimestep,
+    kg/s;
+
+PythonPlugin:OutputVariable,
+    HC_Heat,
+    HC_Heat,
+    Averaged,
+    SystemTimestep,
+    W;
+
+PythonPlugin:OutputVariable,
+    HC_FanPower,
+    HC_FanPower,
+    Averaged,
+    SystemTimestep,
+    W;
+
+PythonPlugin:OutputVariable,
+    HC_FanPenalty,
+    HC_FanPenalty,
+    Averaged,
+    SystemTimestep,
+    W;
+
+PythonPlugin:OutputVariable,
+    HC_Evap,
+    HC_Evap,
+    Averaged,
+    SystemTimestep,
+    m3/s;
+
+PythonPlugin:OutputVariable,
+    HC_Bleed,
+    HC_Bleed,
+    Averaged,
+    SystemTimestep,
+    m3/s;
+
+PythonPlugin:OutputVariable,
+    HC_Makeup,
+    HC_Makeup,
+    Averaged,
+    SystemTimestep,
+    m3/s;
+
+PythonPlugin:OutputVariable,
+    HC_MakeupVol,
+    HC_MakeupVol,
+    Summed,
+    SystemTimestep,
+    m3;
+
+PythonPlugin:OutputVariable,
+    HC_Cycles,
+    HC_Cycles,
+    Averaged,
+    SystemTimestep,
+    ;
+
+Output:Variable,
+    HC_Wet,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_PreT,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_PreW,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_Eps,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_Air,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_Heat,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_FanPower,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_FanPenalty,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_Evap,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_Bleed,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_Makeup,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_MakeupVol,
+    PythonPlugin:OutputVariable,
+    Timestep;
+
+Output:Variable,
+    HC_Cycles,
+    PythonPlugin:OutputVariable,
+    Timestep;

@@ -1,0 +1,32 @@
+! ===== SCRATCH EMS SANITY TEST (not part of the delivered model) =====
+! Wetted-pad pre-cooling of the shared cooler air inlet: DB = DB_out - 0.85 (DB_out - WB_out), WB = WB_out
+  EnergyManagementSystem:Sensor,
+    OAT,                                !- Name
+    Environment,                        !- Output:Variable or Output:Meter Index Key Name
+    Site Outdoor Air Drybulb Temperature; !- Output:Variable or Output:Meter Name
+  EnergyManagementSystem:Sensor,
+    OAWB,                               !- Name
+    Environment,                        !- Output:Variable or Output:Meter Index Key Name
+    Site Outdoor Air Wetbulb Temperature; !- Output:Variable or Output:Meter Name
+  EnergyManagementSystem:Actuator,
+    HybDB,                              !- Name
+    Hybrid Cooler Air Inlet,            !- Actuated Component Unique Name
+    Outdoor Air System Node,            !- Actuated Component Type
+    Drybulb Temperature;                !- Actuated Component Control Type
+  EnergyManagementSystem:Actuator,
+    HybWB,                              !- Name
+    Hybrid Cooler Air Inlet,            !- Actuated Component Unique Name
+    Outdoor Air System Node,            !- Actuated Component Type
+    Wetbulb Temperature;                !- Actuated Component Control Type
+  EnergyManagementSystem:ProgramCallingManager,
+    Pad Precool Manager,                !- Name
+    BeginTimestepBeforePredictor,       !- EnergyPlus Model Calling Point
+    PadPrecool;                         !- Program Name 1
+  EnergyManagementSystem:Program,
+    PadPrecool,                         !- Name
+    SET HybDB = OAT - 0.85 * (OAT - OAWB), !- Program Line 1
+    SET HybWB = OAWB;                   !- Program Line 2
+  Output:EnergyManagementSystem,
+    Verbose,!- Actuator Availability Dictionary Reporting
+    None,                               !- Internal Variable Availability Dictionary Reporting
+    ErrorsOnly;                         !- EMS Runtime Language Debug Output Level

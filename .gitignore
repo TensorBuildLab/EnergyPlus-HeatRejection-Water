@@ -1,0 +1,13 @@
+# raw simulation output (28 GB); compact archive in results/archive/, regenerate with reproduce.sh
+runs/
+__pycache__/
+*.pyc
+weather/*/*.zip
+# LaTeX build products
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.spl
+paper/*.pdf

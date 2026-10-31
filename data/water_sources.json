@@ -1,0 +1,39 @@
+{
+  "_note": "PLACEHOLDER VALUES. Sources are illustrative, not taken from any utility report. Treatment limits are rough rules of thumb, not from a cited reference. Replace both with utility water-quality reports and vendor or literature limits before publishing results. Units: mg/L; hardness and alkalinity as CaCO3; silica as SiO2.",
+  "sources": {
+    "example_soft_surface": {
+      "description": "Illustrative soft surface water",
+      "silica": 8.0, "calcium_hardness": 40.0, "m_alkalinity": 35.0,
+      "chloride": 15.0, "sulfate": 20.0, "tds": 120.0
+    },
+    "example_hard_groundwater": {
+      "description": "Illustrative hard, high-silica groundwater (arid-region style)",
+      "silica": 30.0, "calcium_hardness": 220.0, "m_alkalinity": 180.0,
+      "chloride": 110.0, "sulfate": 120.0, "tds": 650.0
+    },
+    "example_reclaimed": {
+      "description": "Illustrative tertiary-treated reclaimed water",
+      "silica": 20.0, "calcium_hardness": 160.0, "m_alkalinity": 150.0,
+      "chloride": 180.0, "sulfate": 150.0, "tds": 800.0
+    }
+  },
+  "treatments": {
+    "generic_inhibitor": {
+      "description": "Placeholder limits for a scale/corrosion inhibitor program (constant concentration limits only)",
+      "limits": {"silica": 150.0, "calcium_hardness": 1000.0, "chloride": 500.0, "tds": 3000.0},
+      "product_limits": {},
+      "min_cycles": 1.5,
+      "max_cycles": 10.0
+    },
+    "generic_inhibitor_dynamic": {
+      "description": "Placeholder: constituent limits plus LSI limit (acid-fed pH setpoint) and amorphous-silica solubility, evaluated each timestep",
+      "limits": {"silica": 150.0, "calcium_hardness": 1000.0, "chloride": 500.0, "tds": 3000.0},
+      "product_limits": {},
+      "lsi_max": 2.5,
+      "ph_cycled": 8.3,
+      "silica_solubility_factor": 1.0,
+      "min_cycles": 1.5,
+      "max_cycles": 10.0
+    }
+  }
+}

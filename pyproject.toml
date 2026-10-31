@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tower-water"
+version = "0.2.0"
+description = "Multi-method, physics-based cooling tower water consumption for EnergyPlus (Python plugin)"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "Liang Zhang", email = "liangzhang1@arizona.edu" }]
+dependencies = []          # the core and the plugin are standard-library only
+
+[project.optional-dependencies]
+analysis = ["numpy", "scipy", "pandas", "matplotlib", "psychrolib"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

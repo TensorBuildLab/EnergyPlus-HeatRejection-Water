@@ -1,0 +1,46 @@
+{
+  "node": "Hybrid Cooler Air Inlet",
+  "coolers": [
+    {
+      "name": "Hybrid Cooler 1",
+      "v_high": 71.163,
+      "p_high": 13092.0,
+      "v_low": 35.581,
+      "p_low": 2095.0
+    },
+    {
+      "name": "Hybrid Cooler 2",
+      "v_high": 71.163,
+      "p_high": 13092.0,
+      "v_low": 35.581,
+      "p_low": 2095.0
+    },
+    {
+      "name": "Hybrid Cooler 3",
+      "v_high": 71.163,
+      "p_high": 13092.0,
+      "v_low": 35.581,
+      "p_low": 2095.0
+    }
+  ],
+  "timesteps_per_hour": 6,
+  "pad": {
+    "eps_design": 0.85,
+    "system": "media",
+    "spray_efficiency": 0.6,
+    "dp_design": 0.0,
+    "v_design": 213.48899999999998
+  },
+  "controller": {
+    "strategy": "wet",
+    "t_on": 0.0,
+    "hysteresis": 2.0,
+    "t_freeze": 5.0,
+    "min_depression": 0.0
+  },
+  "water_library": "/srv/data1/liangzhang/EnergyPlus-HeatRejection-Water/data/water_sources.json",
+  "water_source": "example_hard_groundwater",
+  "treatment": "generic_inhibitor",
+  "fixed_cycles": null,
+  "coc_mode": null
+}
