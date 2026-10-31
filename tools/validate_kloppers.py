@@ -27,7 +27,8 @@ from tower_water import evaporation as ev  # noqa: E402
 from tower_water import psychro as ps  # noqa: E402
 
 DATA = ROOT / "data" / "equipment" / "kloppers2003_fill_tests.csv"
-N_STEPS = 20
+N_STEPS = 10          # as in the plugin; N_STEPS_CHECK repeats the Poppe solution to show the step effect
+N_STEPS_CHECK = 20
 
 
 def rms(x):
@@ -40,12 +41,21 @@ def main():
     for r in df.itertuples():
         w = ps.w_from_twb(r.Tdb_in_C, r.Twb_in_C, r.p_Pa)
         res = ev.poppe(r.Tw_in_C, r.Tw_out_C, r.mw_kg_s, r.ma_kg_s, r.Tdb_in_C, w, r.p_Pa, n_steps=N_STEPS)
+        res20 = ev.poppe(r.Tw_in_C, r.Tw_out_C, r.mw_kg_s, r.ma_kg_s, r.Tdb_in_C, w, r.p_Pa, n_steps=N_STEPS_CHECK)
+        q = r.mw_kg_s * ps.CP_WATER * (r.Tw_in_C - r.Tw_out_C)
+        msat = ev.merkel_saturated_exit(q, r.ma_kg_s, r.Tdb_in_C, w, r.p_Pa)
+        braun = ev.braun_entu(q, r.Tw_in_C, r.Tw_out_C, r.mw_kg_s, r.ma_kg_s, r.Tdb_in_C, w, r.p_Pa)
+        epsat = ev.eplus_saturated_exit(q, r.ma_kg_s * (1 + w), r.Tdb_in_C, r.Twb_in_C, w, r.p_Pa) * ps.rho_water(20.0)
         me_m = ev.merkel_number_exact(r.Tw_in_C, r.Tw_out_C, r.mw_kg_s, r.ma_kg_s, ps.h_air(r.Tdb_in_C, w), r.p_Pa)
         pts.append(dict(fill=r.fill, Lfi_m=r.Lfi_m, test=r.test, LG=r.mw_kg_s / r.ma_kg_s, Gw=r.Gw, Ga=r.Ga,
                         tw_in=r.Tw_in_C, tw_out=r.Tw_out_C, mw=r.mw_kg_s, ma=r.ma_kg_s, tdb=r.Tdb_in_C, w=w, p=r.p_Pa,
                         MeP=res.merkel, MeP_K=r.Me_Poppe, MeM=me_m, MeM_K=r.Me_Merkel,
-                        Ta_out=res.t_air_out, Ta_out_meas=r.Ta_out_meas_C, Ta_out_K=r.Ta_out_Poppe_C,
-                        evap=res.evap_kg_s, status=res.status))
+                        Ta_out=res.t_air_out, Ta_out_meas=r.Ta_out_meas_C, Ta_out_K=r.Ta_out_Poppe_C, Ta_out_K_M=r.Ta_out_Merkel_C,
+                        evap=res.evap_kg_s, status=res.status, supersat=res.supersaturated,
+                        evap_steps20=res20.evap_kg_s, twb=r.Twb_in_C,
+                        Ta_out_MSAT=msat.t_air_out, evap_MSAT=msat.evap_kg_s,
+                        Ta_out_BRAUN=braun.t_air_out, evap_BRAUN=braun.evap_kg_s, braun_status=braun.status,
+                        evap_EPSAT=epsat))
     p = pd.DataFrame(pts)
     summ = []
     for (fill, lfi), g in p.groupby(["fill", "Lfi_m"], sort=False):
@@ -84,12 +94,44 @@ def main():
                 Ta_vs_meas_bias_K=float(np.mean(p.Ta_out - p.Ta_out_meas)), Ta_vs_meas_rms_K=rms(p.Ta_out - p.Ta_out_meas),
                 Kloppers_Ta_vs_meas_rms_K=rms(p.Ta_out_K - p.Ta_out_meas),
                 evap_frac_min_pct=100 * float((p.evap / p.mw).min()), evap_frac_max_pct=100 * float((p.evap / p.mw).max()))
+    allp.update(steps10_vs_20_evap_maxabs_pct=100 * float(np.max(abs(p.evap / p.evap_steps20 - 1))),
+                supersaturated_share_pct=100 * float(p.supersat.mean()),
+                Tdb_min=p.tdb.min(), Tdb_max=p.tdb.max(), Twb_min=p.twb.min(), Twb_max=p.twb.max(),
+                Tw_in_min=p.tw_in.min(), Tw_in_max=p.tw_in.max(), LG_min=p.LG.min(), LG_max=p.LG.max())
     pd.DataFrame([allp]).to_csv(out / "kloppers_overall.csv", index=False)
+
+    # Other models on the same tests (review R2-M1): outlet-air temperature vs measured, evaporation vs Poppe
+    mrows = [dict(model="POPPE", Ta_bias_K=float(np.mean(p.Ta_out - p.Ta_out_meas)), Ta_rms_K=rms(p.Ta_out - p.Ta_out_meas),
+                  evap_vs_poppe_mean_pct=0.0, evap_vs_poppe_min_pct=0.0, evap_vs_poppe_max_pct=0.0)]
+    for m in ("MSAT", "BRAUN", "EPSAT"):
+        e = p["evap_" + m] / p.evap - 1
+        row = dict(model=m, evap_vs_poppe_mean_pct=100 * e.mean(), evap_vs_poppe_min_pct=100 * e.min(),
+                   evap_vs_poppe_max_pct=100 * e.max())
+        if "Ta_out_" + m in p:
+            row.update(Ta_bias_K=float(np.mean(p["Ta_out_" + m] - p.Ta_out_meas)), Ta_rms_K=rms(p["Ta_out_" + m] - p.Ta_out_meas))
+        mrows.append(row)
+    mrows.append(dict(model="Kloppers Merkel (tabulated)", Ta_bias_K=float(np.mean(p.Ta_out_K_M - p.Ta_out_meas)),
+                      Ta_rms_K=rms(p.Ta_out_K_M - p.Ta_out_meas)))
+    mod = pd.DataFrame(mrows)
+    mod.to_csv(out / "kloppers_models.csv", index=False)
+    ml = ["\\begin{tabular}{lrrr}", "\\toprule",
+          "Model & $T_{a,o}$ bias [K] & $T_{a,o}$ rms [K] & $E$ vs Poppe, mean (range) [\\%] \\\\", "\\midrule"]
+    names = {"POPPE": "Poppe (this work)", "MSAT": "Merkel, saturated exit", "BRAUN": "Braun e-NTU",
+             "EPSAT": "EnergyPlus SaturatedExit", "Kloppers Merkel (tabulated)": "Merkel, Kloppers' analysis"}
+    for r in mod.itertuples():
+        ta = "--" if not np.isfinite(getattr(r, "Ta_rms_K", np.nan)) else "%+.2f & %.2f" % (r.Ta_bias_K, r.Ta_rms_K)
+        if ta == "--":
+            ta = "-- & --"
+        ev_s = "--" if r.model in ("POPPE", "Kloppers Merkel (tabulated)") else "%+.1f (%+.1f to %+.1f)" % (
+            r.evap_vs_poppe_mean_pct, r.evap_vs_poppe_min_pct, r.evap_vs_poppe_max_pct)
+        ml.append("%s & %s & %s \\\\" % (names[r.model], ta, ev_s))
+    ml += ["\\bottomrule", "\\end{tabular}"]
+    (ROOT / "results" / "study" / "kloppers_models_table.tex").write_text("\n".join(ml) + "\n")
 
     # LaTeX table
     lines = ["\\begin{tabular}{llrrrrrr}", "\\toprule",
              "Fill & $L_{fi}$ [m] & $Me_P$ vs K. [\\%] & $T_{a,o}$ vs meas. bias / rms [K] & $n$ & "
-             "$T_{w,o}$ rms, $n$=0.6 [K] & $T_{w,o}$ rms, $G_w,G_a$ fit [K] & $E$ err., $n$=0.6 [\\%] \\\\", "\\midrule"]
+             "$T_{w,o}$ rms, $n$=0.6 [K] & $T_{w,o}$ rms, $G_w,G_a$ fit [K] & $\\Delta E$ from $T_{w,o}$ error, $n$=0.6 [\\%] \\\\", "\\midrule"]
     for r in s.itertuples():
         lines.append("%s & %.2f & %+.1f (max %.1f) & %+.2f / %.2f & %.2f & %.2f & %.2f & %+.1f (max %.1f) \\\\" % (
             r.fill.replace("_", " "), r.Lfi_m, r.MeP_vs_Kloppers_mean_pct, r.MeP_vs_Kloppers_maxabs_pct,

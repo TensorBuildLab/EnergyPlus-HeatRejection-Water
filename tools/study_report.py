@@ -69,7 +69,7 @@ def site_table(run_root: Path) -> pd.DataFrame:
                                       for m in ("constituent", "dynamic")) * 1e3 / it_kwh,
             "WUE_POPPE_max_scen": max(mk("POPPE", s, m) for s in sc.source.unique() if s != "-"
                                       for m in ("constituent", "dynamic")) * 1e3 / it_kwh,
-            "fog_h": r["fog_hours"], "air_adjusted_share_%": r.get("ref_air_adjusted_share_%", 0.0),
+            "fog_h": r["fog_hours"], "air_adjusted_evap_share_%": r.get("ref_air_adjusted_share_%", 0.0),
             "air_scale_mean": r.get("air_scale_mean_adjusted", np.nan),
             "EPSAT_replica_err_%": r["EPSAT_replica_err_%"],
         }

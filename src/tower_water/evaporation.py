@@ -46,6 +46,7 @@ class EvapResult:
     merkel: float = float("nan")
     ntu: float = float("nan")
     status: int = OK
+    converged: bool = True    # Poppe only: exit-humidity fixed point met |dw| < 1e-8 kg/kg within max_iter passes
 
 
 # ---------------------------------------------------------------------------
@@ -252,6 +253,7 @@ def poppe(t_w_in: float, t_w_out: float, m_w_in: float, m_a: float,
     w_out = ps.w_sat(ps.t_sat_from_h(h_out_guess, p), p)
 
     w = h = me = 0.0
+    converged = False
     for _ in range(max_iter):
         w, h, me = w_in, h_in, 0.0
         tw = t_w_out
@@ -282,7 +284,7 @@ def poppe(t_w_in: float, t_w_out: float, m_w_in: float, m_a: float,
             break
 
     t_out, _, supersat = air_state(h, w, p)
-    return EvapResult(m_a * (w - w_in), t_out, w, supersat, me, status=OK)
+    return EvapResult(m_a * (w - w_in), t_out, w, supersat, me, status=OK, converged=converged)
 
 
 # ---------------------------------------------------------------------------

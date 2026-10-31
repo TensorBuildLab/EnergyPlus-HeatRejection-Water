@@ -32,9 +32,10 @@ $PY models/build_datacenter_idf.py --plant modern --out models/sensitivity/moder
 $PY tools/run_climates.py --idf models/sensitivity/modern_plant.idf --out runs/sens_modern_plant --ddy-sizing --jobs 16 \
     --sites $(ls -d weather/*/ | grep -v "weather/phx/")
 
-echo "== 4d. Review analyses (mist, consistency, fill-exponent sweep), site water quality, LaTeX tables"
+echo "== 4d. Review analyses (mist, consistency, fill-exponent sweep, ordinary-fill tower), site water quality, LaTeX tables"
 $PY tools/review_analyses.py runs/dc
 $PY tools/review_analyses.py runs/dc --fill-exp-sweep 0.5 0.6 0.78
+$PY tools/realistic_fill_check.py runs/dc --lg 1.0 1.2 1.4
 $PY tools/water_quality_study.py runs/dc
 $PY tools/review_tables.py
 

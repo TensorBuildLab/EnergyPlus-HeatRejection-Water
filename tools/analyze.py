@@ -83,6 +83,8 @@ def summarize(run: Path) -> pd.DataFrame:
         fb = loaded & st.isin([2, 3])
         row["ref_fallback_share_%"] = 100 * d.loc[fb, "pl_e_" + REFERENCE.lower()].sum() * sec / ref if ref else float("nan")
         adj = loaded & (st == 5)
+        # share of annual Poppe evaporation in timesteps with the near-pinch air-flow adjustment (evaporation-weighted;
+        # review_analyses.py reports the share of loaded timesteps)
         row["ref_air_adjusted_share_%"] = 100 * d.loc[adj, "pl_e_" + REFERENCE.lower()].sum() * sec / ref if ref else float("nan")
         row["air_scale_mean_adjusted"] = d.loc[adj, "pl_airscale"].mean() if adj.any() else float("nan")
         row["fog_hours_any"] = d["pl_fog"].sum() * dt_h

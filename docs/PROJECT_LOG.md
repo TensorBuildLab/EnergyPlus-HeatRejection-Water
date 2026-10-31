@@ -109,3 +109,25 @@ Not yet confirmed on v26.2; not yet filed upstream.
 - Manuscript v3 (v2 kept as `paper/manuscript_v2_before_round2.tex`): new verification paragraph, Table/Fig. Kloppers,
   sourced water-quality section, equipment-informed plant in sensitivity, abstract/highlights/conclusions updated.
 - To verify before citing: ASHRAE 90.1 Addendum bd year (bib says 2021); 90.1-2022 tower table text; BAC drift guarantee.
+
+## 12. Round 2 review of v3 (2026-10-31)
+- An independent referee-style review of v3 (`paper/REVIEW_round2.md`, by a separate agent) recommended minor revision
+  bordering on major. Response: `paper/RESPONSE_round2.md`. Manuscript v4 (v3 kept as
+  `paper/manuscript_v3_before_round2_review.tex`).
+- **Ordinary-fill tower check** (new `tools/realistic_fill_check.py`, all 14 sites, design L/G 1.0/1.2/1.4):
+  - The EnergyPlus tower's design point is near the pinch at design wet-bulb ≤ 21 °C (design Me 5.4–7.6). This explains
+    the near-pinch correction and the Montreal/Stockholm contrast.
+  - With an ordinary fill operated to the same leaving-water temperature:
+    - EnergyPlus vs Poppe is −3.4 to −9.1 % at cool sites but −2.0 to +10.9 % at hot–dry sites;
+    - Poppe evaporation shifts by −0.1 to +6.4 %.
+  - Headline reframed: the cold-climate shortfall is robust; in hot–dry climates the sign depends on L/G. The
+    "≤ 0.17 %" robustness claim was withdrawn as a headline and kept as a per-heat statement for the EnergyPlus fill.
+- **Kloppers**: model comparison added (Merkel 1.10 K rms, Braun 1.07 K, EPSAT −11 % evaporation vs Poppe); covered
+  conditions stated; the plugin's 10 steps used (20 steps: ≤ 0.006 %); evaporation column relabelled.
+- **Water quality**: cap and floor flags, effective annual cycles, missing-constituent flags, unclamped range −16 to
+  +44 % (replaces −17 to +125 % as the headline).
+- **Code**: `EvapResult.converged` for the Poppe fixed point (0–0.38 % of timesteps hit 6 passes, error < 5e-6);
+  `dc_sites.csv` column renamed `air_adjusted_evap_share_%` (evaporation-weighted).
+- Merkel free-convection defect reproduced (modern plant, Montreal, 4.2 h, zero EnergyPlus evaporation).
+- References added: Jaber & Webb 1989, Kröger 2004, Lucas et al. 2009, ASHRAE HVAC Applications water treatment (2023).
+- Open for the author: affiliation; Perry's edition and page; ASHRAE chapter number; filing the EnergyPlus issues.

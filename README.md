@@ -72,24 +72,34 @@ reference method `Drift`, `Blowdown`, `Makeup`, `MakeupVol`, `Cycles`, `CycLimit
 
 ## Verification (details in `docs/METHODS.md` §7)
 
-- 52 unit tests, including psychrometrics against PsychroLib (ASHRAE).
+- 55 unit tests, including psychrometrics against PsychroLib (ASHRAE).
 - Poppe vs an independent height-wise boundary-value solution (SciPy), 7 cases incl. supersaturated: evaporation 0.008 %.
 - **Poppe vs 126 measured counterflow fill tests** (Kloppers 2003): Merkel number +1.0 % vs Kloppers' own Poppe analysis;
-  outlet-air temperature vs measured 0.84 K rms (Kloppers 0.85 K). `tools/validate_kloppers.py`.
+  outlet-air temperature vs measured 0.84 K rms (Kloppers 0.85 K), against 1.10 K for a saturated-exit (Merkel) analysis,
+  which predicts 7 % less evaporation. All tests are mild with supersaturated exhaust, and evaporation is not measured.
+  `tools/validate_kloppers.py`.
 - Rating mode: Merkel, Poppe and e-NTU agree within 0.5 K for the same fill.
 - The EnergyPlus SaturatedExit replica matches EnergyPlus within 0.2 % at all 14 sites.
 
 ## Main results (1 MW data center, 14 climates, TMYx 2011–2025)
 
-- EnergyPlus default (SaturatedExit) gives **3.7–9.3 % less annual evaporation than Poppe** (3.5–7.6 % excluding liquid mist);
-  robust to plant variants including an equipment-informed plant (≤ 1.2 points; that plant gives −2.5 to −8.4 %) and to
-  EnergyPlus' thermal operating point (≤ 0.17 % for fill exponents 0.5–0.78). Model-to-model, not measured.
+- EnergyPlus default (SaturatedExit) gives **3.7–9.3 % less annual evaporation than Poppe** (3.5–7.6 % excluding liquid mist)
+  with EnergyPlus' autosized Merkel tower. Plant variants change this by 0.4–1.2 points; the equipment-informed plant gives
+  −2.5 to −8.4 %. Model-to-model, not measured.
+- **Ordinary-fill tower** (`tools/realistic_fill_check.py`), design L/G 1.0–1.4 operated to EnergyPlus' leaving-water
+  temperature:
+  - cool sites: EnergyPlus still −3.4 to −9.1 %;
+  - hot–dry sites (Phoenix, Las Vegas, Riyadh): **−2.0 to +10.9 %**, so the sign there depends on the tower's L/G,
+    consistent with the full-load map;
+  - Poppe evaporation shifts by up to 6.4 % with air flow.
+- The near-pinch correction is a property of the EnergyPlus design point: design wet-bulb ≤ 21 °C gives design Me 5–8.
 - EnergyPlus LossFactor (as documented, 0.2 %/K) overestimates by 4–64 %; rule of thumb −20 to +26 %; latent-only −11 to +40 %.
 - Evaporation 1.05–1.65 L/kWh of heat rejected; WUE 1.66–2.63 L/kWh IT.
-- **Site makeup-water quality** (sourced utility data, five sourced limit sets) gives 1.5–10 cycles and changes makeup by
-  −17 to +125 % relative to four cycles. That exceeds the evaporation-model effect at every site, by several times at
-  hard-water sites (Phoenix and Las Vegas on Colorado River water, Riyadh, Frankfurt).
-- Fixed tower at full load over all ambient conditions: saturated exit −18 to +11 %, empirical methods −39 to +117 %.
+- **Site makeup-water quality** (sourced utility data, five sourced limit sets) changes makeup by **−16 to +44 %** relative to
+  four cycles where the limits, not the model's 1.5–10 cycle bounds, set the cycles. The bounds give −17 % (cap, soft
+  water) to +125 % (floor; Colorado River sulfate at Phoenix and Las Vegas under galvanized-steel sulfate limits). The
+  cycles assumption matters as much as the evaporation model and multiplies its effect.
+- Fixed tower at full load over all ambient conditions: saturated exit −19 to +11 %, empirical methods −39 to +117 %.
 - **Hybrid dry cooler** (3 × 50 % fluid coolers, 7 control strategies): wetting above 28 °C keeps chillers within their rated
   range at all sites (dry-only: up to 3,285 h/yr outside) and uses 14–100 % less water than the tower; always-wet in Riyadh uses
   9 % *more* than the tower; electricity saved by wetting costs 100–240 L of water per kWh.
@@ -102,7 +112,9 @@ reference method `Drift`, `Blowdown`, `Makeup`, `MakeupVol`, `Cycles`, `CycLimit
   `docs/WATER_QUALITY_SOURCES.md`); confirm the source of the empirical LSI constants (`docs/REFERENCES_CHECK.md`).
 - Validate evaporation against metered makeup and blowdown of an operating tower (the fill tests validate outlet-air
   temperature, not evaporation).
-- Confirm the four EnergyPlus defects on v26.2 and file them upstream (`bugreports/README.md`).
+- Confirm the four EnergyPlus defects on v26.2 and file them upstream (`bugreports/README.md`). Merkel free convection
+  booking no water is now reproduced (modern plant, Montreal, 4.2 h).
+- Confirm the Perry's edition and page and the ASHRAE water-treatment chapter (`docs/REFERENCES_CHECK.md`).
 - In the manuscript, confirm the affiliation (the last `\tbd{}`). Compile with
   pdflatex/bibtex or Overleaf (no LaTeX on this server).
 

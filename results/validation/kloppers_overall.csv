@@ -1,2 +1,2 @@
-n,MeP_mean_pct,MeP_median_abs_pct,MeP_p95_abs_pct,Ta_vs_K_maxabs_K,Ta_vs_meas_bias_K,Ta_vs_meas_rms_K,Kloppers_Ta_vs_meas_rms_K,evap_frac_min_pct,evap_frac_max_pct
-126,1.0018722597588883,0.7721535613191555,2.0035439539845545,0.28146688556670796,-0.2036760346700275,0.8429350363362933,0.8507817413582471,0.5335396891163544,4.073581231342175
+n,MeP_mean_pct,MeP_median_abs_pct,MeP_p95_abs_pct,Ta_vs_K_maxabs_K,Ta_vs_meas_bias_K,Ta_vs_meas_rms_K,Kloppers_Ta_vs_meas_rms_K,evap_frac_min_pct,evap_frac_max_pct,steps10_vs_20_evap_maxabs_pct,supersaturated_share_pct,Tdb_min,Tdb_max,Twb_min,Twb_max,Tw_in_min,Tw_in_max,LG_min,LG_max
+126,1.0031108546308023,0.7723361581581378,2.005856503293313,0.2814585409164394,-0.20367696185339068,0.8429358008459411,0.8507817413582471,0.5335441841963342,4.0736157440799206,0.006481230327270993,100.0,11.837,24.156,9.939,20.565,32.817,52.856,0.6476602023608768,5.772385252069225

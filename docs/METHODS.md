@@ -209,6 +209,12 @@ rtol $10^{-10}$). Five cases from hot-dry to hot-humid; maximum difference in ev
 | mild, high L/G | 26.610 | 0.8027 / 0.8027 | 75.825 / 75.825 |
 | cool, low L/G | 19.860 | 1.0054 / 1.0054 | 104.435 / 104.435 |
 
+**Exit-humidity iteration.** The unknown exit humidity enters the local water flow, $\dot m_w(T_w)=\dot m_{w,i}-\dot m_a(\omega_o-\omega)$,
+and is found by fixed-point iteration (at most `max_iter = 6` passes; converged when $|\Delta\omega_o|<10^{-8}$ kg/kg).
+`EvapResult.converged` flags points that reach the limit (round 2, R2-m7). In the 14-site case study 0–0.38 % of
+timesteps reach it, all at near-pinch sites, and their evaporation differs from a 50-pass solution by less than
+$5\times10^{-6}$ (relative). The plugin uses 10 RK4 steps; 20 steps change evaporation on the 126 fill tests by at most 0.006 %.
+
 ### 3.7 Merkel number from Merkel's method
 
 $$Me_M = \int_{T_{w,o}}^{T_{w,i}} \frac{c_{pw}\,dT_w}{i_{masw}-i_{ma}},\qquad i_{ma}(T_w) = i_{ma,i} + \frac{\dot m_w c_{pw}}{\dot m_a}(T_w - T_{w,o})$$
@@ -307,7 +313,14 @@ timestep: an idealised conductivity controller always running at the allowable $
   - recirculating pH 8.5 for programs without acid (assumption);
   - the LSI limit scales alkalinity with $N$ even under acid feed (conservative);
   - corrosion limits for soft, aggressive waters are not modelled;
-  - the cycle cap is 10.
+  - $N$ is bounded to 1.5–10. Results at a bound reflect the bound, not chemistry. `water_quality_study.py` marks them
+    (`clamp` = `cap`/`floor`, majority of loaded time) and reports the range over the unclamped limit sets separately;
+  - a constituent missing from the site data imposes no limit (`missing` column; Portland and Madrid lack sulfate and
+    chloride, and five sites lack silica);
+  - in `dynamic` mode $N$ follows the water temperatures instantly. The **effective annual cycles**
+    $N_\mathrm{eff}=E/(B+D)+1$ (annual sums) reproduce the annual makeup and are reported instead of a time mean;
+  - LSI closed form: Ca and alkalinity both scale with $N$, so $pH_s$ falls by $2\log N$, and the TDS term raises it by
+    $0.1\log N$; hence $N_{LSI}=10^{(LSI_{\max}-pH+pH_s(1))/1.9}$.
 
 ---
 
@@ -404,10 +417,32 @@ traces the water–energy trade-off.
 | Limit behaviour (saturated exit at high NTU, fog in cold humid air, hot-dry $E>\dot Q/i_{fg}$) | tests | pass |
 
 | Poppe vs 126 measured counterflow fill tests (Kloppers 2003, App. R–T: trickle, splash, film) | `tools/validate_kloppers.py` | $Me_P$ vs Kloppers' own Poppe analysis +1.0 % mean (95th pct 2.0 %); outlet-air T vs measured: bias −0.20 K, rms 0.84 K (Kloppers 0.85 K) |
-| Fill law $Me\propto(L/G)^{-n}$, single-point $n=0.6$, rating mode on the same tests | `tools/validate_kloppers.py` | $T_{w,o}$ rms 0.17–0.83 K; evaporation mean error ±4.4 %, max 11.5 % (film) |
+| Fill law $Me\propto(L/G)^{-n}$, single-point $n=0.6$, rating mode on the same tests | `tools/validate_kloppers.py` | $T_{w,o}$ rms 0.17–0.83 K; resulting change in predicted evaporation ±4.4 % mean, max 11.5 % (film); not an error against measured evaporation |
+| Other models on the same tests (`kloppers_models.csv`) | `tools/validate_kloppers.py` | outlet-air T rms: Merkel saturated exit 1.10 K (bias −0.75 K), Braun 1.07 K, Kloppers' Merkel analysis 1.16 K; evaporation vs Poppe: MSAT −7.2 % (−10.9 to −3.1), Braun −7.3 %, EPSAT −11.2 % |
 
 The fill tests measure outlet-air temperature but not evaporation. They validate the air-side balance, not water use
-directly. Not yet done: metered makeup and blowdown of an operating tower. Data: `data/equipment/kloppers2003_fill_tests.csv`;
+directly. They favour Poppe over saturated-exit analysis, but only weakly (0.26 K rms for a 7 % evaporation difference). All
+126 tests have supersaturated exhaust under Poppe, inlet air at 11.8–24.2 °C dry-bulb and 9.9–20.6 °C wet-bulb, hot water at
+33–53 °C and L/G of 0.65–5.8. Hot–dry and freezing air are not covered. Our Merkel numbers are 3.2 % (2.5–4.3 %) above
+Kloppers' tabulated Merkel values. Quadrature, air-mass basis and inlet-enthalpy definition were tested and do not explain
+this. It does not affect accounting-mode MSAT, which does not use the Merkel number.
+
+**Ordinary-fill tower check** (`tools/realistic_fill_check.py`, round 2, R2-M3/M4). The base EnergyPlus tower is autosized for a
+3.9 K approach at the 0.4 % design wet-bulb with N+1 flow. At design wet-bulbs ≤ 21 °C this gives design $Me_P$ of 5.4–7.6,
+near the pinch. That is why the near-pinch air correction is needed at Dublin, Frankfurt, Madrid, Portland and Stockholm
+but not at equally cold Montreal (design wet-bulb 23.5 °C).
+- The check replaces the tower by an ordinary fill: design L/G 1.0/1.2/1.4 at the same design water flow and conditions,
+  $Me_P\propto(L/G)^{-0.6}$.
+- For each sampled loaded timestep it solves the air flow (bisection, capped at design air flow) at which the fill's
+  Merkel number equals the Poppe Merkel number at EnergyPlus' inlet and leaving water temperatures. Heat is therefore
+  unchanged.
+- Results (`results/study/realistic_fill_{check,sites}.csv`, `realistic_fill_table.tex`):
+  - the ordinary tower needs 11–45 % more air;
+  - its Poppe evaporation differs from accounting mode by −0.1 to +6.4 %;
+  - EnergyPlus SaturatedExit at that point vs Poppe: −9.1 to −3.4 % (Stockholm, Montreal, Dublin, Frankfurt, Portland);
+    −6.0 to +3.0 % (Madrid and the warm–humid sites); −2.0 to +10.9 % (Phoenix, Las Vegas, Riyadh).
+- So the sign at hot–dry sites depends on the tower's air-to-water ratio, consistent with the full-load climate map.
+- Hours the ordinary tower cannot meet are excluded (up to 14 % at Houston and Mumbai). Not yet done: metered makeup and blowdown of an operating tower. Data: `data/equipment/kloppers2003_fill_tests.csv`;
 extraction: `data/equipment/extraction/`.
 
 ---
@@ -420,6 +455,8 @@ extraction: `data/equipment/extraction/`.
    the idle second tower books 4.5–12 m³/yr with zero heat rejected.
 2. **Merkel tower books no water in free convection.** In `calculateMerkelVariableSpeedTower`, the free-convection branch
    sets `airFlowRateRatio = 0` while `Qactual > 0`, so the `SaturatedExit` air mass flow is zero and evaporation is zero.
+   Reproduced in the equipment-informed plant at Montreal: 25 timesteps (4.2 h) at −21 to −27 °C, fans off, about
+   320 kW rejected, zero EnergyPlus evaporation (Poppe 1.0 m³).
 3. **VariableSpeed tower uses a capacity fraction as an air-flow ratio** in the fan-off and cycling regimes (§4).
 4. **`LossFactor` is applied as a fraction, not a percent.** The IDD gives the field in percent/K (default 0.2, typical 0.15–0.27),
    but `UserEvapLossFactor = NumArray(...)` is used without `/100` (drift percent, read the same way, is divided by 100).

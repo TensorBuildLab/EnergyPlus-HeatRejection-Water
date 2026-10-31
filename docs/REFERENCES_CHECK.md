@@ -90,3 +90,12 @@ Caveats:
 - `evapco2019om`, `bac2020baltibond`, `icc2014gew174`, `demadis2003gordian`: URLs are recorded in
   `docs/WATER_QUALITY_SOURCES.md`. The page and table numbers were given by the research agent. The BAC year (2020) is
   unverified.
+
+## Added in review round 2 of v3 (2026-10-31)
+- `jaber1989design` (J. Heat Transfer 111(4) 837–843, doi 10.1115/1.3250794), `kroger2004air` (PennWell 2004) and
+  `lucas2009experimental` (Energy Convers. Manage. 50(3) 490–497, doi 10.1016/j.enconman.2008.11.006) were entered from
+  memory. Check the DOIs and pages.
+- `ashrae2023water`: the chapter number and edition of the HVAC Applications water-treatment chapter are unconfirmed.
+- `green2008perrys` is still unconfirmed (edition and page).
+- The acid-feed pH 7.5 and LSI_max 2.0 are stated as assumptions in the paper. Their training-material origins are listed
+  in `docs/WATER_QUALITY_SOURCES.md`.

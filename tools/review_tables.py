@@ -36,6 +36,11 @@ def sensitivity():
         f = ROOT / "runs" / ("sens_" + v) / "summary.csv"
         if f.exists():
             variants.append((lab, pd.read_csv(f).set_index("site")))
+    rf = S / "realistic_fill_check.csv"
+    if rf.exists():   # tools/realistic_fill_check.py: same EnergyPlus run, tower with an ordinary fill (review R2-M3/M4)
+        r = pd.read_csv(rf)
+        r = r[r.LG_design == 1.2].set_index("site").rename(columns={"EPSAT_realistic_vs_poppe_realistic_%": "EP_vs_POPPE_%"})
+        variants.append(("Ordinary fill, design $L/G$ = 1.2$^b$", r))
     for lab, d in variants:
         allv = d["EP_vs_POPPE_%"]
         rng = "%+.1f to %+.1f (%d)" % (allv.min(), allv.max(), len(allv)) if len(allv) > len(sites) else "--"

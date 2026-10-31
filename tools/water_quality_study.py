@@ -53,6 +53,9 @@ def site_rows(run: Path, lib: dict, it_kwh: float):
         else:
             model = ChemistryModel.from_library(str(LIB), site, treat, None, mode)
         coc = coc_series(model, t_hot, t_cold)
+        tl = model.treatment
+        at_cap = float(np.mean(np.isclose(coc[loaded], tl.max_cycles))) if mode != "fixed" else 0.0
+        at_floor = float(np.mean(np.isclose(coc[loaded], tl.min_cycles))) if mode != "fixed" else 0.0
         # limiting constraint at the annual-mean temperatures (dynamic) or constant (constituent)
         if mode == "dynamic":
             which = model.cycles(t_hot=float(np.mean(t_hot[loaded])), t_cold=float(np.mean(t_cold[loaded])))[1]
@@ -65,6 +68,10 @@ def site_rows(run: Path, lib: dict, it_kwh: float):
             rows.append({"site": site, "case": case, "mode": mode, "method": m,
                          "coc_mean": float(np.mean(coc[loaded])), "coc_min": float(np.min(coc[loaded])),
                          "limit": which, "evap_m3": e.sum() * sec, "blowdown_m3": b.sum() * sec, "makeup_m3": mk,
+                         # effective annual cycles: N such that E/(N-1) = B + D over the year (reproduces the WUE)
+                         "coc_effective": e.sum() / (b.sum() + drift.sum()) + 1.0,
+                         "at_cap_share": at_cap, "at_floor_share": at_floor,
+                         "clamp": "cap" if at_cap > 0.5 else ("floor" if at_floor > 0.5 else ""),
                          "WUE": mk * 1e3 / it_kwh})
     return rows
 
@@ -107,12 +114,24 @@ def main():
         fixed = g.loc["fixed_%g" % FIXED]
         tr = g.loc[treat]
         src = lib["sources"][site]
+        free = tr[tr.clamp == ""]
+        limited = set()
+        for t in lib["treatments"].values():
+            limited |= set(t.get("limits", {}))
+        missing = [c for c in ("silica", "chloride", "sulfate", "calcium_hardness", "m_alkalinity")
+                   if c in limited and not src.get(c)]
         key.append({
             "site": site, "name": nice(site), "cz": climate_zone(site),
             "ca": src.get("calcium_hardness"), "alk": src.get("m_alkalinity"), "sio2": src.get("silica"),
             "cl": src.get("chloride"), "so4": src.get("sulfate"), "tds": src.get("tds"),
             "conf": conf_code(src.get("confidence", "")),
             "N_min": tr.coc_mean.min(), "N_max": tr.coc_mean.max(),
+            "Neff_min": tr.coc_effective.min(), "Neff_max": tr.coc_effective.max(),
+            "n_cap": int((tr.clamp == "cap").sum()), "n_floor": int((tr.clamp == "floor").sum()), "n_sets": len(tr),
+            "missing": "/".join(missing),
+            "unclamped_min_%": 100 * (free.WUE.min() / fixed.WUE - 1) if len(free) else np.nan,
+            "unclamped_max_%": 100 * (free.WUE.max() / fixed.WUE - 1) if len(free) else np.nan,
+            "unclamped_median_%": 100 * (free.WUE.median() / fixed.WUE - 1) if len(free) else np.nan,
             "limit_at_min": tr.loc[tr.coc_mean.idxmin(), "limit"],
             "WUE_fixed4": fixed.WUE, "WUE_min": tr.WUE.min(), "WUE_max": tr.WUE.max(),
             "chem_vs_fixed_min_%": 100 * (tr.WUE.min() / fixed.WUE - 1),
@@ -128,16 +147,21 @@ def main():
 
     def f(v, fmt="%.0f"):
         return "--" if v is None or (isinstance(v, float) and not np.isfinite(v)) else fmt % v
-    lines = ["\\begin{tabular}{lrrrrlrlrr}", "\\toprule",
-             "Site & Ca & Alk. & SO$_4$ & Cl & Data & $N_c$ & Limit (lowest $N_c$) & WUE$_{N=4}$ & $\\Delta$WUE vs $N=4$ [\\%] \\\\",
-             " & \\multicolumn{4}{c}{[mg/L; Ca, Alk.\\ as CaCO$_3$]} & & & & [L/kWh] & \\\\",
+    lines = ["\\begin{tabular}{lrrrrlrlrrr}", "\\toprule",
+             "Site & Ca & Alk. & SO$_4$ & Cl & Data & $N_{c,\\mathrm{eff}}$ & Limit (lowest $N_c$) & WUE$_{N=4}$ & "
+             "$\\Delta$WUE, all sets & $\\Delta$WUE, unclamped \\\\",
+             " & \\multicolumn{4}{c}{[mg/L; Ca, Alk.\\ as CaCO$_3$]} & & & & [L/kWh] & [\\%] & [\\%] \\\\",
              "\\midrule"]
     for _, r in k.iterrows():
         lim = str(r.limit_at_min).split(" ")[0]
-        lines.append("%s & %s & %s & %s & %s & %s & %.1f--%.1f & %s & %.2f & %+.0f to %+.0f \\\\" % (
-            r["name"], f(r.ca), f(r.alk), f(r.so4), f(r.cl), r.conf, r.N_min, r.N_max,
-            LIMIT_NAMES.get(lim, lim) + (" (min.)" if "raised" in str(r.limit_at_min) else ""), r.WUE_fixed4,
-            r["chem_vs_fixed_min_%"], r["chem_vs_fixed_max_%"]))
+        lo, hi = r["chem_vs_fixed_min_%"], r["chem_vs_fixed_max_%"]
+        lo_s = "%+.0f%s" % (lo, "$^c$" if r.n_cap else "")
+        hi_s = "%+.0f%s" % (hi, "$^f$" if r.n_floor else "")
+        unc = "--" if not np.isfinite(r["unclamped_min_%"]) else "%+.0f to %+.0f" % (r["unclamped_min_%"], r["unclamped_max_%"])
+        lines.append("%s & %s & %s & %s & %s & %s%s & %.1f--%.1f & %s & %.2f & %s to %s & %s \\\\" % (
+            r["name"], f(r.ca), f(r.alk), f(r.so4), f(r.cl), r.conf, "$^\\dagger$" if r.missing else "",
+            r.Neff_min, r.Neff_max, LIMIT_NAMES.get(lim, lim) + (" (min.)" if "raised" in str(r.limit_at_min) else ""),
+            r.WUE_fixed4, lo_s, hi_s, unc))
     lines += ["\\bottomrule", "\\end{tabular}"]
     (study / "water_quality_table.tex").write_text("\n".join(lines) + "\n")
 
@@ -146,6 +170,15 @@ def main():
     x = np.arange(len(k))
     ax.vlines(x, k.WUE_min, k.WUE_max, color=fs.SERIES[0], alpha=0.4, linewidth=6,
               label="Poppe, local makeup water, range over treatment programs")
+    ax.plot(x, k.WUE_min, "_", color=fs.SERIES[0], markersize=12, markeredgewidth=2)
+    ax.plot(x, k.WUE_max, "_", color=fs.SERIES[0], markersize=12, markeredgewidth=2)
+    for i, r in enumerate(k.itertuples()):
+        if r.n_cap:
+            ax.annotate("cap", (i, r.WUE_min), xytext=(0, -10), textcoords="offset points", ha="center", fontsize=6.5,
+                        color=fs.TEXT2)
+        if r.n_floor:
+            ax.annotate("floor", (i, r.WUE_max), xytext=(0, 4), textcoords="offset points", ha="center", fontsize=6.5,
+                        color=fs.TEXT2)
     ax.plot(x, k.WUE_fixed4, "o", color=fs.SERIES[0], markersize=7, label="Poppe, fixed 4 cycles")
     ax.plot(x, k.WUE_fixed4 * (1 + k["model_effect_%"] / 100), "D", color=fs.SERIES[3], markersize=6,
             markeredgecolor=fs.SURFACE, label="EnergyPlus SaturatedExit, fixed 4 cycles")
