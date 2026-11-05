@@ -143,6 +143,18 @@ def curve_hours(H, name, L, freq, tol=0.01):
     return {k: (round(v, 2) if isinstance(v, float) else v) for k, v in r.items()}, flags, dt
 
 
+def it_energy_mwh(outdir):
+    """Annual IT energy (CPU + server fans) [MWh] from the ITE end-use meters; works for any model with ITE objects."""
+    hdr, H, R = load(outdir)
+    tot = 0.0
+    for m in ("ITE-CPU:InteriorEquipment:Electricity", "ITE-Fans:InteriorEquipment:Electricity"):
+        v = R.get(f"{m} [J](RunPeriod)")
+        if v is None and H.get(f"{m} [J](Hourly)"):
+            v = sum(H[f"{m} [J](Hourly)"])
+        tot += (v or 0.0) * J2KWH
+    return tot / 1e3
+
+
 def summarize(outdir, idf=None):
     hdr, H, R = load(outdir)
     hybrid = bool(col(H, r"^HYBRID COOLER \d+:Cooling Tower Heat Transfer Rate"))
@@ -275,12 +287,12 @@ def summarize(outdir, idf=None):
                                              max(t for t, p in zip(g("Chiller Condenser Inlet Temperature [C](Hourly)"), plr) if p > 1e-3)) if on else None}
     s["Chillers"] = cs
     s["Hours by number of chillers running [0,1,2,3]"] = [on_counts.count(k) for k in range(4)]
-    s["Plant annual COP (evap Q / chiller elec)"] = evapQ / elecC
+    s["Plant annual COP (evap Q / chiller elec)"] = evapQ / elecC if elecC > 0 else None
     s["Dry-cooler heat rejected [MWh]" if hybrid else "Tower heat rejected [MWh]"] = qt
     s["Chiller condenser heat [MWh]"] = condQ * 3600 * J2KWH / 1e3
     s["Chiller evap Q + chiller elec [MWh]"] = (evapQ + elecC) * 3600 * J2KWH / 1e3
     s["IT + UPS + lights + CRAH fans [MWh] (zone/air-side gains)"] = (it + ups + rp("InteriorLights:Electricity") + rp("Fans:Electricity")) / 1e3
-    s[("Cooler" if hybrid else "Tower") + " Q / (IT + chiller elec)"] = qt * 1e3 / (it + rp("Cooling:Electricity"))
+    s[("Cooler" if hybrid else "Tower") + " Q / (IT + chiller elec)"] = qt * 1e3 / (it + rp("Cooling:Electricity")) if (it + rp("Cooling:Electricity")) > 0 else None
     s["Fan energy / heat rejected [%]"] = 100 * rp("HeatRejection:Electricity") / (qt * 1e3) if qt > 0 else None
 
     # chiller performance-curve validity

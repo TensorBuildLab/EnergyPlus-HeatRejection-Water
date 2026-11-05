@@ -378,3 +378,52 @@ def outlet_temperature_entu(me_fill, t_w_in, m_w, m_a, t_db, w, p):
             break
         t_out = 0.5 * (t_out + new)
     return t_out
+
+
+# ---------------------------------------------------------------------------
+# EnergyPlus single-speed tower: simple e-NTU outlet temperature (replica)
+# ---------------------------------------------------------------------------
+def cp_water(t_c: float) -> float:
+    """Liquid water specific heat [J/(kg K)], 0-100 degC polynomial fit (close to EnergyPlus' water table)."""
+    t = min(max(t_c, 0.0), 100.0)
+    return 4217.4 - 3.720283 * t + 0.1412855 * t ** 2 - 2.654387e-3 * t ** 3 + 2.093236e-5 * t ** 4
+
+
+def eplus_simple_tower_outlet(t_w_in: float, m_w: float, air_vdot: float, ua: float,
+                              t_db: float, t_wb: float, w: float, p: float) -> float:
+    """Leaving-water temperature of one EnergyPlus CoolingTower:SingleSpeed/TwoSpeed cell [C].
+
+    Line-by-line replica of CoolingTower::calculateSimpleTowerOutletTemp (EnergyPlus 22.2): Merkel e-NTU with the
+    air-side capacity linearised between the inlet and outlet wet-bulb (iterated on the outlet wet-bulb). Used to
+    recover the free-convection (fan-off) state of a fan-cycling tower, which EnergyPlus does not report.
+    """
+    if ua <= 0.0 or m_w <= 0.0:
+        return t_w_in
+    m_air = air_vdot * ps.rho_moist_air(t_db, w, p)
+    if m_air <= 0.0:
+        return t_w_in
+    cp_air = 1.00484e3 + max(w, 1e-5) * 1.85895e3          # PsyCpAirFnW
+    mcp_w = m_w * cp_water(t_w_in)
+    h_in = _ep_h(t_wb, ps.w_sat(t_wb, p))                   # PsyHFnTdbRhPb(Twb, 1.0, p)
+    twb_out = t_wb + 6.0
+    q = 0.0
+    err, dtwb, it = 1.0, 1.0, 0
+    while err > 1e-5 and it <= 50 and dtwb > 1e-3:
+        it += 1
+        h_out = _ep_h(twb_out, ps.w_sat(twb_out, p))
+        cp_s = (h_out - h_in) / (twb_out - t_wb)
+        c_air = m_air * cp_s
+        c_min, c_max = min(c_air, mcp_w), max(c_air, mcp_w)
+        cr = c_min / c_max
+        ntu = ua * cp_s / cp_air / c_min
+        if cr <= 0.995:
+            x = ntu * (1.0 - cr)
+            eff = ntu / (1.0 + ntu) if x >= 700.0 else (1.0 - math.exp(-x)) / (1.0 - cr * math.exp(-x))
+        else:
+            eff = ntu / (1.0 + ntu)
+        q = eff * c_min * (t_w_in - t_wb)
+        last = twb_out
+        twb_out = t_wb + q / c_air
+        dtwb = abs(twb_out - t_wb)
+        err = abs((twb_out - last) / (last + 273.15))
+    return t_w_in - q / mcp_w if q >= 0.0 else t_w_in

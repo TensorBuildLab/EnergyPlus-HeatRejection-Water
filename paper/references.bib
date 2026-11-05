@@ -1,4 +1,5 @@
-% Corrected references for METHODS.md section 9. Verified 2026-10-31 (see docs/REFERENCES_CHECK.md).
+% Corrected references for METHODS.md section 9. Verified 2026-10-31 (see docs/REFERENCES_CHECK.md);
+% re-checked 2026-11-05 (see docs/REFERENCES_CHECK_v5.md).
 % Entries marked "UNCERTAIN" in a note must be confirmed against a physical/licensed copy.
 
 @book{ashrae2021fundamentals,
@@ -84,9 +85,9 @@
   journal = {ASHRAE Transactions},
   volume  = {89},
   number  = {2A},
-  pages   = {500--513},
+  pages   = {500--519},
   year    = {1983},
-  note    = {Paper 2793. Page range per secondary sources; UNCERTAIN, confirm against original}
+  note    = {Paper 2793 (RP-216)}
 }
 
 @article{jaber1989design,
@@ -150,6 +151,7 @@
   journal = {R\&D Journal (South African Institution of Mechanical Engineering)},
   volume  = {20},
   number  = {1},
+  pages   = {24--29},
   year    = {2004},
   url     = {https://scielo.org.za/pdf/rd/v20/06.pdf},
   note    = {Open-access source of the Poppe and Bo\v{s}njakovi\'c Lewis-factor equations (Eqs. 4--12)}
@@ -162,7 +164,8 @@
   publisher = {PennWell},
   address   = {Tulsa, OK},
   year      = {2004},
-  isbn      = {0-87814-896-5}
+  isbn      = {0-87814-896-5},
+  note      = {Two volumes; ISBN 0-87814-896-5 (Vol.~1), 1-59370-019-9 (Vol.~2)}
 }
 
 @article{langelier1936analytical,
@@ -202,6 +205,7 @@
   title   = {Data centre water consumption},
   journal = {npj Clean Water},
   volume  = {4},
+  number  = {1},
   pages   = {11},
   year    = {2021},
   doi     = {10.1038/s41545-021-00101-w},
@@ -551,15 +555,17 @@
 
 @misc{ashrae2019addendumbd,
   author = {{ASHRAE}},
-  title = {Addendum bd to {ANSI/ASHRAE/IES} Standard 90.1-2019: Normative Appendix {J}, Chiller performance curves},
-  howpublished = {ASHRAE, Atlanta, GA},
-  year = {2021}
+  title = {{ANSI/ASHRAE/IES} Addendum bd to {ANSI/ASHRAE/IES} Standard 90.1-2019: Normative Appendix {J}, Chiller performance curves},
+  howpublished = {ASHRAE, Peachtree Corners, GA},
+  year = {2022},
+  url = {https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/90_1_2019_bd_20220531.pdf},
+  note = {Approved by ASHRAE and ANSI on 31 May 2022}
 }
 
 @misc{evapco2019om,
   author = {{EVAPCO}},
-  title = {Operation and Maintenance Instructions, Induced and Forced Draft Cooling Towers ({TWR19AOM})},
-  howpublished = {EVAPCO Inc., Taneytown, MD},
+  title = {Operation and Maintenance Instructions for {EVAPCO} Induced Draft and Forced Draft Cooling Towers (Bulletin {TWR19OM})},
+  howpublished = {EVAPCO, Inc., Westminster, MD},
   year = {2019},
   url = {https://www.evapco.com/sites/evapco.com/files/2019-10/O&M-TWR19AOM-10.2019.pdf},
   note = {Table 3, recommended water chemistry guidelines}
@@ -584,30 +590,14 @@
 
 @article{demadis2003gordian,
   author = {Demadis, Konstantinos D.},
-  title = {Water treatment's {Gordian} knot},
+  title = {Water treatment's `{Gordian} knot'},
   journal = {Chemical Processing},
+  month = may,
   year = {2003},
-  url = {https://www.chemicalprocessing.com/articles/2003/235}
+  url = {https://www.chemicalprocessing.com/environmental-protection/water-wastewater/article/11380085/water-treatmentsgordian-knot}
 }
 
-@article{jaber1989design,
-  author  = {Jaber, H. and Webb, R. L.},
-  title   = {Design of cooling towers by the effectiveness-{NTU} method},
-  journal = {Journal of Heat Transfer},
-  volume  = {111},
-  number  = {4},
-  pages   = {837--843},
-  year    = {1989},
-  doi     = {10.1115/1.3250794}
-}
-
-@book{kroger2004air,
-  author    = {Kr{\"o}ger, Detlev G.},
-  title     = {Air-cooled Heat Exchangers and Cooling Towers: Thermal-flow Performance Evaluation and Design},
-  publisher = {PennWell},
-  address   = {Tulsa, OK},
-  year      = {2004}
-}
+% (Duplicate copies of jaber1989design and kroger2004air removed 2026-11-05; see the entries above.)
 
 @article{lucas2009experimental,
   author  = {Lucas, M. and Mart{\'i}nez, P. J. and Viedma, A.},
@@ -617,15 +607,80 @@
   number  = {3},
   pages   = {490--497},
   year    = {2009},
-  doi     = {10.1016/j.enconman.2008.11.006}
+  doi     = {10.1016/j.enconman.2008.11.008}
 }
 
 @incollection{ashrae2023water,
   author    = {{ASHRAE}},
-  title     = {Water treatment: deposition, corrosion, and biological control},
+  title     = {Water Treatment: Deposition, Corrosion, Fouling, and Biological Control},
+  chapter   = {50},
   booktitle = {2023 {ASHRAE} Handbook---{HVAC} Applications},
   publisher = {ASHRAE},
-  address   = {Atlanta, GA},
-  year      = {2023},
-  note      = {Chapter number and edition to be confirmed (round 2)}
+  address   = {Peachtree Corners, GA},
+  year      = {2023}
+}
+
+% ---- added for v5 (author comments round): prototype buildings, EnergyPlus ----
+@article{sun2021prototype,
+  author  = {Sun, Kaiyu and Luo, Na and Luo, Xuan and Hong, Tianzhen},
+  title   = {Prototype energy models for data centers},
+  journal = {Energy and Buildings},
+  volume  = {231},
+  pages   = {110603},
+  year    = {2021},
+  doi     = {10.1016/j.enbuild.2020.110603}
+}
+
+@techreport{deru2011doe,
+  author      = {Deru, M. and Field, K. and Studer, D. and Benne, K. and Griffith, B. and Torcellini, P. and Liu, B. and Halverson, M. and Winiarski, D. and Rosenberg, M. and Yazdanian, M. and Huang, J. and Crawley, D.},
+  title       = {{U.S. Department of Energy} Commercial Reference Building Models of the National Building Stock},
+  institution = {National Renewable Energy Laboratory},
+  number      = {NREL/TP-5500-46861},
+  address     = {Golden, CO},
+  year        = {2011},
+  doi         = {10.2172/1009264}
+}
+
+@article{crawley2001energyplus,
+  author  = {Crawley, Drury B. and Lawrie, Linda K. and Winkelmann, Frederick C. and Buhl, W. F. and Huang, Y. Joe and Pedersen, Curtis O. and Strand, Richard K. and Liesen, Richard J. and Fisher, Daniel E. and Witte, Michael J. and Glazer, Jason},
+  title   = {{EnergyPlus}: creating a new-generation building energy simulation program},
+  journal = {Energy and Buildings},
+  volume  = {33},
+  number  = {4},
+  pages   = {319--331},
+  year    = {2001},
+  doi     = {10.1016/S0378-7788(00)00114-6}
+}
+
+@manual{ashrae2019standard901,
+  author       = {{ASHRAE}},
+  title        = {{ANSI/ASHRAE/IES} Standard 90.1-2019: Energy Standard for Buildings Except Low-Rise Residential Buildings},
+  organization = {ASHRAE},
+  address      = {Atlanta, GA},
+  year         = {2019}
+}
+
+@misc{openstudiostandards,
+  author       = {{National Laboratory of the Rockies}},
+  title        = {{OpenStudio-Standards}: a library of building energy standards and DOE prototype building models},
+  howpublished = {\url{https://github.com/NatLabRockies/openstudio-standards}},
+  note         = {Prototype building types LargeDataCenterHighITE and LargeOffice; accessed 2026-11-05},
+  year         = {2026}
+}
+
+@misc{stor4build2024,
+  author       = {{Stor4Build consortium}},
+  title        = {stor4build: models and tools for building thermal energy storage studies},
+  howpublished = {\url{https://github.com/Stor4Build/stor4build}},
+  note         = {BSD-3-Clause; OpenStudio-Standards output LargeDataCenterHighITE\_3A\_2019.osm (OpenStudio 3.7) used here; accessed 2026-11-05},
+  year         = {2024}
+}
+
+@techreport{epa2012watersense,
+  author      = {{U.S. Environmental Protection Agency}},
+  title       = {{WaterSense} at Work: Best Management Practices for Commercial and Institutional Facilities},
+  institution = {U.S. EPA Office of Wastewater Management},
+  number      = {EPA-832-F-12-034},
+  address     = {Washington, DC},
+  year        = {2012}
 }

@@ -96,8 +96,7 @@ def main():
         if run.name not in lib["sources"]:
             print("no water data for", run.name)
             continue
-        fac = summarize_dc_run.summarize(str(run / "out"))
-        it_kwh = fac["IT energy (CPU+server fans) [MWh]"] * 1e3
+        it_kwh = summarize_dc_run.it_energy_mwh(str(run / "out")) * 1e3
         rows += site_rows(run, lib, it_kwh)
         print("done", run.name)
     df = pd.DataFrame(rows)

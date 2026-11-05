@@ -29,7 +29,7 @@ def sensitivity():
     rows = []
     base = pd.read_csv(ROOT / "runs" / "dc" / "summary.csv").set_index("site")
     sites = ["phoenix_tmyx", "singapore", "frankfurt", "stockholm"]
-    variants = [("Base (N+1 tower, 18\\,\\textdegree C floor)", base)]
+    variants = [("Base (tower for 3 chillers, 18\\,\\textdegree C floor)", base)]
     for v, lab in (("duty_sized", "Tower sized for duty (2 chillers)"), ("cw_floor_15", "Condenser floor 15\\,\\textdegree C"),
                    ("duty_sized_cw_floor_15", "Both"),
                    ("modern_plant", "Equipment-informed plant$^a$")):

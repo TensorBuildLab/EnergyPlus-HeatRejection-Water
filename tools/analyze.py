@@ -30,6 +30,12 @@ def load(run: Path):
     raw = pd.read_csv(run / "out" / "eplusout.csv")
     raw.columns = [c.strip() for c in raw.columns]
     raw = raw[[c for c in raw.columns if c.endswith("(TimeStep)") or c == "Date/Time"]]
+    # keep the weather-file run period only: models with "Do HVAC Sizing Simulation for Sizing Periods" also report
+    # the design days, which precede the annual period in eplusout.csv
+    day = raw["Date/Time"].astype(str).str.strip().str.slice(0, 5)
+    starts = [i for i in range(len(day)) if day.iat[i] == "01/01" and (i == 0 or day.iat[i - 1] != "01/01")]
+    if starts and starts[-1] > 0:
+        raw = raw.iloc[starts[-1]:].reset_index(drop=True)
     site = {}
     for c in raw.columns:
         m = re.match(r"Environment:Site Outdoor Air (.+?) \[", c)

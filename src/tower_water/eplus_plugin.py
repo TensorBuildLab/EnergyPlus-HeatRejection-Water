@@ -6,7 +6,8 @@ operating point and evaluates every evaporation method in tower_water.methods on
 then a water balance (drift, chemistry-based blowdown, makeup) for the reference
 method. See docs/METHODS.md.
 
-Supported: CoolingTower:VariableSpeed, CoolingTower:VariableSpeed:Merkel.
+Supported: CoolingTower:SingleSpeed (fan cycling and fluid bypass), CoolingTower:VariableSpeed,
+CoolingTower:VariableSpeed:Merkel.
 Use tools/prepare_model.py to generate the config, plugin module and IDF objects.
 """
 from __future__ import annotations
@@ -27,7 +28,8 @@ from .chemistry import ChemistryModel, limit_code
 
 VS = "CoolingTower:VariableSpeed"
 MERKEL = "CoolingTower:VariableSpeed:Merkel"
-SUPPORTED = (VS, MERKEL)
+SS = "CoolingTower:SingleSpeed"
+SUPPORTED = (SS, VS, MERKEL)
 
 # (suffix, units, type) of the non-method outputs, per tower
 BALANCE_OUTPUTS = [
@@ -41,6 +43,7 @@ BALANCE_OUTPUTS = [
     ("AirOutT", "C", "Averaged"),
     ("AirOutW", "kgWater/kgDryAir", "Averaged"),
     ("Fog", "", "Averaged"),
+    ("Mist", "m3/s", "Averaged"),   # liquid water carried by supersaturated exit air (part of E_POPPE)
     ("MePoppe", "", "Averaged"),
     ("MeMerkel", "", "Averaged"),
     ("NTU", "", "Averaged"),
@@ -70,6 +73,15 @@ TOWER_VARS = {
         "q": "Cooling Tower Heat Transfer Rate",
         "afr": "Cooling Tower Fan Speed Ratio",   # Merkel towers report the air-flow ratio under this name
         "cells_on": "Cooling Tower Operating Cells Count",
+    },
+    SS: {
+        "t_in": "Cooling Tower Inlet Temperature",
+        "t_out": "Cooling Tower Outlet Temperature",
+        "m_w": "Cooling Tower Mass Flow Rate",
+        "q": "Cooling Tower Heat Transfer Rate",
+        "fcr": "Cooling Tower Fan Cycling Ratio",  # fraction of the timestep the fan runs
+        "cells_on": "Cooling Tower Operating Cells Count",
+        "bypass": "Cooling Tower Bypass Fraction",
     },
 }
 
@@ -154,6 +166,9 @@ def air_volume_flow(t: dict, v: dict) -> float:
     """
     design = t["design_air_flow"]
     fc = t.get("free_conv_air_flow", 0.0)
+    if t["type"] == SS:
+        f = min(max(v.get("fcr", 0.0), 0.0), 1.0)
+        return (f * design + (1.0 - f) * fc) * _cells_frac(t, v) if v["q"] > 0.0 else 0.0
     if t["type"] == MERKEL:
         if v["afr"] > 0.0:
             return v["afr"] * design * _cells_frac(t, v)
@@ -171,11 +186,65 @@ def _cells_frac(t, v):
     return on / cells
 
 
+def single_speed_states(t: dict, v: dict, site: dict):
+    """Steady states of a CoolingTower:SingleSpeed within one timestep: [(time weight, T_w,out, m_w, air m3/s)].
+
+    EnergyPlus reports only the timestep average. With FanCycling the tower runs a fraction f of the timestep with the
+    fan on (design air flow) and 1 - f in free convection; the reported leaving temperature is the time average
+    T_out = f T_on + (1 - f) T_off. T_off is recomputed with EnergyPlus' own simple-tower model (replica) and T_on
+    follows from the reported average, so the heat rejected over the timestep is reproduced exactly. With
+    FluidBypass the fan runs at full speed and a fraction b of the water bypasses the fill. Air and water flows are
+    totals over the operating cells.
+    """
+    cells = int(t.get("cells", 1))
+    on = int(v["cells_on"]) if v["cells_on"] > 0 else cells
+    frac = on / cells
+    design = t["design_air_flow"] * frac
+    fc = t.get("free_conv_air_flow", 0.0) * frac
+    f = min(max(v.get("fcr", 0.0), 0.0), 1.0)
+    b = min(max(v.get("bypass", 0.0), 0.0), 1.0)
+    t_in, t_out, m_w = v["t_in"], v["t_out"], v["m_w"]
+    if b > 1e-6:
+        m_t = (1.0 - b) * m_w
+        if m_t <= 0.0:
+            return []
+        t_tower = t_in - v["q"] / (m_t * ev.cp_water(t_in))
+        return [(1.0, t_tower, m_t, design if f > 0.0 else fc)]
+    if f <= 1e-6:
+        return [(1.0, t_out, m_w, fc)]
+    if f >= 1.0 - 1e-6 or fc <= 0.0:
+        return [(1.0, t_out, m_w, design)]
+    ua_fc = t.get("free_conv_ua", 0.0)
+    t_off = ev.eplus_simple_tower_outlet(t_in, m_w / on, t["free_conv_air_flow"] / cells, ua_fc / cells,
+                                         site["t_db"], site["t_wb"], site["w"], site["p"])
+    t_on = (t_out - (1.0 - f) * t_off) / f
+    if not (site["t_wb"] - 0.5 < t_on < t_in) or t_off < t_out - 1e-6:
+        return [(1.0, t_out, m_w, f * design + (1.0 - f) * fc)]   # inconsistent split: one averaged state
+    return [(f, t_on, m_w, design), (1.0 - f, t_off, m_w, fc)]
+
+
+def _combine(states_res, ids):
+    """Time-weighted evaporation over steady states; diagnostics from the first (fan-on) state."""
+    out = {}
+    for m in ids:
+        r = states_res[0][1][m]
+        r.evap_kg_s = sum(wt * res[m].evap_kg_s for wt, res in states_res)
+        out[m] = r
+    return out
+
+
 def compute_tower(t: dict, v: dict, site: dict, cfg: dict = None, method_ids=None) -> dict:
     """Multi-method water balance for one tower and one timestep (pure function)."""
     cfg = cfg or {}
     method_ids = method_ids or list(mt.METHODS)
     p, t_db, t_wb, w = site["p"], site["t_db"], site["t_wb"], site["w"]
+    states = None
+    if t["type"] == SS:
+        # EnergyPlus' air-flow ratio: 1 whenever the fan ran in the timestep, else the free-convection ratio
+        f = v.get("fcr", 0.0)
+        v = dict(v, afr=1.0 if f > 0.0 else t.get("free_conv_air_flow", 0.0) / max(t["design_air_flow"], 1e-9))
+        if v["q"] > 0.0 and v["m_w"] > 0.0:
+            states = single_speed_states(t, v, site)
     vdot = air_volume_flow(t, v)
     rho_a = ps.rho_moist_air(t_db, w, p)
     cells = int(t.get("cells", 1))
@@ -184,16 +253,38 @@ def compute_tower(t: dict, v: dict, site: dict, cfg: dict = None, method_ids=Non
     op = mt.OperatingPoint(v["t_in"], v["t_out"], v["m_w"], v["q"], vdot * rho_a / (1.0 + w), m_air_ep,
                            t_db, t_wb, w, p)
     out = {}
+    mist = 0.0
     if v["q"] <= 0.0 or v["m_w"] <= 0.0:
         for m in method_ids:
             out["E_" + m] = 0.0
         res = {}
         status = ev.IDLE
+    elif states is not None and not (len(states) == 1 and states[0][2] == v["m_w"] and states[0][1] == v["t_out"]):
+        # single-speed tower in several states (fan cycling) or with bypass: physical methods per state;
+        # heat-based rules (LAT, ROT, LF) and the EnergyPlus replica (EPSAT) on the reported average, as EnergyPlus does
+        phys = [m for m in method_ids if m in mt.COMMON_AIR]
+        res = mt.evaluate(op, [m for m in method_ids if m not in mt.COMMON_AIR], cfg)
+        sub = []
+        for wt, t_o, m_t, air in states:
+            q_k = m_t * ev.cp_water(v["t_in"]) * (v["t_in"] - t_o)
+            op_k = mt.OperatingPoint(v["t_in"], t_o, m_t, q_k, air * rho_a / (1.0 + w), m_air_ep, t_db, t_wb, w, p)
+            rk = mt.evaluate(op_k, phys, cfg)
+            mist += wt * _mist(rk.get(mt.REFERENCE), op_k.m_a, p)
+            sub.append((wt, rk))
+        if sub:
+            res.update(_combine(sub, phys))
+        res = type(res)((m, res[m]) for m in method_ids if m in res)
+        for m, r in res.items():
+            out["E_" + m] = r.evap_kg_s / mt.RHO_REF
+        status = res[mt.REFERENCE].status if mt.REFERENCE in res else ev.OK
+        op = mt.OperatingPoint(v["t_in"], states[0][1], states[0][2], op.q, states[0][3] * rho_a / (1.0 + w),
+                               m_air_ep, t_db, t_wb, w, p) if states else op
     else:
         res = mt.evaluate(op, method_ids, cfg)
         for m, r in res.items():
             out["E_" + m] = r.evap_kg_s / mt.RHO_REF
         status = res[mt.REFERENCE].status if mt.REFERENCE in res else ev.OK
+        mist = _mist(res.get(mt.REFERENCE), op.m_a, p)
 
     ref = res.get(mt.REFERENCE)
     drift = t["design_water_flow"] * t.get("drift_fraction", 0.0) * (op.m_a > 0) * min(
@@ -211,10 +302,11 @@ def compute_tower(t: dict, v: dict, site: dict, cfg: dict = None, method_ids=Non
         "Makeup": e_ref + drift + blow,
         "Cycles": coc,
         "CycLimit": float(limit_code(which)),
-        "AirMass": op.m_a,
+        "AirMass": vdot * rho_a / (1.0 + w),   # time-averaged dry-air flow (equals op.m_a except for fan cycling)
         "AirOutT": ref.t_air_out if ok else 0.0,
         "AirOutW": ref.w_air_out if ok else 0.0,
         "Fog": 1.0 if ok and ref.supersaturated else 0.0,
+        "Mist": mist / mt.RHO_REF,
         "MePoppe": ref.merkel if ok else 0.0,
         "MeMerkel": _nan0(ev.merkel_number_chebyshev(op.t_w_in, op.t_w_out, op.m_w, op.m_a,
                                                      ps.h_air(t_db, w), p)) if ok else 0.0,
@@ -223,6 +315,14 @@ def compute_tower(t: dict, v: dict, site: dict, cfg: dict = None, method_ids=Non
         "Status": float(status),
     })
     return out
+
+
+def _mist(r, m_a, p):
+    """Liquid mist leaving with the exit air [kg/s] for one Poppe result (0 if unsaturated or not solved)."""
+    if r is None or not r.supersaturated or r.status not in (ev.OK, ev.ADJUSTED):
+        return 0.0
+    sc = r.air_scale if r.air_scale == r.air_scale else 1.0
+    return m_a * sc * max(r.w_air_out - ps.w_sat(r.t_air_out, p), 0.0)
 
 
 def _nan0(x):

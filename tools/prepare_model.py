@@ -3,7 +3,7 @@
 
 Steps:
  1. Run a design-day-only simulation to get autosized tower flows (from the .eio).
- 2. Read each CoolingTower:VariableSpeed (drift, cells, concentration ratio).
+ 2. Read each supported tower (CoolingTower:SingleSpeed, :VariableSpeed, :VariableSpeed:Merkel): flows, drift, cells.
  3. Write <out>/tower_water_config.json and <out>/tower_water_model_plugin.py.
  4. Write <out>/model.idf = input IDF + PythonPlugin objects + output requests.
 
@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from tower_water import idf  # noqa: E402
-from tower_water.eplus_plugin import MERKEL, SUPPORTED, VS, outputs, required_output_variables  # noqa: E402
+from tower_water.eplus_plugin import MERKEL, SS, SUPPORTED, VS, outputs, required_output_variables  # noqa: E402
 from tower_water.methods import METHODS  # noqa: E402
 
 DEFAULT_EPLUS = "/srv/data1/EnergyPlus-22-2-0/energyplus"
@@ -37,6 +37,10 @@ FIELDS = {
     MERKEL: dict(water=(8, "Design Water Flow Rate [m3/s]"), air=(10, "Design Air Flow Rate [m3/s]"),
                  fc_air=(16, "Design Free Convection Regime Air Flow Rate [m3/s]"),
                  min_afr=12, drift=33, conc=35, cells=39),
+    SS: dict(water=(3, "Design Water Flow Rate [m3/s]"), air=(4, "Design Air Flow Rate [m3/s]"),
+             fc_air=(7, "Free Convection Regime Air Flow Rate [m3/s]"),
+             fc_ua=(9, "Free Convection U-Factor Times Area Value [W/K]"),
+             min_afr=None, drift=25, conc=27, cells=32, capacity_control=31),
 }
 
 
@@ -87,6 +91,9 @@ def main(argv=None):
     ap.add_argument("--methods", default=",".join(METHODS), help="comma-separated method IDs to evaluate")
     ap.add_argument("--loss-factor", type=float, default=0.2, help="LF method, percent per K")
     ap.add_argument("--ddy", type=Path, default=None, help="replace design days with this .ddy's (models/set_design_days.py)")
+    ap.add_argument("--keep-plant-sizing", action="store_true",
+                    help="with --ddy: replace design days only; keep the model's tower and condenser-loop sizing "
+                         "(prototype buildings)")
     ap.add_argument("--eplus", default=DEFAULT_EPLUS)
     a = ap.parse_args(argv)
 
@@ -101,14 +108,14 @@ def main(argv=None):
     base = out / "base.idf"
     base.write_text(idf.dump(objs))
     if a.ddy:
-        subprocess.run([sys.executable, str(ROOT / "models" / "set_design_days.py"), str(base), str(a.ddy), str(base)],
-                       check=True)
+        subprocess.run([sys.executable, str(ROOT / "models" / "set_design_days.py"), str(base), str(a.ddy), str(base)]
+                       + (["--no-tower-update"] if a.keep_plant_sizing else []), check=True)
         objs = idf.parse(base.read_text(errors="replace"))
     sizes = sizing_values(a.eplus, base, a.epw.resolve(), out / "sizing")
 
     towers = []
     for o in [o for o in objs if o[0] in SUPPORTED or o[0].lower() in {x.lower() for x in SUPPORTED}]:
-        typ = VS if o[0].lower() == VS.lower() else MERKEL
+        typ = next(x for x in SUPPORTED if x.lower() == o[0].lower())
         f = FIELDS[typ]
         name = idf.field(o, 0)
         key = name.upper()
@@ -129,7 +136,9 @@ def main(argv=None):
             "design_water_flow": sized(f["water"]),
             "design_air_flow": sized(f["air"]),
             "free_conv_air_flow": sized(f["fc_air"], required=False) or 0.0,
-            "min_air_flow_ratio": num(o, f["min_afr"], 0.2),
+            "min_air_flow_ratio": num(o, f["min_afr"], 0.2) if f["min_afr"] is not None else 0.0,
+            "free_conv_ua": (sized(f["fc_ua"], required=False) or 0.0) if "fc_ua" in f else 0.0,
+            "capacity_control": idf.field(o, f["capacity_control"], "FanCycling") if "capacity_control" in f else "",
             "drift_fraction": num(o, f["drift"], 0.008) / 100.0,
             "eplus_concentration_ratio": num(o, f["conc"], 3.0),
             "cells": int(num(o, f["cells"], 1)),

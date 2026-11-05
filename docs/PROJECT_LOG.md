@@ -131,3 +131,26 @@ Not yet confirmed on v26.2; not yet filed upstream.
 - Merkel free-convection defect reproduced (modern plant, Montreal, 4.2 h, zero EnergyPlus evaporation).
 - References added: Jaber & Webb 1989, Kröger 2004, Lucas et al. 2009, ASHRAE HVAC Applications water treatment (2023).
 - Open for the author: affiliation; Perry's edition and page; ASHRAE chapter number; filing the EnergyPlus issues.
+
+## 13. Author's comments on v4 → manuscript v5 (2026-11-05)
+Comments: `paper/manuscript_Liang Zhang comment v1.docx` (17 comments + direct edits); responses
+`paper/RESPONSE_author_comments_v1.md` (.docx). v4 kept as `paper/manuscript_v4_before_author_comments.tex` / `manuscript_v4.docx`.
+- **Reframed** around evaporation physics (new title, Section 2 physics, Discussion 7.1 principle: the error of simplified
+  models follows the exhaust-air state, set by weather and the tower's air-to-water ratio). Data center = primary case.
+- **Prototype buildings** (`models/prototypes/`, README there): LBNL/DOE large data center (HighITE, 90.1-2019; archived
+  OpenStudio-Standards 3A model from Stor4Build, translated with `openstudio==3.7.0` Python bindings in
+  `/srv/data1/liangzhang/envs/ostudio`, down-converted to E+ 22.2) and DOE large office (EnergyPlus example file; its
+  SimulationControl ran design days only → fixed). Running the downloaded OpenStudio CLI was blocked by the sandbox.
+- **Plugin**: `CoolingTower:SingleSpeed` (fan cycling: fan-on + free-convection states with a replica of
+  `calculateSimpleTowerOutletTemp`; fluid bypass), `Mist` output, `prepare_model.py --keep-plant-sizing`,
+  `analyze.load` drops design-day periods (prototype has "Do HVAC Sizing Simulation" = Yes). 60 tests.
+- **Results** (`tools/building_study.py`, `tools/single_speed_check.py`): EnergyPlus default vs Poppe −9.3 to −3.7 %
+  (variable-speed DC), −4.7 to +15.9 % (office), +2.4 to +37.5 % (DC prototype; EnergyPlus' averaging of fan cycling
+  +5.2 to +21.8 points, physics −5.1 to +14.2). MSAT −1.9 to +16.0 % for single-speed towers. Replicas: EPSAT within
+  0.5 %, free convection within 0.17 K. Plugin overhead 7 s → 109 s per annual run (DC prototype, 8 models).
+- **Removed from the paper**: loss-factor units section, water-accounting appendix (kept in `bugreports/`).
+- **Word export** rebuilt (`tools/make_docx.py`, `tools/docx/`): numbered sections/captions (SEQ fields), bordered tables,
+  numbered citations (Elsevier numeric CSL), title block, line numbers. Tex uses `elsarticle-num`.
+- **References** checked (`docs/REFERENCES_CHECK_v5.md`): 10 corrected, 7 added. Open: Perry's edition/page, CTI ATC-105
+  edition, BAC Baltibond year, Braun 1989 pages.
+- Open for the author: co-authorship (T. Hong), per-climate-zone prototype generation with the OpenStudio CLI.

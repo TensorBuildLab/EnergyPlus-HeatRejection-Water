@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reproduce every number and figure in the paper from scratch (~15 min on a 16+ core machine).
+# Reproduce every number and figure in the paper from scratch (~30 min on a 16+ core machine).
 set -euo pipefail
 cd "$(dirname "$0")"
 PY=${PY:-python3}    # Python 3.8+ with numpy scipy pandas matplotlib psychrolib pypandoc_binary (see pyproject.toml [analysis])
@@ -38,6 +38,20 @@ $PY tools/review_analyses.py runs/dc --fill-exp-sweep 0.5 0.6 0.78
 $PY tools/realistic_fill_check.py runs/dc --lg 1.0 1.2 1.4
 $PY tools/water_quality_study.py runs/dc
 $PY tools/review_tables.py
+
+echo "== 4e. Prototype buildings (v5): LBNL/DOE large data center and DOE large office, single-speed towers, 14 climates"
+# models/prototypes/lbnl_src/*_v232.idf comes from the archived OpenStudio-Standards model via
+#   <openstudio 3.7 python> models/prototypes/translate_osm.py (see models/prototypes/README.md)
+$PY models/prototypes/build_prototypes.py
+for b in lbnl_large_datacenter:proto_dc doe_large_office:proto_office; do
+    $PY tools/run_climates.py --idf models/prototypes/${b%%:*}.idf --out runs/${b##*:} --ddy-sizing --keep-plant-sizing \
+        --annual --fixed-cycles 4 --jobs 14 --sites $(ls -d weather/*/ | grep -v "weather/phx/")
+done
+$PY tools/single_speed_check.py runs/proto_dc
+$PY tools/single_speed_check.py runs/proto_office
+$PY tools/water_quality_study.py runs/proto_dc --out results/proto
+$PY tools/building_study.py dc_proto=runs/proto_dc office=runs/proto_office dc_vs=runs/dc
+$PY tools/fig_plugin.py
 
 echo "== 5. Hybrid adiabatic dry cooler: 14 climates x 7 control strategies"
 $PY models/build_datacenter_idf.py --heat-rejection hybrid

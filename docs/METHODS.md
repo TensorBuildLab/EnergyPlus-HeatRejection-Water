@@ -242,6 +242,20 @@ Physical evaporation methods need the actual air flow. What EnergyPlus reports d
 | fan cycling / free convection | EnergyPlus sets $r = PLR\,r_{min} + (1-PLR)\,f_{fc}$, where $f_{fc}$ is the free-convection **capacity** fraction | $r = 0$ although $\dot Q>0$ |
 | used by this tool | $PLR\,r_{min}\dot V_{des} + (1-PLR)\dot V_{fc}$ | $\dot V_{fc}$ from sizing (`Free Convection Regime Air Flow Rate`) |
 
+**`CoolingTower:SingleSpeed`** (v5). With `FanCycling` the fan runs a fraction $f$ (`Fan Cycling Ratio`) of the
+timestep at design air flow and $1-f$ in free convection; EnergyPlus reports only the average leaving temperature
+$T_{w,o}=fT_{on}+(1-f)T_{off}$ and, for its own evaporation, applies the average heat to the full design air
+(`airFlowRateRatio` = 1 whenever the fan ran). The plugin (`eplus_plugin.single_speed_states`) recomputes $T_{off}$ with
+a line-by-line replica of `CoolingTower::calculateSimpleTowerOutletTemp` (`evaporation.eplus_simple_tower_outlet`, free-
+convection air and UA per cell, water per operating cell), sets $T_{on}=(T_{w,o}-(1-f)T_{off})/f$ (heat rejected exact),
+evaluates `MSAT`, `BRAUN`, `POPPE`, `POPPE1` at both states and time-weights them. `LAT`, `ROT`, `LF` (linear in heat or
+range) and `EPSAT` (EnergyPlus' own convention) use the reported average. If the split is inconsistent
+($T_{on}\ge T_{w,i}$ or below the wet-bulb), one state at the time-averaged air flow is used. With `FluidBypass`
+(`Bypass Fraction` $b$) the fan runs at full speed and the fill water flow is $(1-b)\dot m_w$ with
+$T_{fill,o}=T_{w,i}-\dot Q/((1-b)\dot m_w c_{pw})$. Checks (`tools/single_speed_check.py`): replica vs EnergyPlus in
+fan-off timesteps within 0.17 K; Poppe one averaged state vs two states −1.5 to 0 %; `Mist` output = time-weighted liquid
+in the exhaust.
+
 $\dot V_{fc}$ comes from the `.eio` sizing report. Cell staging is applied as $N_{on}/N$. For the empirical
 VariableSpeed models, the air-flow ratio is a control variable of a regression, not a measured flow, so physical
 methods can find some operating points infeasible. **The Merkel tower is recommended** because its air flow is
@@ -328,8 +342,9 @@ timestep: an idealised conductivity controller always running at the allowable $
 
 Per tower, each timestep: `E_<ID>` for every method (m³/s, converted from kg/s at $\rho_w(20\,^\circ\mathrm{C})$;
 `EPSAT` is exactly the EnergyPlus volume), and for the reference method: `Drift`, `Blowdown`, `Makeup`, `MakeupVol`,
-`Cycles`, `CycLimit` (code of the limiting constraint), `AirMass`, `AirOutT`, `AirOutW`, `Fog`, `MePoppe`, `MeMerkel`,
-`NTU`, `Status`.
+`Cycles`, `CycLimit` (code of the limiting constraint), `AirMass` (time-averaged dry air), `AirOutT`, `AirOutW` (fan-on
+state for fan-cycling towers), `Fog`, `Mist` (liquid water leaving with the exhaust, m³/s, part of `E_POPPE`), `MePoppe`,
+`MeMerkel`, `NTU`, `AirScale`, `Status`.
 
 **Fog**: the reference method flags supersaturated exit air (`Fog`). Annual "fog hours" in `tools/analyze.py` count
 timesteps whose exit air carries more than 0.1 g/kg of liquid (`FOG_LIQUID_GKG`), evaluated at site pressure, so that traces of

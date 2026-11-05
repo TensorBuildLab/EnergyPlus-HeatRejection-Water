@@ -45,8 +45,10 @@ for validation against manufacturer data.
 a `FluidCooler:TwoSpeed` bank through EMS outdoor-air-node actuators (changes the EnergyPlus solution), pad water from the
 coolers' actual air flow, media or spray water systems, and dry / always-wet / switch-over-temperature control.
 
-Supported towers: `CoolingTower:VariableSpeed:Merkel` (recommended, physically meaningful air flow) and
-`CoolingTower:VariableSpeed`. EnergyPlus 22.2. The core is standard-library Python 3.8+.
+Supported towers: `CoolingTower:SingleSpeed` (fan cycling and fluid bypass; the tower of the DOE prototype buildings;
+each fan-cycling timestep is resolved into its fan-on and free-convection states), `CoolingTower:VariableSpeed:Merkel`
+(recommended for variable-speed towers, physically meaningful air flow) and `CoolingTower:VariableSpeed`. Tested with
+EnergyPlus 22.2. The core is standard-library Python 3.8+.
 
 ## Use
 
@@ -68,20 +70,44 @@ $PY tools/scenarios.py runs/dublin        # makeup for every method x water sour
 
 Per-tower outputs (`<Prefix>_<Name>:PythonPlugin:OutputVariable`): `E_<method>` (m³/s) for every method; for the
 reference method `Drift`, `Blowdown`, `Makeup`, `MakeupVol`, `Cycles`, `CycLimit`, `AirMass`, `AirOutT`, `AirOutW`,
-`Fog`, `MePoppe`, `MeMerkel`, `NTU`, `AirScale`, `Status` (0 ok, 1 idle, 2 no air, 3 infeasible, 4 clipped, 5 air adjusted).
+`Fog`, `Mist` (liquid in the exhaust, m³/s), `MePoppe`, `MeMerkel`, `NTU`, `AirScale`, `Status` (0 ok, 1 idle, 2 no air,
+3 infeasible, 4 clipped, 5 air adjusted).
+
+Prototype buildings (`models/prototypes/README.md`): any EnergyPlus model with a supported tower works, e.g.
+
+```bash
+$PY models/prototypes/build_prototypes.py
+$PY tools/run_climates.py --idf models/prototypes/lbnl_large_datacenter.idf --out runs/proto_dc --ddy-sizing \
+    --keep-plant-sizing --annual --fixed-cycles 4 --sites weather/phoenix_tmyx weather/stockholm
+```
 
 ## Verification (details in `docs/METHODS.md` §7)
 
-- 55 unit tests, including psychrometrics against PsychroLib (ASHRAE).
+- 60 unit tests, including psychrometrics against PsychroLib (ASHRAE) and the single-speed tower states.
 - Poppe vs an independent height-wise boundary-value solution (SciPy), 7 cases incl. supersaturated: evaporation 0.008 %.
 - **Poppe vs 126 measured counterflow fill tests** (Kloppers 2003): Merkel number +1.0 % vs Kloppers' own Poppe analysis;
   outlet-air temperature vs measured 0.84 K rms (Kloppers 0.85 K), against 1.10 K for a saturated-exit (Merkel) analysis,
   which predicts 7 % less evaporation. All tests are mild with supersaturated exhaust, and evaporation is not measured.
   `tools/validate_kloppers.py`.
 - Rating mode: Merkel, Poppe and e-NTU agree within 0.5 K for the same fill.
-- The EnergyPlus SaturatedExit replica matches EnergyPlus within 0.2 % at all 14 sites.
+- The EnergyPlus SaturatedExit replica matches EnergyPlus within 0.5 % at all 14 sites for all three buildings; the
+  free-convection replica of the single-speed tower matches EnergyPlus' leaving-water temperature within 0.17 K.
 
-## Main results (1 MW data center, 14 climates, TMYx 2011–2025)
+## Main results, manuscript v5 (three buildings, 14 climates, TMYx 2011–2025)
+
+- The error of simplified models follows the exhaust-air state: saturated-exit models overpredict where hot, dry air
+  leaves the fill unsaturated and underpredict where cold air leaves it supersaturated; the tower's air-to-water ratio
+  decides which regime dominates.
+- EnergyPlus default vs Poppe, annual: **−9.3 to −3.7 %** for the variable-speed data center, **−4.7 to +15.9 %** for the
+  DOE large office prototype, **+2.4 to +37.5 %** for the LBNL/DOE large data center prototype (fan-cycling tower).
+  For the latter, EnergyPlus' averaging of fan cycling (average heat on the full air flow) accounts for +5.2 to +21.8
+  points (`tools/single_speed_check.py`); Merkel saturated exit with the physical states gives −1.9 to +15.0 %.
+- Evaporation per heat rejected: 1.04–2.13 (data center prototype), 1.42–2.76 (office), 1.05–1.65 L/kWh_th
+  (variable-speed data center). Loss factor 0.2 %/K: −38 to +65 % depending on building and climate.
+- Site makeup water changes makeup by −16 to +44 % relative to four cycles (data center prototype).
+- `tools/building_study.py` → `results/study/buildings_*.csv`, `fig_buildings_deviation`.
+
+## Earlier results (manuscript v4: 1 MW data center with variable-speed tower)
 
 - EnergyPlus default (SaturatedExit) gives **3.7–9.3 % less annual evaporation than Poppe** (3.5–7.6 % excluding liquid mist)
   with EnergyPlus' autosized Merkel tower. Plant variants change this by 0.4–1.2 points; the equipment-informed plant gives
@@ -112,16 +138,19 @@ reference method `Drift`, `Blowdown`, `Makeup`, `MakeupVol`, `Cycles`, `CycLimit
   `docs/WATER_QUALITY_SOURCES.md`); confirm the source of the empirical LSI constants (`docs/REFERENCES_CHECK.md`).
 - Validate evaporation against metered makeup and blowdown of an operating tower (the fill tests validate outlet-air
   temperature, not evaporation).
-- Confirm the four EnergyPlus defects on v26.2 and file them upstream (`bugreports/README.md`). Merkel free convection
-  booking no water is now reproduced (modern plant, Montreal, 4.2 h).
+- Confirm the EnergyPlus water-accounting issues on v26.2 and file them upstream (`bugreports/README.md`); they are no
+  longer discussed in the manuscript (author's decision, v5). Merkel free convection booking no water is reproduced
+  (modern plant, Montreal, 4.2 h).
+- Generate the LBNL prototype directly with the OpenStudio CLI per climate zone (here: the archived 3A model, see
+  `models/prototypes/README.md`).
 - Confirm the Perry's edition and page and the ASHRAE water-treatment chapter (`docs/REFERENCES_CHECK.md`).
-- In the manuscript, confirm the affiliation (the last `\tbd{}`). Compile with
-  pdflatex/bibtex or Overleaf (no LaTeX on this server).
+- Compile the manuscript with pdflatex/bibtex or Overleaf (no LaTeX on this server); numbered citations
+  (`elsarticle-num`).
 
 ## Next steps
 
 - Full Poppe tower as a `PlantComponent:UserDefined` (the rating functions are ready); hybrid and adiabatic dry coolers
-  (concept note 4.1); SingleSpeed and TwoSpeed towers and evaporative fluid coolers; water-side economizer variant of the
+  (concept note 4.1); TwoSpeed towers and evaporative fluid coolers; water-side economizer variant of the
   data-center model; uncertainty analysis of the chemistry inputs.
 
 ## Licence

@@ -1,0 +1,36 @@
+{
+  "water_library": "/srv/data1/liangzhang/EnergyPlus-HeatRejection-Water/data/water_sources.json",
+  "poppe_steps": 10,
+  "methods": [
+    "LAT",
+    "ROT",
+    "LF",
+    "EPSAT",
+    "MSAT",
+    "BRAUN",
+    "POPPE",
+    "POPPE1"
+  ],
+  "loss_factor_pct_per_k": 0.2,
+  "timesteps_per_hour": 6,
+  "towers": [
+    {
+      "name": "TowerWaterSys CoolTower",
+      "type": "CoolingTower:SingleSpeed",
+      "prefix": "TowerwatersysCooltower",
+      "design_water_flow": 0.20723,
+      "design_air_flow": 134.48202,
+      "free_conv_air_flow": 13.4482,
+      "min_air_flow_ratio": 0.0,
+      "free_conv_ua": 30204.25977,
+      "capacity_control": "FanCycling",
+      "drift_fraction": 8e-05,
+      "eplus_concentration_ratio": 3.0,
+      "cells": 1,
+      "water_source": "example_hard_groundwater",
+      "treatment": "generic_inhibitor",
+      "fixed_cycles": 4.0,
+      "coc_mode": null
+    }
+  ]
+}

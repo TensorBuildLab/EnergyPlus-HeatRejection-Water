@@ -1,0 +1,36 @@
+{
+  "water_library": "/srv/data1/liangzhang/EnergyPlus-HeatRejection-Water/data/water_sources.json",
+  "poppe_steps": 10,
+  "methods": [
+    "LAT",
+    "ROT",
+    "LF",
+    "EPSAT",
+    "MSAT",
+    "BRAUN",
+    "POPPE",
+    "POPPE1"
+  ],
+  "loss_factor_pct_per_k": 0.2,
+  "timesteps_per_hour": 6,
+  "towers": [
+    {
+      "name": "Centrifugal Fan Cycling Open Cooling Tower 40.2 gpm/hp",
+      "type": "CoolingTower:SingleSpeed",
+      "prefix": "CentrifugalFanCyclingOpenCoolingTower402GpmHp",
+      "design_water_flow": 0.49455,
+      "design_air_flow": 341.74495,
+      "free_conv_air_flow": 34.1745,
+      "min_air_flow_ratio": 0.0,
+      "free_conv_ua": 67264.36351,
+      "capacity_control": "FanCycling",
+      "drift_fraction": 8e-05,
+      "eplus_concentration_ratio": 3.0,
+      "cells": 2,
+      "water_source": "example_hard_groundwater",
+      "treatment": "generic_inhibitor",
+      "fixed_cycles": 4.0,
+      "coc_mode": null
+    }
+  ]
+}

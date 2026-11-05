@@ -44,19 +44,20 @@ def keep_common(run: Path, dst: Path):
         gz(run / "out" / f, dst / f)
 
 
-def tower_study():
-    root = RUNS / "dc"
+def tower_study(name="dc"):
+    """Full timestep series of a tower study (runs/dc; prototype buildings runs/proto_dc, runs/proto_office)."""
+    root = RUNS / name
     if not root.exists():
         return
     for f in ("summary.csv", "scenarios.csv"):
-        copy(root / f, ARCH / "dc" / f)
+        copy(root / f, ARCH / name / f)
     for run in sorted(p for p in root.iterdir() if (p / "out" / "eplusout.csv").exists()):
-        dst = ARCH / "dc" / run.name
+        dst = ARCH / name / run.name
         keep_common(run, dst)
         _, frames, _ = analyze.load(run)
         df = pd.concat(frames, names=["tower", "row"]).reset_index(level="row", drop=True).reset_index()
         df.to_csv(dst / "timestep.csv.gz", index=False, float_format="%.6g", compression="gzip")
-        print("dc", run.name)
+        print(name, run.name)
 
 
 def hybrid_study():
@@ -105,7 +106,8 @@ def dev_runs():
 
 
 if __name__ == "__main__":
-    tower_study()
+    for name in ("dc", "proto_dc", "proto_office"):
+        tower_study(name)
     hybrid_study()
     light_runs()
     dev_runs()
