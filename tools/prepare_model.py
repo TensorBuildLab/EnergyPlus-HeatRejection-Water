@@ -15,7 +15,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -27,7 +29,8 @@ from tower_water import idf  # noqa: E402
 from tower_water.eplus_plugin import MERKEL, SS, SUPPORTED, VS, outputs, required_output_variables  # noqa: E402
 from tower_water.methods import METHODS  # noqa: E402
 
-DEFAULT_EPLUS = "/srv/data1/EnergyPlus-22-2-0/energyplus"
+# EnergyPlus binary: $ENERGYPLUS, else `energyplus` on PATH, else the author's install
+DEFAULT_EPLUS = os.environ.get("ENERGYPLUS") or shutil.which("energyplus") or "/srv/data1/EnergyPlus-22-2-0/energyplus"
 
 # IDF field numbers (0 = Name) and .eio labels per tower type (EnergyPlus 22.2 IDD)
 FIELDS = {
@@ -52,8 +55,10 @@ def prefix_for(name: str) -> str:
 def sizing_values(eplus: str, idf_path: Path, epw: Path, work: Path) -> dict:
     """{(TOWER NAME, field): value} from a design-day-only run."""
     work.mkdir(parents=True, exist_ok=True)
-    subprocess.run([eplus, "-D", "-d", str(work), "-w", str(epw), str(idf_path)],
-                   check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    r = subprocess.run([eplus, "-D", "-d", str(work), "-w", str(epw), str(idf_path)],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if r.returncode != 0:
+        raise SystemExit("Sizing run (design days only) failed; see %s" % (work / "eplusout.err"))
     vals = {}
     for line in (work / "eplusout.eio").read_text(errors="replace").splitlines():
         parts = [s.strip() for s in line.split(",")]
@@ -94,8 +99,15 @@ def main(argv=None):
     ap.add_argument("--keep-plant-sizing", action="store_true",
                     help="with --ddy: replace design days only; keep the model's tower and condenser-loop sizing "
                          "(prototype buildings)")
-    ap.add_argument("--eplus", default=DEFAULT_EPLUS)
+    ap.add_argument("--eplus", default=DEFAULT_EPLUS, help="EnergyPlus binary (default: %(default)s)")
     a = ap.parse_args(argv)
+
+    lib = json.loads(a.library.read_text())
+    if a.source not in lib["sources"]:
+        raise SystemExit("Unknown --source %r in %s (known: %s)" % (a.source, a.library, ", ".join(lib["sources"])))
+    if a.treatment not in lib["treatments"]:
+        raise SystemExit("Unknown --treatment %r in %s (known: %s)" % (
+            a.treatment, a.library, ", ".join(lib["treatments"])))
 
     out = a.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -104,6 +116,9 @@ def main(argv=None):
     if a.annual:
         objs = [o for o in objs if o[0].lower() != "runperiod"]
         objs.append(idf.obj("RunPeriod", "Annual", 1, 1, "", 12, 31, "", "", "Yes", "Yes", "No", "Yes", "Yes"))
+        for o in idf.find(objs, "SimulationControl"):   # make sure the weather-file run period is simulated
+            o.extend([""] * (6 - len(o)))
+            o[5] = "Yes"
 
     base = out / "base.idf"
     base.write_text(idf.dump(objs))

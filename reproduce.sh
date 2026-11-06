@@ -52,6 +52,7 @@ $PY tools/single_speed_check.py runs/proto_office
 $PY tools/water_quality_study.py runs/proto_dc --out results/proto
 $PY tools/building_study.py dc_proto=runs/proto_dc office=runs/proto_office dc_vs=runs/dc
 $PY tools/fig_plugin.py
+$PY tools/fig_graphical_abstract.py
 
 echo "== 5. Hybrid adiabatic dry cooler: 14 climates x 7 control strategies"
 $PY models/build_datacenter_idf.py --heat-rejection hybrid
@@ -64,4 +65,5 @@ $PY bugreports/check_eplus_water_accounting.py
 
 echo "== 7. Word versions"
 $PY tools/make_docx.py
-echo "Done: results/figures, results/study, paper/manuscript.tex/.docx, docs/METHODS.docx"
+$PY tools/make_submission.py   # paper/Energy and Buildings submission files/
+echo "Done: results/figures, results/study, paper/manuscript_v6_final.tex/.docx, submission folder, docs/METHODS.docx"

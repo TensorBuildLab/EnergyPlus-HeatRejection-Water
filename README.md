@@ -5,6 +5,10 @@ An EnergyPlus Python Plugin and standalone library that compute cooling tower wa
 They are evaluated on the same simulated operating point every timestep, together with **blowdown driven by
 makeup-water chemistry**. Research context: `CONCEPT_NOTE.md` (Study 2 for the NSF CAREER proposal).
 
+**Quick start: [`docs/TUTORIAL.md`](docs/TUTORIAL.md)** is a tested, step-by-step tutorial: install, run a prototype
+data center end to end (prepare, simulate, analyze), read the outputs, add the plugin to your own model, water-quality
+scenarios, many climates, tests and troubleshooting.
+
 | Where | What |
 |---|---|
 | `docs/METHODS.md` | **Technical reference**: every equation, assumption, source, and verification |
@@ -14,10 +18,12 @@ makeup-water chemistry**. Research context: `CONCEPT_NOTE.md` (Study 2 for the N
 | `docs/EQUIPMENT_SPECS.md`, `data/equipment/` | Specifications of data-center towers, chillers and adiabatic coolers; recommended model inputs; **126 measured fill tests** (Kloppers 2003) |
 | `docs/PROJECT_LOG.md` | Record of decisions, findings and open items |
 | `results/archive/` | Compact archive of every simulation run (models, configs, logs, timestep/hourly series); `tools/archive_runs.py` |
-| `paper/manuscript.tex`, `paper/references.bib` | Journal manuscript v2 (Elsevier `elsarticle`), revised after review round 1 |
+| `paper/manuscript_v6_final.tex`, `paper/references.bib` | Journal manuscript v6 (final, Energy and Buildings submission; Elsevier `elsarticle`). Earlier versions: `paper/manuscript_v*.tex` |
+| `paper/Energy and Buildings submission files/` | Cover letter, highlights, graphical abstract, title page, declarations, suggested reviewers, figures, LaTeX source and checklist (`tools/make_submission.py`) |
+| `paper/RESPONSE_author_comments_v2.md` | Responses to the author's comments on v5 |
 | `paper/REVIEW_round1.md`, `paper/RESPONSE_round1.md` | Referee-style review and point-by-point response |
 | `paper/hybrid/manuscript_hybrid.tex` | Companion draft: hybrid dry cooler study (split off in review round 1) |
-| `paper/manuscript.docx`, `docs/METHODS.docx` | Word versions (native editable equations; regenerate with `tools/make_docx.py`) |
+| `paper/manuscript_v6_final.docx`, `docs/METHODS.docx` | Word versions (native editable equations; regenerate with `tools/make_docx.py`) |
 | `results/figures/`, `results/study/` | Paper figures (PNG + PDF) and tables |
 | `models/` | Representative 1 MW water-cooled data center (`DATACENTER_MODEL.md`) and stock examples |
 | `bugreports/` | Four EnergyPlus water-accounting defects with reproductions |

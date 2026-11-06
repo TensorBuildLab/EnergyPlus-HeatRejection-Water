@@ -154,3 +154,20 @@ Comments: `paper/manuscript_Liang Zhang comment v1.docx` (17 comments + direct e
 - **References** checked (`docs/REFERENCES_CHECK_v5.md`): 10 corrected, 7 added. Open: Perry's edition/page, CTI ATC-105
   edition, BAC Baltibond year, Braun 1989 pages.
 - Open for the author: co-authorship (T. Hong), per-climate-zone prototype generation with the OpenStudio CLI.
+
+## 14. Author's comments on v5 → manuscript v6 final, Energy and Buildings submission (2026-11-06)
+- Comments: `paper/manuscript v5 Liang Zhang comments and edits.docx` (10 comments; direct edit = left-aligned title
+  block). Response: `paper/RESPONSE_author_comments_v2.md/.docx`. Manuscript: `paper/manuscript_v6_final.tex/.docx`
+  (v5 renamed to `manuscript_v5.tex/.docx`).
+- Changes: new title "Evaluating cooling tower evaporation models for data center water use in building energy
+  simulation"; Arizona water paragraph (Reclamation 2021/2022 shortage releases, ADWR Phoenix AMA model via Governor's
+  office and ASU Kyl Center, ASHRAE service life, DOE FEMP guide, Karimi 2022); Table 1 with model name + equation
+  columns; Section 7.3 data center recommendations; prose conclusions with limitations and future work; Appendix A
+  plugin code; NSF Award No. 2623038 acknowledgement; CRediT, competing interest, generative AI declaration, data
+  availability; plain "-" for negative numbers (text and figures: `axes.unicode_minus = False`); Figure 2 redrawn with
+  text-sized boxes; GitHub links for all supplementary files.
+- Energy and Buildings checks (official guide page blocks automated access; from search excerpts + Elsevier policy):
+  abstract 249 words, highlights ≤ 77 characters, 7 keywords, graphical abstract (`tools/fig_graphical_abstract.py`),
+  line numbers. Submission folder `paper/Energy and Buildings submission files/` built by `tools/make_submission.py`.
+- Tutorial: `docs/TUTORIAL.md` (all commands run), linked from README.
+- Open: make the repository public before submission; author to check the AI declaration and reviewer conflicts.

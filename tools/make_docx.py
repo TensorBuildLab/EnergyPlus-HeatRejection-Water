@@ -12,8 +12,8 @@ Manuscripts (elsarticle LaTeX -> pandoc -> post-processing):
   * Letter page, 1-inch margins, continuous line numbers, page numbers in the footer; "References" heading.
   The style template (tools/docx/reference.docx) is regenerated from pandoc's default by build_reference_doc().
 
-  python tools/make_docx.py                       # -> paper/manuscript.docx, docs/METHODS.docx, paper/hybrid/...docx
-  python tools/make_docx.py paper/manuscript.tex  # one manuscript (output next to it, .docx)
+  python tools/make_docx.py                       # -> paper/manuscript_v6_final.docx, docs/METHODS.docx, paper/hybrid/...docx
+  python tools/make_docx.py paper/manuscript_v6_final.tex  # one manuscript (output next to it, .docx)
   python tools/make_docx.py IN.tex -o OUT.docx [--no-line-numbers] [--author-year]
 """
 from __future__ import annotations
@@ -336,11 +336,11 @@ def build_reference_doc(out: Path = REFERENCE_DOC) -> Path:
         _para(s, before=18 if lvl == 1 else 12, after=6, line=1.0, keep_next=True, align=WD_ALIGN_PARAGRAPH.LEFT)
     s = get("Title")
     _set_font(s, HEAD_FONT, 18, bold=True, color=RGBColor(0, 0, 0))
-    _para(s, before=0, after=12, line=1.1, align=WD_ALIGN_PARAGRAPH.CENTER)
+    _para(s, before=0, after=12, line=1.1, align=WD_ALIGN_PARAGRAPH.LEFT)
     for name, size, italic in (("Author", 12, False), ("Affiliation", 10, True), ("Correspondence", 10, False)):
         s = get(name)
         _set_font(s, BODY_FONT, size, bold=False, italic=italic)
-        _para(s, before=0, after=4, line=1.0, align=WD_ALIGN_PARAGRAPH.CENTER)
+        _para(s, before=0, after=4, line=1.0, align=WD_ALIGN_PARAGRAPH.LEFT)
     for name, before, after in (("Table Caption", 10, 4), ("Image Caption", 4, 12)):
         s = get(name, "Caption") if "Caption" in [x.name for x in st] else get(name)
         _set_font(s, BODY_FONT, 10, italic=False)
@@ -711,7 +711,7 @@ def page_setup(d, line_numbers=True):
 # ----------------------------------------------------------------------------------------------------------------
 # Conversion
 # ----------------------------------------------------------------------------------------------------------------
-def convert_manuscript(tex: Path = PAPER / "manuscript.tex", out: Path = PAPER / "manuscript.docx",
+def convert_manuscript(tex: Path = PAPER / "manuscript_v6_final.tex", out: Path = PAPER / "manuscript_v6_final.docx",
                        numeric: bool = True, line_numbers: bool = True, number_sections: bool = True) -> Path:
     tex, out = Path(tex).resolve(), Path(out).resolve()
     bib = tex.parent / "references.bib"
@@ -773,9 +773,9 @@ def main(argv=None):
         outs = [convert_manuscript(a.tex, a.out or a.tex.with_suffix(".docx"), **kw)]
     else:
         outs = [convert_manuscript(**kw), convert_methods()]
-        resp = PAPER / "RESPONSE_author_comments_v1.md"
-        if resp.exists():
-            outs.append(convert_methods(resp))
+        for resp in (PAPER / "RESPONSE_author_comments_v1.md", PAPER / "RESPONSE_author_comments_v2.md"):
+            if resp.exists():
+                outs.append(convert_methods(resp))
         hyb = PAPER / "hybrid" / "manuscript_hybrid.tex"
         if hyb.exists():
             outs.append(convert_manuscript(hyb, PAPER / "hybrid" / "manuscript_hybrid.docx", **kw))

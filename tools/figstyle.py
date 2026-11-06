@@ -35,7 +35,7 @@ def apply():
         "xtick.color": TEXT2, "ytick.color": TEXT2, "axes.grid": True, "grid.color": GRID,
         "grid.linewidth": 0.6, "axes.spines.top": False, "axes.spines.right": False,
         "font.size": 9, "axes.titlesize": 9.5, "axes.titleweight": "bold", "legend.frameon": False,
-        "lines.linewidth": 2.0, "figure.dpi": 150, "savefig.dpi": 300, "savefig.bbox": "tight",
+        "lines.linewidth": 2.0, "axes.unicode_minus": False, "figure.dpi": 150, "savefig.dpi": 300, "savefig.bbox": "tight",
     })
 
 

@@ -5,6 +5,7 @@ For every evaporation method x makeup-water source x chemistry mode, recompute d
 from the timestep evaporation and water temperatures stored in the run, and return annual totals.
 
   python tools/scenarios.py runs/dc/phoenix
+  python tools/scenarios.py runs/dc/phoenix --library data/water_sources_sourced.json --treatment icc_advanced_inhibitor
 """
 from __future__ import annotations
 
@@ -40,9 +41,13 @@ def coc_series(model: ChemistryModel, t_hot: np.ndarray, t_cold: np.ndarray) -> 
     return out
 
 
-def run_scenarios(run: Path, fixed_cycles: float = None) -> pd.DataFrame:
+def run_scenarios(run: Path, fixed_cycles: float = None, library: Path = LIB, treatment: str = None) -> pd.DataFrame:
+    """treatment=None: the example library's generic_inhibitor / generic_inhibitor_dynamic; else this treatment
+    of `library` for both the constituent and the dynamic mode."""
     cfg, frames, dt_h = analyze.load(run)
-    lib = json.loads(LIB.read_text())
+    lib = json.loads(Path(library).read_text())
+    modes = MODES if treatment is None else [("fixed", None), ("constituent", treatment), ("dynamic", treatment)]
+    fixed_treat = "generic_inhibitor" if treatment is None else treatment
     sec = dt_h * 3600.0
     rows = []
     for t in cfg["towers"]:
@@ -51,11 +56,11 @@ def run_scenarios(run: Path, fixed_cycles: float = None) -> pd.DataFrame:
         t_hot, t_cold = d["ep_inlet_temperature"].to_numpy(), d["ep_outlet_temperature"].to_numpy()
         drift = d["pl_drift"].to_numpy()
         n_fixed = fixed_cycles or t["eplus_concentration_ratio"]
-        for source, (mode, treat) in itertools.product(lib["sources"], MODES):
+        for source, (mode, treat) in itertools.product(lib["sources"], modes):
             if mode == "fixed":
-                model = ChemistryModel.from_library(str(LIB), source, "generic_inhibitor", n_fixed, "fixed")
+                model = ChemistryModel.from_library(str(library), source, fixed_treat, n_fixed, "fixed")
             else:
-                model = ChemistryModel.from_library(str(LIB), source, treat, None, mode)
+                model = ChemistryModel.from_library(str(library), source, treat, None, mode)
             coc = coc_series(model, t_hot, t_cold)
             for m in analyze.method_ids(d):
                 e = d["pl_e_" + m.lower()].to_numpy() * loaded
@@ -80,9 +85,15 @@ def run_scenarios(run: Path, fixed_cycles: float = None) -> pd.DataFrame:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("run", type=Path)
+    ap.add_argument("--library", type=Path, default=LIB, help="water-quality library (default: %(default)s)")
+    ap.add_argument("--treatment", default=None,
+                    help="treatment for the constituent and dynamic modes (default: the example library's "
+                         "generic_inhibitor / generic_inhibitor_dynamic)")
+    ap.add_argument("--fixed-cycles", type=float, default=None,
+                    help="cycles for the fixed mode (default: the tower's EnergyPlus concentration ratio)")
     a = ap.parse_args()
     pd.set_option("display.width", 200)
-    df = run_scenarios(a.run)
+    df = run_scenarios(a.run, a.fixed_cycles, a.library, a.treatment)
     df.to_csv(a.run / "scenarios.csv", index=False)
     print(df[df.method.isin(["POPPE", "EPSAT", "EnergyPlus"])].round(2).to_string(index=False))
 
